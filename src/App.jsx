@@ -9,7 +9,7 @@ import { DarkModeProvider } from './contexts/DarkModeContext'
 
 import { Routes, Route, useLocation } from 'react-router-dom'
 
-import Hakkimizda from './pages/Hakkimizda'
+import Hakkimizda from './pages/hakkimizda'
 import Iletisim from './pages/iletisim'
 import SSS from './pages/sss'
 import EkonomikDetay from './pages/ekonomik'
