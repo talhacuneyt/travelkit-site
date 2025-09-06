@@ -212,16 +212,17 @@
 
 .sort-buttons {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   margin-top: 12px;
-  justify-content: flex-start;
+  justify-content: stretch;
+  width: 100%;
 }
 
 .sort-btn {
   background: #f8fafc;
   color: #6b7280;
   border: 1px solid #e5e7eb;
-  padding: 6px 8px;
+  padding: 8px 12px;
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
@@ -229,9 +230,10 @@
   outline: none;
   display: flex;
   align-items: center;
-  gap: 2px;
-  min-width: 32px;
+  gap: 4px;
   justify-content: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .sort-btn:hover {
@@ -248,13 +250,18 @@
 
 .search-icon {
   position: absolute;
-  left: 8px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 14px;
+  font-size: 16px;
   color: #6b7280;
   pointer-events: none;
   z-index: 1;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-results-info {
