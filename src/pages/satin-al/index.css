@@ -34,42 +34,38 @@
   margin: 0 auto;
 }
 
+.satin-al__back-section {
+  margin-bottom: 20px;
+  padding-top: 20px;
+}
+
 .satin-al__header {
   margin-bottom: 40px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
+  text-align: center;
 }
 
 .satin-al__back-btn {
   background: transparent;
-  border: none;
+  border: 1px solid #f97316;
   color: #f97316;
   font-size: 16px;
   cursor: pointer;
-  padding: 8px 0;
-  transition: color 0.3s ease;
-  position: relative;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .satin-al__back-btn:hover {
-  color: #ea580c;
-}
-
-.satin-al__back-btn::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
+  color: white;
   background: #f97316;
-  transition: width 0.3s ease;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
-.satin-al__back-btn:hover::after {
-  width: 100%;
-}
 
 .satin-al__title {
   font-size: 32px;

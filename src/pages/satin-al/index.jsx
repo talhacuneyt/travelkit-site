@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useState } from 'react'
+import Navbar from '../../components/navbar'
 import './index.css'
 
 function SatinAl() {
@@ -111,43 +112,55 @@ function SatinAl() {
 
   if (isSuccess) {
     return (
-      <main className="satin-al">
-        <div className="satin-al__container">
-          <div className="satin-al__success">
-            <div className="satin-al__success-icon">✓</div>
-            <h1 className="satin-al__success-title">Siparişiniz Alındı!</h1>
-            <p className="satin-al__success-desc">
-              {packageTitle} paketi için siparişiniz başarıyla oluşturuldu. 
-              En kısa sürede sizinle iletişime geçeceğiz.
-            </p>
-            <div className="satin-al__success-info">
-              <p><strong>Sipariş No:</strong> #{Date.now().toString().slice(-6)}</p>
-              <p><strong>Paket:</strong> {packageTitle}</p>
-              <p><strong>Tutar:</strong> {packagePrice}</p>
+      <>
+        <Navbar />
+        <main className="satin-al">
+          <div className="satin-al__container">
+            <div className="satin-al__back-section">
+              <button onClick={handleBack} className="satin-al__back-btn">
+                ← Geri Dön
+              </button>
             </div>
-            <div className="satin-al__success-actions">
-              <button onClick={handleBack} className="satin-al__btn satin-al__btn--primary">
-                Ana Sayfaya Dön
-              </button>
-              <button onClick={() => window.location.href = '/iletisim'} className="satin-al__btn satin-al__btn--secondary">
-                İletişime Geç
-              </button>
+            <div className="satin-al__success">
+              <div className="satin-al__success-icon">✓</div>
+              <h1 className="satin-al__success-title">Siparişiniz Alındı!</h1>
+              <p className="satin-al__success-desc">
+                {packageTitle} paketi için siparişiniz başarıyla oluşturuldu. 
+                En kısa sürede sizinle iletişime geçeceğiz.
+              </p>
+              <div className="satin-al__success-info">
+                <p><strong>Sipariş No:</strong> #{Date.now().toString().slice(-6)}</p>
+                <p><strong>Paket:</strong> {packageTitle}</p>
+                <p><strong>Tutar:</strong> {packagePrice}</p>
+              </div>
+              <div className="satin-al__success-actions">
+                <button onClick={handleBack} className="satin-al__btn satin-al__btn--primary">
+                  Ana Sayfaya Dön
+                </button>
+                <button onClick={() => window.location.href = '/iletisim'} className="satin-al__btn satin-al__btn--secondary">
+                  İletişime Geç
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </>
     )
   }
 
   return (
-    <main className="satin-al">
-      <div className="satin-al__container">
-        <div className="satin-al__header">
-          <button onClick={handleBack} className="satin-al__back-btn">
-            ← Geri Dön
-          </button>
-          <h1 className="satin-al__title">Satın Alma</h1>
-        </div>
+    <>
+      <Navbar />
+      <main className="satin-al">
+        <div className="satin-al__container">
+          <div className="satin-al__back-section">
+            <button onClick={handleBack} className="satin-al__back-btn">
+              ← Geri Dön
+            </button>
+          </div>
+          <div className="satin-al__header">
+            <h1 className="satin-al__title">Satın Alma</h1>
+          </div>
 
         <div className="satin-al__content">
           <div className="satin-al__package-info">
@@ -371,6 +384,7 @@ function SatinAl() {
         </div>
       </div>
     </main>
+    </>
   )
 }
 
