@@ -66,28 +66,28 @@ function Iletisim() {
 
     async function sendWithSimpleAPI() {
       try {
-        // Formspree.io kullanarak basit email gönderimi
-        const response = await fetch('https://formspree.io/f/xpwgkqyw', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            message,
-            _subject: 'TravelKit İletişim Formu'
-          })
-        })
+        // EmailJS'i direkt kullan (hardcoded keys)
+        const serviceId = 'service_gkqoexj'
+        const templateId = 'template_mlpj99e'
+        const publicKey = 'YHkV0_Y_204JXzOSm'
+        
+        const templateParams = {
+          from_name: name,
+          from_email: email,
+          message: message,
+          to_name: 'TravelKit'
+        }
 
-        if (response.ok) {
+        const result = await emailjs.send(serviceId, templateId, templateParams, publicKey)
+        
+        if (result.status === 200) {
           setToast({ message: 'Mesajınız başarıyla gönderildi!', type: 'success' })
           form.reset()
         } else {
-          throw new Error('Formspree API hatası')
+          throw new Error('EmailJS gönderim hatası')
         }
       } catch (error) {
-        console.error('Simple API error:', error)
+        console.error('EmailJS error:', error)
         // Son çare: mailto
         const mailtoLink = `mailto:cuneytosmanlioglu@gmail.com?subject=TravelKit İletişim Formu&body=İsim: ${name}%0AEmail: ${email}%0AMesaj: ${message}`
         window.open(mailtoLink)
