@@ -381,7 +381,7 @@ function Navbar() {
             className="navbar__toggle"
             aria-expanded={isOpen}
             aria-label={language === 'tr' ? 'Menüyü aç/kapat' : 'Toggle menu'}
-            onClick={toggleMenu}
+            onClick={() => isOpen ? closeMenu() : setIsOpen(true)}
           >
             <span className="navbar__bar"></span>
             <span className="navbar__bar"></span>
