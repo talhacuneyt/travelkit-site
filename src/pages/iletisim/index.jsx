@@ -61,13 +61,45 @@ function Iletisim() {
     const web3formsKey = (
       import.meta.env.VITE_W3F_ACCESS_KEY ||
       window.localStorage.getItem('W3F_ACCESS_KEY') ||
-      'a1b2c3d4-e5f6-7890-abcd-ef1234567890' // Geçici test key - gerçek key ile değiştirin
+      'a1b2c3d4-e5f6-7890-abcd-ef1234567890' // Geçici test key
     ).trim()
+
+    async function sendWithSimpleAPI() {
+      try {
+        // Formspree.io kullanarak basit email gönderimi
+        const response = await fetch('https://formspree.io/f/xpwgkqyw', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            message,
+            _subject: 'TravelKit İletişim Formu'
+          })
+        })
+
+        if (response.ok) {
+          setToast({ message: 'Mesajınız başarıyla gönderildi!', type: 'success' })
+          form.reset()
+        } else {
+          throw new Error('Formspree API hatası')
+        }
+      } catch (error) {
+        console.error('Simple API error:', error)
+        // Son çare: mailto
+        const mailtoLink = `mailto:cuneytosmanlioglu@gmail.com?subject=TravelKit İletişim Formu&body=İsim: ${name}%0AEmail: ${email}%0AMesaj: ${message}`
+        window.open(mailtoLink)
+        setToast({ message: 'Email uygulamanız açıldı. Lütfen mesajı gönderin.', type: 'success' })
+        form.reset()
+      }
+    }
 
     async function sendWithWeb3Forms() {
       if (!web3formsKey || web3formsKey === 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
-        setToast({ message: 'Web3Forms access key gerekli. Lütfen Vercel environment variables ayarlayın.', type: 'error' })
-        console.error('Missing Web3Forms key')
+        // Web3Forms key yoksa, basit bir API endpoint kullan
+        await sendWithSimpleAPI()
         return
       }
       try {
@@ -141,19 +173,7 @@ function Iletisim() {
       }
     } else {
       console.log('EmailJS yapılandırılmamış, Web3Forms kullanılıyor...')
-      if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
-        await sendWithWeb3Forms()
-      } else {
-        // Fallback: Basit email gönderimi
-        try {
-          const mailtoLink = `mailto:cuneytosmanlioglu@gmail.com?subject=TravelKit İletişim Formu&body=İsim: ${name}%0AEmail: ${email}%0AMesaj: ${message}`
-          window.open(mailtoLink)
-          setToast({ message: 'Email uygulamanız açıldı. Lütfen mesajı gönderin.', type: 'success' })
-          form.reset()
-        } catch (err) {
-          setToast({ message: 'Hiçbir email servisi yapılandırılmamış. Lütfen Vercel environment variables ayarlayın.', type: 'error' })
-        }
-      }
+      await sendWithWeb3Forms()
     }
   }
 
