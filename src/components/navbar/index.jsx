@@ -378,23 +378,25 @@ function Navbar() {
           <NavLink to="/sss" className="navbar__link" onClick={closeMenu}>{t('nav.faq')}</NavLink>
           <NavLink to="/iletisim" className="navbar__cta" role="button" onClick={closeMenu}>{t('nav.contact')}</NavLink>
           
-          <button 
-            className="navbar__dark-mode-toggle"
-            onClick={toggleDarkMode}
-            aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
-            title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
-          >
-            {isDarkMode ? '☀️' : '🌙'}
-          </button>
-          
-          <button 
-            className="navbar__language-toggle"
-            onClick={handleLanguageChange}
-            aria-label={`Switch to ${language === 'tr' ? 'English' : 'Türkçe'}`}
-            title={`Switch to ${language === 'tr' ? 'English' : 'Türkçe'}`}
-          >
-            {language === 'tr' ? 'EN' : 'TR'}
-          </button>
+          <div className="navbar__button-group">
+            <button 
+              className="navbar__dark-mode-toggle"
+              onClick={toggleDarkMode}
+              aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+              title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+            
+            <button 
+              className="navbar__language-toggle"
+              onClick={handleLanguageChange}
+              aria-label={`Switch to ${language === 'tr' ? 'English' : 'Türkçe'}`}
+              title={`Switch to ${language === 'tr' ? 'English' : 'Türkçe'}`}
+            >
+              {language === 'tr' ? 'EN' : 'TR'}
+            </button>
+          </div>
         </nav>
 
         <button
