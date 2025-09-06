@@ -768,8 +768,9 @@
 .navbar__nav.is-open .navbar__button-group {
   display: flex;
   gap: 12px;
-  padding: 8px 20px 0 20px;
+  padding: 0 0 20px 20px;
   margin: 0;
+  justify-content: flex-start;
 }
 
 .navbar__nav.is-open .navbar__dark-mode-toggle {
