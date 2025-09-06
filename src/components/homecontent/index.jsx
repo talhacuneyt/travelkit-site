@@ -194,9 +194,9 @@ function HomeContent() {
         })}
       </section>
 
-      <h2 className="home-grid__heading" ref={packagesHeadingRef} id="paketler">{t('home.packages.title')}</h2>
-
-      <section className="home-grid" aria-label={t('home.ariaLabels.packages')} ref={packagesRef}>
+      <section className="home-packages-section">
+        <h2 className="home-grid__heading" ref={packagesHeadingRef} id="paketler">{t('home.packages.title')}</h2>
+        <div className="home-grid" aria-label={t('home.ariaLabels.packages')} ref={packagesRef}>
         {packages.map((item) => {
           const target = item.key === 'economic' ? '/paket/ekonomik' : item.key === 'comfort' ? '/paket/konforlu' : '/paket/lux'
           return (
@@ -234,6 +234,7 @@ function HomeContent() {
             </div>
           </article>
           )})}
+        </div>
       </section>
 
       <section className="home-testimonials" aria-label={t('home.ariaLabels.testimonials')} ref={testimonialsRef}>
