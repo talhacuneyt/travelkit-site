@@ -29,7 +29,6 @@ function Footer() {
           <div className="footer__logo">
             <img src="/images/logo.png" alt="TravelKit Logo" className="footer__logo-img" />
           </div>
-          <p className="footer__description">Daha kolay, daha keyifli seyahat</p>
         </div>
 
         <div className="footer__section">
