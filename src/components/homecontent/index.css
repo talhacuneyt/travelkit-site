@@ -392,6 +392,8 @@
   grid-template-columns: 1fr;
   gap: 36px;
   margin: 36px 0 42px;
+  min-height: 100vh;
+  align-items: center;
 }
 
 .feature-card {
