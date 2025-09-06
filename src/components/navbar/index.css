@@ -736,9 +736,9 @@
 
 .navbar__nav.is-open .navbar__link {
   color: #6b7280;
-  padding: 12px 0;
+  padding: 12px 20px;
   font-size: 16px;
-  text-align: center;
+  text-align: left;
   border-bottom: 1px solid #f3f4f6;
   margin: 0;
   width: 100%;
@@ -746,9 +746,9 @@
 
 .navbar__nav.is-open .navbar__cta {
   color: #6b7280;
-  padding: 12px 0;
+  padding: 12px 20px;
   font-size: 16px;
-  text-align: center;
+  text-align: left;
   border-bottom: 1px solid #f3f4f6;
   margin: 0;
   width: 100%;
@@ -758,7 +758,7 @@
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   color: #6b7280;
-  margin: 8px 20px;
+  margin: 0;
   text-align: center;
   border-radius: 8px;
   flex: 1;
@@ -768,7 +768,7 @@
 .navbar__nav.is-open .navbar__button-group {
   display: flex;
   gap: 12px;
-  padding: 8px 20px;
+  padding: 8px 20px 0 20px;
   margin: 0;
 }
 
