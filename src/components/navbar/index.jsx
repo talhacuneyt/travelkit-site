@@ -373,10 +373,23 @@ function Navbar() {
           </div>
         </Link>
 
-        <nav className={`navbar__nav ${isOpen ? 'is-open' : ''} ${isClosing ? 'is-closing' : ''}`} aria-label="Primary">
+        <div className="navbar__right">
           <div className="navbar__menu-logo">
             <img src="/images/logo.png" alt="TravelKit Logo" />
           </div>
+          <button
+            className="navbar__toggle"
+            aria-expanded={isOpen}
+            aria-label={language === 'tr' ? 'Menüyü aç/kapat' : 'Toggle menu'}
+            onClick={toggleMenu}
+          >
+            <span className="navbar__bar"></span>
+            <span className="navbar__bar"></span>
+            <span className="navbar__bar"></span>
+          </button>
+        </div>
+
+        <nav className={`navbar__nav ${isOpen ? 'is-open' : ''} ${isClosing ? 'is-closing' : ''}`} aria-label="Primary">
           <NavLink to="/hakkimizda" className="navbar__link" onClick={closeMenu}>{t('nav.about')}</NavLink>
           <NavLink to="/sss" className="navbar__link" onClick={closeMenu}>{t('nav.faq')}</NavLink>
           <NavLink to="/iletisim" className="navbar__cta" role="button" onClick={closeMenu}>{t('nav.contact')}</NavLink>
@@ -402,16 +415,6 @@ function Navbar() {
           </div>
         </nav>
 
-        <button
-          className="navbar__toggle"
-          aria-expanded={isOpen}
-          aria-label={language === 'tr' ? 'Menüyü aç/kapat' : 'Toggle menu'}
-          onClick={() => isOpen ? closeMenu() : setIsOpen(true)}
-        >
-          <span className="navbar__bar" />
-          <span className="navbar__bar" />
-          <span className="navbar__bar" />
-        </button>
       </div>
     </header>
   )

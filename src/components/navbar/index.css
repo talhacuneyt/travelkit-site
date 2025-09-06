@@ -732,17 +732,24 @@
   align-items: center;
 }
 
-/* Logo in hamburger menu */
-.navbar__nav.is-open .navbar__menu-logo {
+/* Right side of navbar */
+.navbar__right {
   display: flex;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #f3f4f6;
-  margin-bottom: 0;
-  justify-content: flex-start;
+  gap: 12px;
 }
 
-.navbar__nav.is-open .navbar__menu-logo img {
+/* Logo in navbar right */
+.navbar__menu-logo {
+  display: none;
+}
+
+.navbar.menu-open .navbar__menu-logo {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__menu-logo img {
   height: 32px;
   width: auto;
 }
