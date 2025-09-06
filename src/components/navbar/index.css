@@ -711,6 +711,11 @@
   padding-top: calc(var(--navbar-h) - 10px);
 }
 
+/* Hide brand text when menu is open */
+.navbar.menu-open .navbar__brand-text {
+  display: none;
+}
+
 .navbar__nav.is-closing {
   animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }

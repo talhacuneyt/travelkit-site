@@ -364,7 +364,7 @@ function Navbar() {
 
   // Normal navbar
   return (
-    <header className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
+    <header className={`navbar ${scrolled ? 'navbar--scrolled' : ''} ${isOpen ? 'menu-open' : ''}`}>
       <div className="navbar__inner">
         <Link to="/" className="navbar__brand" aria-label={t('nav.home')}>
           <img src="/images/logo.png" alt="TravelKit Logo" className="navbar__logo" />
