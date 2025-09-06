@@ -25,8 +25,10 @@ function Footer() {
   return (
     <footer className="footer" role="contentinfo">
       <div className="footer__content">
-        <div className="footer__section">
-          <h3 className="footer__title">TravelKit</h3>
+        <div className="footer__section footer__section--logo">
+          <div className="footer__logo">
+            <img src="/images/logo.png" alt="TravelKit Logo" className="footer__logo-img" />
+          </div>
           <p className="footer__description">Daha kolay, daha keyifli seyahat</p>
         </div>
 
