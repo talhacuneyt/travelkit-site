@@ -478,7 +478,7 @@
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 1002;
   width: 100%;
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
@@ -694,7 +694,7 @@
 /* Mobile Menu */
 .navbar__nav.is-open {
   position: fixed;
-  top: var(--navbar-h);
+  top: 0;
   right: 0;
   left: 0;
   display: flex;
@@ -704,8 +704,9 @@
   padding: 0;
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
+  z-index: 999;
   animation: slideDown 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  padding-top: var(--navbar-h);
 }
 
 .navbar__nav.is-closing {
