@@ -656,6 +656,8 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: border-color 0.2s ease;
+  position: relative;
+  z-index: 1003;
 }
 
 .navbar__toggle:hover {
@@ -706,7 +708,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   z-index: 999;
   animation: slideDown 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  padding-top: var(--navbar-h);
+  padding-top: calc(var(--navbar-h) - 10px);
 }
 
 .navbar__nav.is-closing {
