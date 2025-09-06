@@ -732,6 +732,11 @@
   align-items: center;
 }
 
+/* Hide left brand when menu is open, show only right logo */
+.navbar.menu-open .navbar__brand {
+  display: none;
+}
+
 /* Right side of navbar */
 .navbar__right {
   display: flex;
@@ -739,12 +744,8 @@
   gap: 12px;
 }
 
-/* Logo in navbar right */
+/* Logo in navbar right - always visible */
 .navbar__menu-logo {
-  display: none;
-}
-
-.navbar.menu-open .navbar__menu-logo {
   display: flex;
   align-items: center;
 }
