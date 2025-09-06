@@ -703,7 +703,7 @@
   .charts-section {
     grid-template-columns: 1fr;
     gap: 20px;
-    margin: 0 -10px 20px -10px;
+    margin: 0 0 20px 0;
   }
 }
 
@@ -721,7 +721,7 @@
 @media (max-width: 768px) {
   .chart-container {
     padding: 16px;
-    margin: 0 -10px;
+    margin: 0;
   }
 }
 
