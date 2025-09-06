@@ -39,41 +39,11 @@
 
 @media (min-width: 768px) {
   .footer__content {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 40px;
   }
 }
 
-/* Footer Logo Section */
-.footer__section--logo {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-.footer__logo {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.footer__logo-img {
-  height: 60px;
-  width: auto;
-  object-fit: contain;
-  transition: transform 0.3s ease;
-}
-
-.footer__logo-img:hover {
-  transform: scale(1.05);
-}
-
-@media (min-width: 768px) {
-  .footer__logo-img {
-    height: 80px;
-  }
-}
 
 /* Footer Section - same as paket__section */
 .footer__section {

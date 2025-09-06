@@ -25,12 +25,6 @@ function Footer() {
   return (
     <footer className="footer" role="contentinfo">
       <div className="footer__content">
-        <div className="footer__section footer__section--logo">
-          <div className="footer__logo">
-            <img src="/images/logo.png" alt="TravelKit Logo" className="footer__logo-img" />
-          </div>
-        </div>
-
         <div className="footer__section">
           <h4 className="footer__section-title">Sayfalar</h4>
           <div className="footer__links">
