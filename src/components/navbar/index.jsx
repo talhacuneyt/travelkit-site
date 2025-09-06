@@ -373,6 +373,26 @@ function Navbar() {
           </div>
         </Link>
 
+        <div className="navbar__toggles">
+          <button 
+            className="navbar__dark-mode-toggle"
+            onClick={toggleDarkMode}
+            aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+            title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+          >
+            {isDarkMode ? '☀️' : '🌙'}
+          </button>
+          
+          <button 
+            className="navbar__language-toggle"
+            onClick={handleLanguageChange}
+            aria-label={`Switch to ${language === 'tr' ? 'English' : 'Türkçe'}`}
+            title={`Switch to ${language === 'tr' ? 'English' : 'Türkçe'}`}
+          >
+            {language === 'tr' ? 'EN' : 'TR'}
+          </button>
+        </div>
+
         <button
           className="navbar__toggle"
           aria-expanded={isOpen}

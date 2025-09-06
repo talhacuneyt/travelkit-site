@@ -882,6 +882,13 @@
   }
 }
 
+/* Navbar Toggles Container */
+.navbar__toggles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* Language Toggle */
 .navbar__language-toggle {
   color: #6b7280;
