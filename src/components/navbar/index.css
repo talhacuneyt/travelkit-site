@@ -706,7 +706,7 @@
 /* Mobile Menu */
 .navbar__nav.is-open {
   position: fixed;
-  top: 0;
+  top: var(--navbar-h);
   right: 0;
   left: 0;
   display: flex;
@@ -718,42 +718,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   z-index: 999;
   animation: slideDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  padding-top: calc(var(--navbar-h) - 10px);
 }
 
-/* Hide brand text when menu is open */
-.navbar.menu-open .navbar__brand-text {
-  display: none;
-}
-
-/* Show only logo when menu is open */
-.navbar.menu-open .navbar__brand {
-  display: flex;
-  align-items: center;
-}
-
-/* Hide left brand when menu is open, show only right logo */
-.navbar.menu-open .navbar__brand {
-  display: none;
-}
-
-/* Right side of navbar */
-.navbar__right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Logo in navbar right - always visible */
-.navbar__menu-logo {
-  display: flex;
-  align-items: center;
-}
-
-.navbar__menu-logo img {
-  height: 32px;
-  width: auto;
-}
 
 .navbar__nav.is-closing {
   animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);

@@ -373,21 +373,16 @@ function Navbar() {
           </div>
         </Link>
 
-        <div className="navbar__right">
-          <div className="navbar__menu-logo">
-            <img src="/images/logo.png" alt="TravelKit Logo" />
-          </div>
-          <button
-            className="navbar__toggle"
-            aria-expanded={isOpen}
-            aria-label={language === 'tr' ? 'Menüyü aç/kapat' : 'Toggle menu'}
-            onClick={() => isOpen ? closeMenu() : setIsOpen(true)}
-          >
-            <span className="navbar__bar"></span>
-            <span className="navbar__bar"></span>
-            <span className="navbar__bar"></span>
-          </button>
-        </div>
+        <button
+          className="navbar__toggle"
+          aria-expanded={isOpen}
+          aria-label={language === 'tr' ? 'Menüyü aç/kapat' : 'Toggle menu'}
+          onClick={() => isOpen ? closeMenu() : setIsOpen(true)}
+        >
+          <span className="navbar__bar"></span>
+          <span className="navbar__bar"></span>
+          <span className="navbar__bar"></span>
+        </button>
 
         <nav className={`navbar__nav ${isOpen ? 'is-open' : ''} ${isClosing ? 'is-closing' : ''}`} aria-label="Primary">
           <NavLink to="/hakkimizda" className="navbar__link" onClick={closeMenu}>{t('nav.about')}</NavLink>
