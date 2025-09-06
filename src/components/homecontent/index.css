@@ -1,7 +1,7 @@
 .home {
   width: 100%;
   margin: 0;
-  padding: 0 40px;
+  padding: 0 20px;
   position: relative;
   min-height: 100vh;
 }
@@ -207,11 +207,29 @@
 
 .home-hero__inner {
   text-align: center;
-  padding: 0;
+  padding: 20px;
   width: 100%;
   margin: 0;
   position: relative;
   z-index: 2;
+}
+
+@media (min-width: 768px) {
+  .home-hero__inner {
+    padding: 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-hero__inner {
+    padding: 60px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .home-hero__inner {
+    padding: 80px;
+  }
 }
 
 .home-hero__eyebrow {

@@ -664,6 +664,16 @@
   border-color: #f97316;
 }
 
+.navbar__toggle:focus {
+  outline: none;
+  border-color: #f97316;
+}
+
+.navbar__toggle:active {
+  outline: none;
+  border-color: #f97316;
+}
+
 @media (min-width: 768px) {
   .navbar__toggle {
     display: none;
@@ -714,6 +724,12 @@
 /* Hide brand text when menu is open */
 .navbar.menu-open .navbar__brand-text {
   display: none;
+}
+
+/* Show only logo when menu is open */
+.navbar.menu-open .navbar__brand {
+  display: flex;
+  align-items: center;
 }
 
 .navbar__nav.is-closing {
