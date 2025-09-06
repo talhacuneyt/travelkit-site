@@ -1,0 +1,158 @@
+/* Minimal 404 Page Styles - Single Centered Area */
+
+.not-found {
+  min-height: 100vh;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Dark mode styles */
+.dark .not-found {
+  color: #ffffff;
+}
+
+.not-found-container {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.not-found-number {
+  font-size: 120px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0 0 24px 0;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.not-found__title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0 0 16px 0;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -1px;
+}
+
+.not-found__subtitle {
+  font-size: 18px;
+  color: #64748b;
+  margin: 0 0 40px 0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.not-found-button {
+  background: #111111;
+  border: 1px solid #111111;
+  color: white;
+  padding: 18px 48px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.not-found-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.not-found-button:hover {
+  background: #374151;
+  border-color: #374151;
+  transform: translateY(-1px);
+  color: white;
+  text-decoration: none;
+}
+
+.not-found-button:hover::before {
+  left: 100%;
+}
+
+.not-found-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .not-found {
+    padding: 20px;
+  }
+  
+  .not-found__title {
+    font-size: 36px;
+  }
+  
+  .not-found__subtitle {
+    font-size: 16px;
+  }
+  
+  .not-found-number {
+    font-size: 80px;
+  }
+  
+  .not-found-button {
+    padding: 16px 40px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .not-found {
+    padding: 16px;
+  }
+  
+  .not-found__title {
+    font-size: 28px;
+  }
+  
+  .not-found-number {
+    font-size: 60px;
+  }
+}
+
+/* Dark Mode Styles */
+.dark .not-found-number {
+  color: #ffffff;
+}
+
+.dark .not-found__title {
+  color: #ffffff;
+}
+
+.dark .not-found__subtitle {
+  color: #a0a0a0;
+}
+
+.dark .not-found-button {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.dark .not-found-button:hover {
+  background: #f0f0f0;
+  color: #000000;
+  border-color: #f0f0f0;
+}
