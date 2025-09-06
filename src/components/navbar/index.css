@@ -732,6 +732,21 @@
   align-items: center;
 }
 
+/* Logo in hamburger menu */
+.navbar__nav.is-open .navbar__menu-logo {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 0;
+  justify-content: flex-start;
+}
+
+.navbar__nav.is-open .navbar__menu-logo img {
+  height: 32px;
+  width: auto;
+}
+
 .navbar__nav.is-closing {
   animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
