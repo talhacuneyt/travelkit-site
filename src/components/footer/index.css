@@ -81,7 +81,7 @@
   font-weight: 700;
   color: #111111;
   margin-bottom: 20px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   text-align: right;
@@ -101,7 +101,7 @@
   margin: 0;
   color: #64748b;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   transition: color 0.3s ease;
   cursor: pointer;
   text-decoration: none;

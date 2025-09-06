@@ -113,3 +113,4 @@ class KuveytTurkService {
 }
 
 module.exports = new KuveytTurkService();
+

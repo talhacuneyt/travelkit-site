@@ -207,11 +207,27 @@ function Admin() {
       return
     }
 
-    // Her zaman login formu göster - session kontrolünü kaldır
-    localStorage.removeItem('admin_session')
-    localStorage.removeItem('admin_session_timestamp')
-    localStorage.removeItem('admin_remember_me')
-    setIsAuthenticated(false)
+    // Session kontrolü
+    const session = localStorage.getItem('admin_session')
+    const sessionTimestamp = localStorage.getItem('admin_session_timestamp')
+    
+    // Session süresi kontrolü (24 saat)
+    const now = Date.now()
+    const sessionAge = sessionTimestamp ? now - parseInt(sessionTimestamp) : Infinity
+    const maxSessionAge = 24 * 60 * 60 * 1000 // 24 saat
+    
+    if (session === 'authenticated' && sessionAge < maxSessionAge) {
+      setIsAuthenticated(true)
+      if (supabase) {
+        fetchMessages()
+      }
+    } else {
+      // Geçersiz veya süresi dolmuş session
+      localStorage.removeItem('admin_session')
+      localStorage.removeItem('admin_session_timestamp')
+      setIsAuthenticated(false)
+    }
+    
     setLoading(false)
 
     // Dark mode kontrolü

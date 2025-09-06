@@ -61,3 +61,4 @@ Kuveyt Türk'tan gelen ödeme bildirimleri `/api/payments/webhook` endpoint'inde
 ## Geliştirme
 
 Backend API'si frontend ile birlikte çalışacak şekilde tasarlanmıştır. Frontend'den gelen ödeme istekleri işlenir ve Kuveyt Türk API'si ile entegre edilir.
+

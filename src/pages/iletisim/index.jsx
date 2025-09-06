@@ -61,7 +61,7 @@ function Iletisim() {
     const web3formsKey = (
       import.meta.env.VITE_W3F_ACCESS_KEY ||
       window.localStorage.getItem('W3F_ACCESS_KEY') ||
-      ''
+      'a1b2c3d4-e5f6-7890-abcd-ef1234567890' // Geçici test key - gerçek key ile değiştirin
     ).trim()
 
     async function sendWithWeb3Forms() {
@@ -99,8 +99,13 @@ function Iletisim() {
       }
     }
 
+    // Debug bilgileri
+    console.log('EmailJS Config:', { serviceId, templateId, publicKey })
+    console.log('Web3Forms Key:', web3formsKey ? 'Mevcut' : 'Yok')
+
     if (serviceId && templateId && publicKey) {
       try {
+        console.log('EmailJS ile gönderim deneniyor...')
         await emailjs.send(
           serviceId,
           templateId,
@@ -114,27 +119,33 @@ function Iletisim() {
         )
         setToast({ message: t('contact.success'), type: 'success' })
         form.reset()
+        console.log('EmailJS ile gönderim başarılı!')
       } catch (err) {
         const status = err?.status || err?.response?.status
         const text = err?.text || err?.message || ''
-        console.error('Email gönderimi sırasında hata:', { status, error: err })
+        console.error('EmailJS hatası:', { status, error: err, text })
         
         // Check if it's a public key error
         if (status === 400 && text.includes('Public Key is invalid')) {
           console.warn('EmailJS Public Key geçersiz. Web3Forms kullanılıyor...')
-          if (web3formsKey) {
+          if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
             await sendWithWeb3Forms()
           } else {
             setToast({ message: 'EmailJS yapılandırması hatalı. Lütfen Web3Forms access key ekleyin veya EmailJS ayarlarını kontrol edin.', type: 'error' })
           }
-        } else if (web3formsKey) {
+        } else if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
           await sendWithWeb3Forms()
         } else {
           setToast({ message: `Gönderim hatası${status ? ` (${status})` : ''}: ${text || t('contact.error')}`, type: 'error' })
         }
       }
     } else {
-      await sendWithWeb3Forms()
+      console.log('EmailJS yapılandırılmamış, Web3Forms kullanılıyor...')
+      if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
+        await sendWithWeb3Forms()
+      } else {
+        setToast({ message: 'Hiçbir email servisi yapılandırılmamış. Lütfen Vercel environment variables ayarlayın.', type: 'error' })
+      }
     }
   }
 
