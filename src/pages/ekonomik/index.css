@@ -418,6 +418,12 @@
   text-align: center;
 }
 
+@media (max-width: 768px) {
+  .paket__section-title {
+    text-align: left;
+  }
+}
+
 /* Carded groups */
 .paket__grid {
   display: grid;

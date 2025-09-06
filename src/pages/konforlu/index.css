@@ -178,6 +178,12 @@
   text-align: center;
 }
 
+@media (max-width: 768px) {
+  .paket__section-title {
+    text-align: left;
+  }
+}
+
 /* Carded groups */
 .paket__grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
 .paket__card { border: 1px solid var(--border); border-left: 4px solid #f97316; border-radius: 14px; padding: 14px 16px; background: transparent; }
