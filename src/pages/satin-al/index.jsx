@@ -79,7 +79,8 @@ function SatinAl() {
 
     try {
       // Backend API'ye Iyzico ödeme isteği gönder
-      const response = await fetch('http://localhost:3001/api/payments/create-session', {
+      const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend-lylw6qeuy-cuneyts-projects-a4c33b73.vercel.app');
+      const response = await fetch(`${API_URL}/api/payments/create-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
