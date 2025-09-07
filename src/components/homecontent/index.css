@@ -391,7 +391,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  margin: 36px 0 42px;
   min-height: 100vh;
   align-items: center;
 }
@@ -556,7 +555,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 40px 0;
 }
 
 .home-grid {
@@ -1033,76 +1031,6 @@
   order: 3;
 }
 
-.home-cta-band {
-  margin-top: 16px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-  color: white;
-}
-
-.home-cta-band__inner {
-  text-align: center;
-  padding: 28px 20px;
-}
-
-.home-cta-band__inner h2 {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  font-size: 28.8px;
-  color: #111111;
-}
-
-.home-cta-band__inner p {
-  margin: 0 0 12px;
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  color: #64748b;
-}
-
-.home-cta-band .btn--inverse {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 14px 28px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 16px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.home-cta-band .btn--inverse::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.home-cta-band .btn--inverse:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4);
-  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
-}
-
-.home-cta-band .btn--inverse:hover::before {
-  left: 100%;
-}
-
-.home-cta-band .btn--inverse:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
-}
 
 @media (min-width: 960px) {
   .home {
@@ -1126,12 +1054,8 @@
 
   .features-xl {
     gap: 40px;
-    margin: 80px 0;
   }
 
-  .home-cta-band__inner {
-    padding: 36px 24px;
-  }
 }
 
 /* Hero floating particles - very subtle and stable */
@@ -1256,7 +1180,6 @@
   .feature { background: transparent; }
   .home-card { background: transparent; }
   .home-card__media { background: transparent; }
-  .home-cta-band { background: transparent; color: var(--text); }
 }
 
 /* Dark Mode Styles */
@@ -1311,27 +1234,5 @@
   color: #a0a0a0;
 }
 
-.dark .home-cta-band {
-  color: #ffffff;
-}
-
-.dark .home-cta-band__title {
-  color: #ffffff;
-}
-
-.dark .home-cta-band__subtitle {
-  color: #a0a0a0;
-}
-
-.dark .home-cta-band__button {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-}
-
-.dark .home-cta-band__button:hover {
-  background: #f0f0f0;
-  color: #000000;
-}
 
 /* Removed minimal redesign styles */

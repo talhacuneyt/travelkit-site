@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from '../../hooks/useTranslation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '../../components/navbar'
 import './index.css'
 
@@ -32,6 +32,23 @@ function SatinAl() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [paymentError, setPaymentError] = useState('')
+
+  // URL parametrelerini kontrol et (ödeme sonucu)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search)
+    const success = urlParams.get('success')
+    const cancel = urlParams.get('cancel')
+    const testPayment = urlParams.get('test-payment')
+    const orderId = urlParams.get('orderId')
+
+    if (success === 'true' || testPayment === 'true') {
+      setIsSuccess(true)
+      setPaymentError('')
+    } else if (cancel === 'true') {
+      setPaymentError('Ödeme işlemi iptal edildi.')
+    }
+  }, [location.search])
 
   const handleBack = () => {
     navigate(-1)
@@ -58,9 +75,10 @@ function SatinAl() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setPaymentError('')
 
     try {
-      // Backend API'ye ödeme isteği gönder
+      // Backend API'ye Iyzico ödeme isteği gönder
       const response = await fetch('http://localhost:3001/api/payments/create-session', {
         method: 'POST',
         headers: {
@@ -76,29 +94,22 @@ function SatinAl() {
             phone: formData.phone,
             address: formData.address
           },
-          paymentMethod: formData.paymentMethod,
-          cardInfo: formData.paymentMethod === 'credit-card' ? {
-            cardNumber: formData.cardNumber,
-            cardName: formData.cardName,
-            expiryMonth: formData.expiryMonth,
-            expiryYear: formData.expiryYear,
-            cvv: formData.cvv
-          } : null
+          paymentMethod: formData.paymentMethod
         })
       })
 
       const result = await response.json()
 
       if (result.success) {
-        // Ödeme sayfasına yönlendir
+        // Iyzico ödeme sayfasına yönlendir
         window.location.href = result.paymentUrl
       } else {
-        alert('Ödeme oturumu oluşturulamadı: ' + result.error)
+        setPaymentError('Ödeme formu oluşturulamadı: ' + result.error)
         setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Payment error:', error)
-      alert('Ödeme işlemi sırasında bir hata oluştu')
+      setPaymentError('Ödeme işlemi sırasında bir hata oluştu')
       setIsSubmitting(false)
     }
   }
@@ -173,6 +184,13 @@ function SatinAl() {
 
           <form onSubmit={handleSubmit} className="satin-al__form">
             <h3 className="satin-al__form-title">Sipariş Bilgileri</h3>
+            
+            {paymentError && (
+              <div className="satin-al__error">
+                <div className="satin-al__error-icon">⚠️</div>
+                <div className="satin-al__error-message">{paymentError}</div>
+              </div>
+            )}
             
             <div className="satin-al__form-row">
               <div className="satin-al__form-group">
@@ -258,101 +276,20 @@ function SatinAl() {
               />
             </div>
 
-            {/* Kart Bilgileri - Sadece kredi kartı seçildiğinde göster */}
-            {formData.paymentMethod === 'credit-card' && (
-              <div className="satin-al__card-section">
-                <h4 className="satin-al__card-title">Kart Bilgileri</h4>
-                
-                <div className="satin-al__form-group">
-                  <label htmlFor="cardNumber">Kart Numarası *</label>
-                  <input
-                    type="text"
-                    id="cardNumber"
-                    name="cardNumber"
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                    required
-                    className="satin-al__input satin-al__input--card"
-                    placeholder="1234 5678 9012 3456"
-                    maxLength="19"
-                  />
-                </div>
-
-                <div className="satin-al__form-group">
-                  <label htmlFor="cardName">Kart Üzerindeki İsim *</label>
-                  <input
-                    type="text"
-                    id="cardName"
-                    name="cardName"
-                    value={formData.cardName}
-                    onChange={handleInputChange}
-                    required
-                    className="satin-al__input"
-                    placeholder="Ad Soyad"
-                  />
-                </div>
-
-                <div className="satin-al__form-row">
-                  <div className="satin-al__form-group">
-                    <label htmlFor="expiryMonth">Son Kullanma Ay *</label>
-                    <select
-                      id="expiryMonth"
-                      name="expiryMonth"
-                      value={formData.expiryMonth}
-                      onChange={handleInputChange}
-                      required
-                      className="satin-al__select"
-                    >
-                      <option value="">Ay</option>
-                      {Array.from({ length: 12 }, (_, i) => (
-                        <option key={i + 1} value={String(i + 1).padStart(2, '0')}>
-                          {String(i + 1).padStart(2, '0')}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="satin-al__form-group">
-                    <label htmlFor="expiryYear">Son Kullanma Yıl *</label>
-                    <select
-                      id="expiryYear"
-                      name="expiryYear"
-                      value={formData.expiryYear}
-                      onChange={handleInputChange}
-                      required
-                      className="satin-al__select"
-                    >
-                      <option value="">Yıl</option>
-                      {Array.from({ length: 10 }, (_, i) => {
-                        const year = new Date().getFullYear() + i
-                        return (
-                          <option key={year} value={year}>
-                            {year}
-                          </option>
-                        )
-                      })}
-                    </select>
-                  </div>
-                  <div className="satin-al__form-group">
-                    <label htmlFor="cvv">CVV *</label>
-                    <input
-                      type="text"
-                      id="cvv"
-                      name="cvv"
-                      value={formData.cvv}
-                      onChange={handleInputChange}
-                      required
-                      className="satin-al__input satin-al__input--cvv"
-                      placeholder="123"
-                      maxLength="4"
-                    />
-                  </div>
-                </div>
-                
-                <div className="satin-al__security-info">
-                  Kart bilgileriniz güvenli şekilde şifrelenir ve saklanmaz.
-                </div>
+            {/* Iyzico Ödeme Bilgisi */}
+            <div className="satin-al__payment-info">
+              <div className="satin-al__payment-icon">🔒</div>
+              <div className="satin-al__payment-text">
+                <h4>Güvenli Ödeme</h4>
+                <p>Ödeme işlemi Iyzico güvenli ödeme sistemi ile gerçekleştirilir. Kart bilgileriniz güvenli şekilde işlenir ve saklanmaz.</p>
+                <ul>
+                  <li>✓ SSL şifreleme ile korunur</li>
+                  <li>✓ PCI DSS uyumlu</li>
+                  <li>✓ 3D Secure desteği</li>
+                  <li>✓ Tüm kart türleri kabul edilir</li>
+                </ul>
               </div>
-            )}
+            </div>
 
             <div className="satin-al__form-actions">
               <button 
@@ -360,7 +297,7 @@ function SatinAl() {
                 disabled={isSubmitting}
                 className="satin-al__btn satin-al__btn--primary"
               >
-                {isSubmitting ? 'Sipariş Veriliyor...' : 'Siparişi Tamamla'}
+                {isSubmitting ? 'Iyzico Ödeme Sayfasına Yönlendiriliyor...' : 'Güvenli Ödeme ile Devam Et'}
               </button>
               <button 
                 type="button" 

@@ -302,13 +302,6 @@ function HomeContent() {
         </button>
       </section>
 
-      <section className="home-cta-band" aria-label={t('home.ariaLabels.cta')}>
-        <div className="home-cta-band__inner">
-          <h2>{t('home.cta.title')}</h2>
-          <p>{t('home.cta.subtitle')}</p>
-          <Link to="/iletisim" className="btn btn--inverse">{t('home.cta.button')}</Link>
-        </div>
-      </section>
     </main>
   )
 }

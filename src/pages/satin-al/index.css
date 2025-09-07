@@ -617,18 +617,101 @@
   font-size: 16px;
 }
 
-/* Dark Mode Kart Bilgileri */
-.dark .satin-al__card-section {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.1);
+/* Error Display */
+.satin-al__error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.dark .satin-al__card-title {
-  color: #ffffff;
+.satin-al__error-icon {
+  font-size: 20px;
+  color: #dc2626;
 }
 
-.dark .satin-al__security-info {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #6ee7b7;
+.satin-al__error-message {
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Payment Info Section */
+.satin-al__payment-info {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.satin-al__payment-icon {
+  font-size: 32px;
+  color: #0369a1;
+  flex-shrink: 0;
+}
+
+.satin-al__payment-text h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0c4a6e;
+  margin: 0 0 8px 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.satin-al__payment-text p {
+  font-size: 14px;
+  color: #0369a1;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+.satin-al__payment-text ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.satin-al__payment-text li {
+  font-size: 13px;
+  color: #0369a1;
+  margin-bottom: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Dark Mode Error */
+.dark .satin-al__error {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.dark .satin-al__error-message {
+  color: #fca5a5;
+}
+
+/* Dark Mode Payment Info */
+.dark .satin-al__payment-info {
+  background: rgba(3, 105, 161, 0.1);
+  border-color: rgba(3, 105, 161, 0.3);
+}
+
+.dark .satin-al__payment-text h4 {
+  color: #7dd3fc;
+}
+
+.dark .satin-al__payment-text p {
+  color: #7dd3fc;
+}
+
+.dark .satin-al__payment-text li {
+  color: #7dd3fc;
 }
