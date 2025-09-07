@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://oxgttvuktsjokfgxbibh.supabase.co'
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94Z3R0dnVrdHNqb2tmZ3hiaWJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwODA3NDcsImV4cCI6MjA3MjY1Njc0N30.PRAg8CW1ezMVkQVmebqgX6EhLBInz6JS7Aoe74yv2mg'
+const supabaseUrl = 'https://kegdhelzdksivfekktkx.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2RoZWx6ZGtzaXZmZWtrdGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTA1NDgsImV4cCI6MjA3MjgyNjU0OH0.9srURxR_AsLu5lqwodeFuV-zsmkkr82PRh9RSToqQUU'
 
 // EmailJS Configuration - Environment variables with fallback
 export const EMAILJS_CONFIG = {
@@ -21,4 +21,4 @@ if (!supabaseUrl || !supabaseKey) {
 }
 console.log('✅ EmailJS yapılandırması tamamlandı!')
 
-export const supabase = null // Geçici olarak devre dışı - API key sorunu
+export const supabase = createClient(supabaseUrl, supabaseKey)
