@@ -21,6 +21,4 @@ if (!supabaseUrl || !supabaseKey) {
 }
 console.log('✅ EmailJS yapılandırması tamamlandı!')
 
-export const supabase = supabaseUrl && supabaseKey 
-  ? createClient(supabaseUrl, supabaseKey)
-  : null
+export const supabase = null // Geçici olarak devre dışı - API key sorunu

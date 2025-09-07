@@ -17,6 +17,8 @@ function Iletisim() {
     const message = form.message?.value || ''
 
     // Veritabanına kaydet (eğer Supabase yapılandırılmışsa)
+    // Supabase geçici olarak devre dışı - API key sorunu
+    /*
     if (supabase) {
       try {
         const { data, error } = await supabase
@@ -38,9 +40,10 @@ function Iletisim() {
       } catch (dbError) {
         console.error('Veritabanı bağlantı hatası:', dbError)
       }
-    } else {
-      console.log('Supabase yapılandırılmamış. Sadece mail gönderimi yapılıyor.')
     }
+    */
+    
+    console.log('Supabase geçici olarak devre dışı. Sadece mail gönderimi yapılıyor.')
 
     const serviceId = (
       import.meta.env.VITE_EMAILJS_SERVICE_ID ||
