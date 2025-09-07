@@ -79,7 +79,7 @@ function SatinAl() {
 
     try {
       // Backend API'ye Iyzico ödeme isteği gönder
-      const response = await fetch('https://travelkit-backend-pidx1mdzw-cuneyts-projects-a4c33b73.vercel.app/api/payments/create-session', {
+      const response = await fetch('https://travelkit-backend-g6vlztniy-cuneyts-projects-a4c33b73.vercel.app/api/payments/create-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
