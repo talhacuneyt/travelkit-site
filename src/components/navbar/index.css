@@ -790,7 +790,8 @@
 /* Butonları yan yana getiren container */
 .navbar__nav.is-open .navbar__button-group {
   display: flex;
-  gap: 0;
+  flex-direction: row;
+  gap: 12px;
   padding: 20px 12px;
   margin: 0;
   justify-content: flex-start;
@@ -880,13 +881,6 @@
   .navbar__nav.is-open {
     padding: 24px 40px;
   }
-}
-
-/* Navbar Toggles Container */
-.navbar__toggles {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 /* Language Toggle */
