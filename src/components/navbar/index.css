@@ -887,6 +887,14 @@
   }
 }
 
+/* Normal navbar button layout */
+.navbar__button-group {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 12px !important;
+  align-items: center;
+}
+
 /* Language Toggle */
 .navbar__language-toggle {
   color: #6b7280;
@@ -903,9 +911,11 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
+  flex: none !important;
+  flex-shrink: 0 !important;
 }
 
 .navbar__language-toggle:hover {
@@ -929,11 +939,13 @@
   cursor: pointer;
   min-width: 44px;
   height: 44px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
+  margin: 0 !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  flex: none !important;
+  flex-shrink: 0 !important;
 }
 
 .navbar__dark-mode-toggle:hover {
