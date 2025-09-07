@@ -155,7 +155,7 @@ function Iletisim() {
       } catch (err) {
         const status = err?.status || err?.response?.status
         const text = err?.text || err?.message || ''
-        console.error('EmailJS hatası:', { status, error: err, text })
+        // EmailJS hatası - sessizce işle (Web3Forms kullanılacak)
         
         // Check if it's a public key error
         if (status === 400 && text.includes('Public Key is invalid')) {
