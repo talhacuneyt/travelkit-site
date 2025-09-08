@@ -18,6 +18,9 @@ app.use(cors({
     'http://localhost:5177',
     'http://localhost:5178',
     'https://travelkit-site.vercel.app',
+    'https://travelkit-site-git-main-talhacuneyt.vercel.app',
+    'https://travelkit-site-git-main-talhacuneyt.vercel.app',
+    /^https:\/\/travelkit-site.*\.vercel\.app$/,
     process.env.FRONTEND_URL || 'http://localhost:5174'
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
