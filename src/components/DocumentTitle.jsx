@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 
-const DocumentTitle = () => {
+const DocumentTitle = ({ title }) => {
   const { language } = useLanguage()
   const location = useLocation()
 
@@ -10,12 +10,18 @@ const DocumentTitle = () => {
     const getPageTitle = () => {
       const baseTitle = 'TravelKit'
       
+      // Eğer title prop'u varsa onu kullan
+      if (title) {
+        return title
+      }
+      
       // Sayfa başlıkları
       const pageTitles = {
         '/': language === 'en' ? 'Home' : 'Anasayfa',
         '/hakkimizda': language === 'en' ? 'About Us' : 'Hakkımızda',
         '/iletisim': language === 'en' ? 'Contact' : 'İletişim',
         '/sss': language === 'en' ? 'FAQ' : 'SSS',
+        '/satin-al': language === 'en' ? 'Buy Package' : 'Paket Satın Al',
         '/paket/ekonomik': language === 'en' ? 'Economic Package' : 'Ekonomik Paket',
         '/paket/konforlu': language === 'en' ? 'Comfort Package' : 'Konforlu Paket',
         '/paket/lux': language === 'en' ? 'Luxury Package' : 'Lüks Paket',
@@ -38,7 +44,7 @@ const DocumentTitle = () => {
     }
 
     document.title = getPageTitle()
-  }, [language, location.pathname])
+  }, [language, location.pathname, title])
 
   return null
 }

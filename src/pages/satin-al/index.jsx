@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useState, useEffect } from 'react'
 import Navbar from '../../components/navbar'
+import DocumentTitle from '../../components/DocumentTitle'
 import './index.css'
 
 function SatinAl() {
@@ -35,6 +36,8 @@ function SatinAl() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [paymentError, setPaymentError] = useState('')
+  const [countdown, setCountdown] = useState(5)
+  const [orderNumber, setOrderNumber] = useState('')
 
   // URL parametrelerini kontrol et (ödeme sonucu)
   useEffect(() => {
@@ -51,6 +54,29 @@ function SatinAl() {
       setPaymentError('Ödeme işlemi iptal edildi.')
     }
   }, [location.search])
+
+  // Başarılı sipariş sonrası 5 saniye bekleyip yönlendirme
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        // Ekonomik detay sayfasına yönlendir
+        navigate(`/paket/ekonomik`)
+      }, 5000) // 5 saniye
+
+      return () => clearTimeout(timer)
+    }
+  }, [isSuccess, navigate])
+
+  // Geri sayım için timer
+  useEffect(() => {
+    if (isSuccess && countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1)
+      }, 1000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [isSuccess, countdown])
 
   const handleBack = () => {
     navigate(-1)
@@ -105,6 +131,9 @@ function SatinAl() {
       if (result.success) {
         // Mock payment - gerçek ödeme sayfasına yönlendirme yerine başarı sayfasına git
         console.log('Payment session created:', result.data)
+        // Sipariş numarası oluştur
+        const orderNum = `TK${Date.now().toString().slice(-6)}`
+        setOrderNumber(orderNum)
         setIsSuccess(true)
         setIsSubmitting(false)
       } else {
@@ -128,34 +157,23 @@ function SatinAl() {
   if (isSuccess) {
     return (
       <>
+        <DocumentTitle title="Siparişiniz Alındı - TravelKit" />
         <Navbar />
-        <main className="satin-al">
-          <div className="satin-al__container">
-            <div className="satin-al__back-section">
-              <button onClick={handleBack} className="satin-al__back-btn">
-                ← Geri Dön
-              </button>
+        <main className="satin-al-success">
+          <div className="satin-al-success-container">
+            <div className="satin-al-success-icon">✓</div>
+            <h1 className="satin-al-success__title">Siparişiniz Alındı!</h1>
+            <p className="satin-al-success__subtitle">
+              {packageTitle} paketi için siparişiniz başarıyla oluşturuldu. 
+              En kısa sürede sizinle iletişime geçeceğiz.
+            </p>
+            <div className="satin-al-success__info">
+              <p><strong>Sipariş No:</strong> {orderNumber}</p>
+              <p><strong>Paket:</strong> {packageTitle}</p>
+              <p><strong>Tutar:</strong> {packagePriceString}</p>
             </div>
-            <div className="satin-al__success">
-              <div className="satin-al__success-icon">✓</div>
-              <h1 className="satin-al__success-title">Siparişiniz Alındı!</h1>
-              <p className="satin-al__success-desc">
-                {packageTitle} paketi için siparişiniz başarıyla oluşturuldu. 
-                En kısa sürede sizinle iletişime geçeceğiz.
-              </p>
-              <div className="satin-al__success-info">
-                <p><strong>Sipariş No:</strong> #{Date.now().toString().slice(-6)}</p>
-                <p><strong>Paket:</strong> {packageTitle}</p>
-                <p><strong>Tutar:</strong> {packagePriceString}</p>
-              </div>
-              <div className="satin-al__success-actions">
-                <button onClick={handleBack} className="satin-al__btn satin-al__btn--primary">
-                  Ana Sayfaya Dön
-                </button>
-                <button onClick={() => window.location.href = '/iletisim'} className="satin-al__btn satin-al__btn--secondary">
-                  İletişime Geç
-                </button>
-              </div>
+            <div className="satin-al-success__countdown">
+              {countdown} saniye sonra ekonomik paket sayfasına yönlendirileceksiniz...
             </div>
           </div>
         </main>
@@ -165,6 +183,7 @@ function SatinAl() {
 
   return (
     <>
+      <DocumentTitle title={`${packageTitle} Paket - Satın Al - TravelKit`} />
       <Navbar />
       <main className="satin-al">
         <div className="satin-al__container">

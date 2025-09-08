@@ -1692,6 +1692,8 @@
   padding: 20px;
   overflow-y: auto;
   flex: 1;
+  min-height: 500px;
+  max-height: 70vh;
 }
 
 .modal-email-date {
@@ -1779,9 +1781,19 @@
 }
 
 .settings-modal {
-  max-width: 600px;
+  max-width: 800px;
   width: 90%;
-  max-height: 85vh;
+  max-height: 90vh;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-modal .modal-body {
+  min-height: 500px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 20px;
 }
 
 .settings-sections {
@@ -1791,6 +1803,7 @@
   overflow-y: auto;
   flex: 1;
   padding-right: 8px;
+  min-height: 400px;
 }
 
 .settings-sections::-webkit-scrollbar {
@@ -2372,4 +2385,997 @@
   background: #0f172a;
   border-color: #334155;
   color: #f1f5f9;
+}
+
+/* 2FA Settings Styles */
+.twofa-status {
+  margin-bottom: 20px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.status-dot.active {
+  background: #10b981;
+}
+
+.twofa-description {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.dark .twofa-description {
+  color: #9ca3af;
+}
+
+.twofa-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.twofa-btn {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.twofa-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.twofa-btn.enable-btn {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.twofa-btn.enable-btn:hover {
+  background: #059669;
+}
+
+.twofa-btn.disable-btn {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.twofa-btn.disable-btn:hover {
+  background: #dc2626;
+}
+
+.twofa-qr {
+  text-align: center;
+}
+
+.twofa-qr p {
+  margin: 0 0 16px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.dark .twofa-qr p {
+  color: #9ca3af;
+}
+
+.qr-placeholder {
+  display: inline-block;
+  padding: 20px;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.dark .qr-placeholder {
+  border-color: #374151;
+  background: #1f2937;
+}
+
+.qr-code {
+  font-size: 24px;
+  color: #6b7280;
+}
+
+/* Package Management Styles */
+.package-management {
+  margin-top: 16px;
+}
+
+.package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.package-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.dark .package-item {
+  border-color: #374151;
+  background: #1f2937;
+}
+
+.package-info h5 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.dark .package-info h5 {
+  color: #f9fafb;
+}
+
+.package-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.dark .package-info p {
+  color: #9ca3af;
+}
+
+.edit-package-btn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-package-btn:hover {
+  background: #2563eb;
+}
+
+.add-package-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-package-btn:hover {
+  background: #059669;
+}
+
+/* Yeni Admin Settings Modal */
+.admin-settings-modal {
+  background: white;
+  max-width: 900px;
+  width: 95%;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.admin-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.admin-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.admin-modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.admin-modal-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  background: #dfdfdf;
+  border-right: 1px solid #e5e7eb;
+  padding: 0;
+}
+
+.admin-tab {
+  background: none;
+  border: none;
+  padding: 16px 24px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-tab:hover {
+  background: #f1f5f9;
+  color: #374151;
+  box-shadow: none ;
+  transform: none !important;
+}
+
+.admin-tab.active {
+  background: white;
+  color: #111827;
+  font-weight: 600;
+}
+
+.admin-tab-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tab-panel h4 {
+  margin: 0 0 24px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Dark mode */
+.dark .admin-settings-modal {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .admin-modal-header {
+  background: #0f172a;
+  border-bottom-color: #334155;
+}
+
+.dark .admin-modal-header h3 {
+  color: #f1f5f9;
+}
+
+.dark .admin-modal-close {
+  color: #94a3af;
+}
+
+.dark .admin-modal-close:hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.dark .admin-tabs {
+  background: #0f172a;
+  border-right-color: #334155;
+}
+
+.dark .admin-tab {
+  color: #94a3af;
+  border-bottom-color: #334155;
+}
+
+.dark .admin-tab:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .admin-tab.active {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-right-color: #3b82f6;
+}
+
+.dark .tab-panel h4 {
+  color: #f1f5f9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-settings-modal {
+    width: 98%;
+    max-height: 95vh;
+  }
+  
+  .admin-modal-content {
+    flex-direction: column;
+  }
+  
+  .admin-tabs {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .admin-tab {
+    min-width: 120px;
+    text-align: center;
+    border-bottom: none;
+    border-right: 1px solid #e5e7eb;
+  }
+  
+  .admin-tab.active {
+    border-right: none;
+    border-bottom: 3px solid #3b82f6;
+  }
+  
+  .admin-tab-content {
+    padding: 16px;
+  }
+}
+
+/* Admin Settings Modal Layout - İletişim Sayfası Tarzı */
+.admin-settings-layout {
+  display: flex;
+  height: 600px;
+  background: #ffffff;
+}
+
+.dark .admin-settings-layout {
+  background: #000000;
+}
+
+.admin-tabs-sidebar {
+  width: 250px;
+  background: #ffffff;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dark .admin-tabs-sidebar {
+  background: #000000;
+}
+
+.admin-tab {
+  width: 100%;
+  padding: 20px 24px;
+  border: none;
+  background: transparent;
+  color: #111111;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.3px;
+  outline: none;
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.admin-tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(17, 17, 17, 0.1), transparent);
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.admin-tab:hover::before {
+  left: 100%;
+}
+
+.admin-tab:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
+  border-left: 3px solid transparent;
+}
+
+.admin-tab:active {
+  outline: none;
+  box-shadow: none;
+  border: none;
+  border-left: 3px solid transparent;
+}
+
+.admin-tab:hover {
+  background: #f8f9fa;
+  color: #111111;
+}
+
+.dark .admin-tab {
+  color: #ffffff;
+  border-right: 1px solid #333333;
+}
+
+.dark .admin-tab::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.dark .admin-tab:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+.admin-tab.active {
+  background: #111111;
+  color: #ffffff;
+  border-left-color: #ffffff;
+  font-weight: 600;
+}
+
+.dark .admin-tab.active {
+  background: #ffffff;
+  color: #000000;
+  border-left-color: #000000;
+}
+
+.admin-tab-content {
+  flex: 1;
+  padding: 0 !important;
+  padding-left: 20px !important;
+  overflow-y: auto;
+  background: #ffffff;
+  border-left: none;
+}
+
+.dark .admin-tab-content {
+  background: #000000;
+}
+
+.tab-panel h4 {
+  margin: 0 0 30px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111111;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.dark .tab-panel h4 {
+  color: #ffffff;
+}
+
+/* Form Elements - İletişim Sayfası Tarzı */
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  max-width: 500px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111111;
+  margin-bottom: 8px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.dark .form-group label {
+  color: #ffffff;
+}
+
+.form-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  background: transparent;
+  color: #111111;
+  padding: 15px 15px 15px 0;
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  letter-spacing: 0.3px;
+  border-radius: 0;
+}
+
+.dark .form-input {
+  background: transparent !important;
+  color: #ffffff;
+  border-bottom-color: #555555;
+}
+
+.form-input:focus {
+  border-bottom-color: #111111;
+  padding: 15px 15px 15px 0;
+  border: none;
+  border-bottom: 1px solid #111111;
+  outline: none;
+  box-shadow: none;
+}
+
+.dark .form-input:focus {
+  background: transparent !important;
+  border-bottom-color: #ffffff;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #64748b;
+  font-size: 16px;
+  transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #111111;
+}
+
+.dark .password-toggle-btn {
+  color: #94a3af;
+}
+
+.dark .password-toggle-btn:hover {
+  color: #ffffff;
+}
+
+.change-password-btn {
+  background: #111111;
+  border: 1px solid #111111;
+  color: white;
+  padding: 18px 48px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  align-self: flex-start;
+  margin-top: 0;
+  border-radius: 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.change-password-btn:hover {
+  background: #374151;
+  border-color: #374151;
+}
+
+.dark .change-password-btn {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.dark .change-password-btn:hover {
+  background: #f0f0f0;
+  color: #000000;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+.success-message {
+  color: #059669;
+  font-size: 14px;
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* 2FA Styles - İletişim Sayfası Tarzı */
+.twofa-status {
+  margin-bottom: 30px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #dc2626;
+  transition: all 0.3s ease;
+}
+
+.status-dot.active {
+  background: #059669;
+}
+
+.twofa-description {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.dark .twofa-description {
+  color: #94a3af;
+}
+
+.twofa-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.twofa-btn {
+  background: #111111;
+  border: 1px solid #111111;
+  color: white;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.twofa-btn:hover {
+  background: #374151;
+  border-color: #374151;
+}
+
+.dark .twofa-btn {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.dark .twofa-btn:hover {
+  background: #f0f0f0;
+  color: #000000;
+}
+
+.twofa-btn.enable-btn {
+  background: #111111;
+  border-color: #111111;
+}
+
+.twofa-btn.enable-btn:hover {
+  background: #374151;
+  border-color: #374151;
+}
+
+.twofa-btn.disable-btn {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.twofa-btn.disable-btn:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+/* Package Management Styles - İletişim Sayfası Tarzı */
+.package-management {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.package-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.dark .package-item {
+  background: #111111;
+  border-color: #333333;
+}
+
+.package-item:hover {
+  border-color: #111111;
+}
+
+.dark .package-item:hover {
+  border-color: #ffffff;
+}
+
+.package-info h5 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111111;
+  font-family: 'Inter', sans-serif;
+}
+
+.dark .package-info h5 {
+  color: #ffffff;
+}
+
+.package-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+}
+
+.dark .package-info p {
+  color: #94a3af;
+}
+
+.edit-package-btn {
+  background: #111111;
+  border: 1px solid #111111;
+  color: white;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.edit-package-btn:hover {
+  background: #374151;
+  border-color: #374151;
+}
+
+.dark .edit-package-btn {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.dark .edit-package-btn:hover {
+  background: #f0f0f0;
+  color: #000000;
+}
+
+.add-package-btn {
+  background: #111111;
+  border: 1px solid #111111;
+  color: white;
+  padding: 16px 32px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  align-self: flex-start;
+  outline: none;
+}
+
+.add-package-btn:hover {
+  background: #374151;
+  border-color: #374151;
+}
+
+.dark .add-package-btn {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.dark .add-package-btn:hover {
+  background: #f0f0f0;
+  color: #000000;
+}
+
+/* 2FA Modal Overlay - Sayfanın Ortasında */
+.two-factor-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10001 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding: 20px;
+}
+
+.two-factor-setup-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .two-factor-setup-modal {
+  background: #000000;
+  border: 1px solid #333333;
+}
+
+/* SMS Butonları */
+.send-sms-btn {
+  background: #111111;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 12px;
+}
+
+.send-sms-btn:hover:not(:disabled) {
+  background: #333333;
+}
+
+.send-sms-btn:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.dark .send-sms-btn {
+  background: #ffffff;
+  color: #000000;
+}
+
+.dark .send-sms-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.two-factor-setup-modal .modal-header {
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.dark .two-factor-setup-modal .modal-header {
+  border-bottom-color: #333333;
+}
+
+.two-factor-setup-modal .modal-content {
+  padding: 0 24px 24px 24px;
+}
+
+.two-factor-setup-modal .modal-actions {
+  padding: 0 24px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .admin-settings-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .admin-tabs-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none !important;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0;
+  }
+  
+  .admin-tab {
+    min-width: 120px;
+    text-align: center;
+    border-left: none;
+    padding: 12px 16px;
+  }
+  
+  .admin-tab.active {
+    border: none !important;
+    border-bottom-color: #1d4ed8;
+  }
+  
+  .dark .admin-tab.active {
+    border-bottom-color: #60a5fa;
+  }
+  
+  .admin-tab-content {
+    padding: 16px;
+  }
 }

@@ -42,106 +42,108 @@ function Admin() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [settingsActiveTab, setSettingsActiveTab] = useState('password')
 
-  // 2FA States
+  // SMS 2FA States
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const [twoFactorSecret, setTwoFactorSecret] = useState('')
-  const [twoFactorQrCode, setTwoFactorQrCode] = useState('')
-  const [twoFactorCode, setTwoFactorCode] = useState('')
-  const [twoFactorBackupCodes, setTwoFactorBackupCodes] = useState([])
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [smsCode, setSmsCode] = useState('')
+  const [smsSent, setSmsSent] = useState(false)
+  const [smsError, setSmsError] = useState('')
   const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false)
-  const [twoFactorError, setTwoFactorError] = useState('')
   const [twoFactorSuccess, setTwoFactorSuccess] = useState('')
-  const [showBackupCodes, setShowBackupCodes] = useState(false)
   const [loginTwoFactorCode, setLoginTwoFactorCode] = useState('')
   const [showTwoFactorLogin, setShowTwoFactorLogin] = useState(false)
 
-  // 2FA Functions
-  const generateTwoFactorSecret = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-    let secret = ''
-    for (let i = 0; i < 32; i++) {
-      secret += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    return secret
-  }
-
-  const generateBackupCodes = () => {
-    const codes = []
-    for (let i = 0; i < 10; i++) {
-      codes.push(Math.random().toString(36).substring(2, 8).toUpperCase())
-    }
-    return codes
-  }
-
-  const generateQRCode = (secret, username) => {
-    const issuer = 'TravelKit Admin'
-    const accountName = username || 'admin'
-    const otpUrl = `otpauth://totp/${issuer}:${accountName}?secret=${secret}&issuer=${issuer}`
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpUrl)}`
-  }
-
-  const generateTOTP = (secret) => {
-    const key = secret.replace(/\s/g, '').toUpperCase()
-    const epoch = Math.round(new Date().getTime() / 1000.0)
-    const time = Math.floor(epoch / 30)
-    
-    // Basit TOTP implementasyonu (gerçek uygulamada crypto kütüphanesi kullanılmalı)
-    const hash = btoa(String.fromCharCode.apply(null, new Uint8Array(
-      Array.from(key).map(c => c.charCodeAt(0))
-    )))
-    const code = Math.abs(parseInt(hash.substring(0, 8), 16)) % 1000000
-    return code.toString().padStart(6, '0')
-  }
-
-  const verifyTwoFactorCode = (secret, code) => {
-    const expectedCode = generateTOTP(secret)
-    return code === expectedCode
-  }
-
+  // SMS 2FA Functions
   const enableTwoFactor = () => {
-    const secret = generateTwoFactorSecret()
-    const backupCodes = generateBackupCodes()
-    
-    setTwoFactorSecret(secret)
-    setTwoFactorQrCode(generateQRCode(secret, username))
-    setTwoFactorBackupCodes(backupCodes)
     setShowTwoFactorSetup(true)
-    setTwoFactorError('')
+    setSmsError('')
   }
 
-  const confirmTwoFactorSetup = () => {
-    if (!twoFactorCode || twoFactorCode.length !== 6) {
-      setTwoFactorError('Lütfen 6 haneli kodu girin')
+  // SMS 2FA Fonksiyonları
+  const sendSMS = async (phoneNumber) => {
+    try {
+      const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
+      
+      // Gerçek SMS gönderme - Backend API'sine istek gönder
+      const response = await fetch('http://localhost:3001/api/send-sms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: phoneNumber,
+          message: `TravelKit Admin 2FA Kodu: ${smsCode}. Bu kodu kimseyle paylaşmayın.`
+        })
+      })
+
+      if (response.ok) {
+        setSmsCode(smsCode)
+        setSmsSent(true)
+        setSmsError('')
+        console.log(`SMS gönderildi: ${phoneNumber} - Kod: ${smsCode}`)
+        return true
+      } else {
+        const errorData = await response.json()
+        setSmsError(errorData.message || 'SMS gönderilemedi. Lütfen tekrar deneyin.')
+        return false
+      }
+    } catch (error) {
+      console.error('SMS gönderme hatası:', error)
+      setSmsError('SMS gönderilemedi. Lütfen tekrar deneyin.')
+      return false
+    }
+  }
+
+  const verifySMSCode = (inputCode) => {
+    return inputCode === smsCode
+  }
+
+  const enableSMS2FA = async () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      setSmsError('Lütfen geçerli bir telefon numarası girin')
       return
     }
 
-    if (verifyTwoFactorCode(twoFactorSecret, twoFactorCode)) {
+    const success = await sendSMS(phoneNumber)
+    if (success) {
+      // SMS gönderildi
+    }
+  }
+
+  const confirmSMS2FA = () => {
+    if (!smsCode || smsCode.length !== 6) {
+      setSmsError('Lütfen 6 haneli SMS kodunu girin')
+      return
+    }
+
+    if (verifySMSCode(smsCode)) {
       setTwoFactorEnabled(true)
-      setTwoFactorSuccess('2FA başarıyla etkinleştirildi!')
+      setTwoFactorSuccess('SMS 2FA başarıyla etkinleştirildi!')
       setShowTwoFactorSetup(false)
-      setShowBackupCodes(true)
       
       // LocalStorage'a kaydet
       localStorage.setItem('admin_2fa_enabled', 'true')
-      localStorage.setItem('admin_2fa_secret', twoFactorSecret)
-      localStorage.setItem('admin_2fa_backup_codes', JSON.stringify(twoFactorBackupCodes))
+      localStorage.setItem('admin_2fa_method', 'sms')
+      localStorage.setItem('admin_2fa_phone', phoneNumber)
     } else {
-      setTwoFactorError('Geçersiz kod. Lütfen tekrar deneyin.')
+      setSmsError('Geçersiz SMS kodu. Lütfen tekrar deneyin.')
     }
   }
 
   const disableTwoFactor = () => {
     setTwoFactorEnabled(false)
-    setTwoFactorSecret('')
-    setTwoFactorQrCode('')
-    setTwoFactorBackupCodes([])
-    setTwoFactorSuccess('2FA devre dışı bırakıldı')
+    setPhoneNumber('')
+    setSmsCode('')
+    setSmsSent(false)
+    setSmsError('')
+    setTwoFactorSuccess('SMS 2FA devre dışı bırakıldı')
     
     // LocalStorage'dan kaldır
     localStorage.removeItem('admin_2fa_enabled')
-    localStorage.removeItem('admin_2fa_secret')
-    localStorage.removeItem('admin_2fa_backup_codes')
+    localStorage.removeItem('admin_2fa_method')
+    localStorage.removeItem('admin_2fa_phone')
   }
 
   const verifyLoginTwoFactor = () => {
@@ -1112,6 +1114,7 @@ function Admin() {
     )
   }
 
+
   // Login formu
   if (!isAuthenticated) {
     return (
@@ -1582,162 +1585,178 @@ function Admin() {
       {/* Admin Settings Modal */}
       {showSettingsModal && (
         <div className="modal-overlay" onClick={closeSettingsModal}>
-          <div className="modal-content settings-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="admin-settings-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
               <h3>⚙️ Admin Ayarları</h3>
-              <button className="modal-close" onClick={closeSettingsModal}>
+              <button className="admin-modal-close" onClick={closeSettingsModal}>
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
-            <div className="modal-body">
-              <div className="settings-sections">
-                {/* Password Change Section */}
-                <div className="settings-section">
-                  <h4>🔐 Şifre Değiştir</h4>
-                  <form onSubmit={handlePasswordChange} className="password-form">
-                    <div className="form-group">
-                      <label>Mevcut Şifre:</label>
-                      <div className="password-input-wrapper">
-                        <input
-                          type={showCurrentPassword ? "text" : "password"}
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="form-input"
-                          placeholder="Mevcut şifrenizi girin"
-                        />
-                        <button
-                          type="button"
-                          className="password-toggle-btn"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          title={showCurrentPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                        >
-                          {showCurrentPassword ? "🙈" : "👁️"}
-                        </button>
+            <div className="admin-modal-content">
+              <div className="admin-settings-layout">
+                <div className="admin-tabs-sidebar">
+                  <button 
+                    className={`admin-tab ${settingsActiveTab === 'password' ? 'active' : ''}`}
+                    onClick={() => setSettingsActiveTab('password')}
+                  >
+                    🔐 Şifre Değiştir
+                  </button>
+                  <button 
+                    className={`admin-tab ${settingsActiveTab === '2fa' ? 'active' : ''}`}
+                    onClick={() => setSettingsActiveTab('2fa')}
+                  >
+                    🔒 2FA Ayarları
+                  </button>
+                  <button 
+                    className={`admin-tab ${settingsActiveTab === 'packages' ? 'active' : ''}`}
+                    onClick={() => setSettingsActiveTab('packages')}
+                  >
+                    📦 Paket Güncelle
+                  </button>
+                </div>
+                <div className="admin-tab-content">
+                {settingsActiveTab === 'password' && (
+                  <div className="tab-panel">
+                    <h4>Şifre Değiştir</h4>
+                    <form onSubmit={handlePasswordChange} className="password-form">
+                      <div className="form-group">
+                        <label>Mevcut Şifre:</label>
+                        <div className="password-input-wrapper">
+                          <input
+                            type={showCurrentPassword ? "text" : "password"}
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            className="form-input"
+                            placeholder="Mevcut şifrenizi girin"
+                          />
+                          <button
+                            type="button"
+                            className="password-toggle-btn"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          >
+                            {showCurrentPassword ? "🙈" : "👁️"}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Yeni Şifre:</label>
+                        <div className="password-input-wrapper">
+                          <input
+                            type={showNewPassword ? "text" : "password"}
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="form-input"
+                            placeholder="Yeni şifrenizi girin (min 6 karakter)"
+                          />
+                          <button
+                            type="button"
+                            className="password-toggle-btn"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                          >
+                            {showNewPassword ? "🙈" : "👁️"}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Yeni Şifre Tekrar:</label>
+                        <div className="password-input-wrapper">
+                          <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="form-input"
+                            placeholder="Yeni şifrenizi tekrar girin"
+                          />
+                          <button
+                            type="button"
+                            className="password-toggle-btn"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? "🙈" : "👁️"}
+                          </button>
+                        </div>
+                      </div>
+                      {passwordError && <div className="error-message">{passwordError}</div>}
+                      {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+                      <button type="submit" className="change-password-btn">
+                        Şifre Değiştir
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {settingsActiveTab === '2fa' && (
+                  <div className="tab-panel">
+                    <h4>İki Faktörlü Kimlik Doğrulama (2FA)</h4>
+                    <div className="twofa-status">
+                      <div className="status-indicator">
+                        <span className="status-dot active"></span>
+                        <span>2FA Aktif</span>
+                      </div>
+                      <p className="twofa-description">
+                        Hesabınızı daha güvenli hale getirmek için 2FA'yı etkinleştirin.
+                      </p>
+                    </div>
+                    <div className="twofa-actions">
+                      <button className="twofa-btn enable-btn">
+                        📱 2FA'yı Etkinleştir
+                      </button>
+                      <button className="twofa-btn disable-btn">
+                        ❌ 2FA'yı Devre Dışı Bırak
+                      </button>
+                    </div>
+                    <div className="twofa-qr">
+                      <p>QR Kodu tarayarak 2FA'yı etkinleştirin:</p>
+                      <div className="qr-placeholder">
+                        <div className="qr-code">📱 QR KOD</div>
                       </div>
                     </div>
-                    <div className="form-group">
-                      <label>Yeni Şifre:</label>
-                      <div className="password-input-wrapper">
-                        <input
-                          type={showNewPassword ? "text" : "password"}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="form-input"
-                          placeholder="Yeni şifrenizi girin (min 6 karakter)"
-                        />
-                        <button
-                          type="button"
-                          className="password-toggle-btn"
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                          title={showNewPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                        >
-                          {showNewPassword ? "🙈" : "👁️"}
-                        </button>
+                  </div>
+                )}
+
+                {settingsActiveTab === 'packages' && (
+                  <div className="tab-panel">
+                    <h4>Paket Yönetimi</h4>
+                    <div className="package-management">
+                      <div className="package-list">
+                        <div className="package-item">
+                          <div className="package-info">
+                            <h5>Ekonomik Paket</h5>
+                            <p>Fiyat: ₺299</p>
+                          </div>
+                          <button className="edit-package-btn">
+                            ✏️ Düzenle
+                          </button>
+                        </div>
+                        <div className="package-item">
+                          <div className="package-info">
+                            <h5>Konforlu Paket</h5>
+                            <p>Fiyat: ₺599</p>
+                          </div>
+                          <button className="edit-package-btn">
+                            ✏️ Düzenle
+                          </button>
+                        </div>
+                        <div className="package-item">
+                          <div className="package-info">
+                            <h5>Lüks Paket</h5>
+                            <p>Fiyat: ₺999</p>
+                          </div>
+                          <button className="edit-package-btn">
+                            ✏️ Düzenle
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="form-group">
-                      <label>Yeni Şifre Tekrar:</label>
-                      <div className="password-input-wrapper">
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="form-input"
-                          placeholder="Yeni şifrenizi tekrar girin"
-                        />
-                        <button
-                          type="button"
-                          className="password-toggle-btn"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          title={showConfirmPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                        >
-                          {showConfirmPassword ? "🙈" : "👁️"}
-                        </button>
-                      </div>
-                    </div>
-                    {passwordError && <div className="error-message">{passwordError}</div>}
-                    {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
-                    <button type="submit" className="change-password-btn">
-                      Şifre Değiştir
-                    </button>
-                  </form>
-                </div>
-
-                {/* 2FA Settings Section */}
-                <div className="settings-section">
-                  <h4>🔐 İki Faktörlü Kimlik Doğrulama (2FA)</h4>
-                  <div>
-                    <p><strong>2FA Durumu:</strong> Devre Dışı</p>
-                    <button 
-                      onClick={() => alert('2FA butonuna tıklandı!')}
-                      style={{
-                        padding: '12px 24px',
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        marginTop: '10px'
-                      }}
-                    >
-                      🔐 2FA'yı Etkinleştir
-                    </button>
-                  </div>
-                </div>
-
-                {/* Session Duration Section */}
-                <div className="settings-section">
-                  <h4>⏰ Oturum Süresi</h4>
-                  <div className="session-duration-controls">
-                    <label>Oturum süresi: {sessionDuration} dakika</label>
-                    <div className="duration-options">
-                      {[15, 30, 60, 120, 240].map((duration) => (
-                        <button
-                          key={duration}
-                          className={`duration-btn ${sessionDuration === duration ? 'active' : ''}`}
-                          onClick={() => handleSessionDurationChange(duration)}
-                        >
-                          {duration} dk
-                        </button>
-                      ))}
-                    </div>
-                    <div className="session-info">
-                      <small>
-                        Oturum süresi dolduğunda otomatik olarak çıkış yapılacaktır.
-                        <br />
-                        Mevcut oturum: {sessionDuration} dakika sonra sona erecek.
-                      </small>
+                      <button className="add-package-btn">
+                        ➕ Yeni Paket Ekle
+                      </button>
                     </div>
                   </div>
+                )}
                 </div>
-
-                {/* Security Info Section */}
-                <div className="settings-section">
-                  <h4>🔒 Güvenlik Bilgileri</h4>
-                  <div className="security-info">
-                    <div className="info-item">
-                      <strong>Son Giriş:</strong> {new Date().toLocaleString('tr-TR')}
-                    </div>
-                    <div className="info-item">
-                      <strong>Oturum Durumu:</strong> Aktif
-                    </div>
-                    <div className="info-item">
-                      <strong>Güvenlik Seviyesi:</strong> Yüksek
-                    </div>
-                  </div>
-                </div>
-
               </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={closeSettingsModal}
-              >
-                Kapat
-              </button>
             </div>
           </div>
         </div>
@@ -1745,7 +1764,7 @@ function Admin() {
 
       {/* 2FA Setup Modal */}
       {showTwoFactorSetup && (
-        <div className="modal-overlay">
+        <div className="two-factor-modal-overlay">
           <div className="modal two-factor-setup-modal">
             <div className="modal-header">
               <h3>🔐 2FA Kurulumu</h3>
@@ -1753,34 +1772,47 @@ function Admin() {
             <div className="modal-content">
               <div className="two-factor-setup">
                 <div className="setup-step">
-                  <h4>1. QR Kodu Tarayın</h4>
-                  <p>Google Authenticator veya benzeri bir uygulama ile QR kodu tarayın:</p>
-                  <div className="qr-code-container">
-                    <img src={twoFactorQrCode} alt="2FA QR Code" className="qr-code" />
-                  </div>
-                </div>
-
-                <div className="setup-step">
-                  <h4>2. Kodu Doğrulayın</h4>
-                  <p>Uygulamadan aldığınız 6 haneli kodu girin:</p>
+                  <h4>1. Telefon Numarası</h4>
+                  <p>Telefon numaranızı girin (ülke kodu ile birlikte):</p>
                   <input
-                    type="text"
-                    value={twoFactorCode}
-                    onChange={(e) => setTwoFactorCode(e.target.value)}
-                    placeholder="123456"
-                    maxLength="6"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+90 5XX XXX XX XX"
                     className="two-factor-input"
                   />
                   <button 
-                    className="verify-2fa-btn"
-                    onClick={confirmTwoFactorSetup}
+                    className="send-sms-btn"
+                    onClick={enableSMS2FA}
+                    disabled={smsSent}
                   >
-                    Doğrula ve Etkinleştir
+                    {smsSent ? 'SMS Gönderildi' : 'SMS Gönder'}
                   </button>
                 </div>
 
-                {twoFactorError && (
-                  <div className="error-message">{twoFactorError}</div>
+                {smsSent && (
+                  <div className="setup-step">
+                    <h4>2. SMS Kodunu Doğrulayın</h4>
+                    <p>Telefonunuza gönderilen 6 haneli kodu girin:</p>
+                    <input
+                      type="text"
+                      value={smsCode}
+                      onChange={(e) => setSmsCode(e.target.value)}
+                      placeholder="123456"
+                      maxLength="6"
+                      className="two-factor-input"
+                    />
+                    <button 
+                      className="verify-2fa-btn"
+                      onClick={confirmSMS2FA}
+                    >
+                      Doğrula ve Etkinleştir
+                    </button>
+                  </div>
+                )}
+
+                {smsError && (
+                  <div className="error-message">{smsError}</div>
                 )}
               </div>
             </div>
@@ -1796,45 +1828,6 @@ function Admin() {
         </div>
       )}
 
-      {/* Backup Codes Modal */}
-      {showBackupCodes && (
-        <div className="modal-overlay">
-          <div className="modal backup-codes-modal">
-            <div className="modal-header">
-              <h3>🔑 Yedek Kodlar</h3>
-            </div>
-            <div className="modal-content">
-              <div className="backup-codes">
-                <p><strong>Önemli:</strong> Bu kodları güvenli bir yerde saklayın. Her kod sadece bir kez kullanılabilir.</p>
-                <div className="backup-codes-list">
-                  {twoFactorBackupCodes.map((code, index) => (
-                    <div key={index} className="backup-code-item">
-                      {code}
-                    </div>
-                  ))}
-                </div>
-                <button 
-                  className="copy-codes-btn"
-                  onClick={() => {
-                    navigator.clipboard.writeText(twoFactorBackupCodes.join('\n'))
-                    alert('Kodlar panoya kopyalandı!')
-                  }}
-                >
-                  📋 Kodları Kopyala
-                </button>
-              </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="confirm-btn"
-                onClick={() => setShowBackupCodes(false)}
-              >
-                Tamam
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 2FA Login Modal */}
       {showTwoFactorLogin && (

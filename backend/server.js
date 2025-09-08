@@ -154,11 +154,72 @@ app.use('*', (req, res) => {
   });
 });
 
+// SMS endpoint
+app.post('/api/send-sms', async (req, res) => {
+  try {
+    const { phoneNumber, message } = req.body;
+    
+    // Validate required fields
+    if (!phoneNumber || !message) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Telefon numarası ve mesaj gerekli' 
+      });
+    }
+
+    // Phone number validation
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Geçerli bir telefon numarası girin' 
+      });
+    }
+
+    // Twilio SMS gönderme (gerçek implementasyon)
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const twilio = require('twilio');
+      const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+      
+      const result = await client.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: phoneNumber
+      });
+      
+      console.log(`SMS gönderildi: ${phoneNumber} - SID: ${result.sid}`);
+      
+      res.json({ 
+        success: true, 
+        message: 'SMS başarıyla gönderildi',
+        sid: result.sid
+      });
+    } else {
+      // Twilio yapılandırılmamışsa simüle et
+      console.log(`[SIMÜLE] SMS gönderildi: ${phoneNumber} - Mesaj: ${message}`);
+      
+      res.json({ 
+        success: true, 
+        message: 'SMS simüle edildi (Twilio yapılandırılmamış)',
+        simulated: true
+      });
+    }
+    
+  } catch (error) {
+    console.error('SMS gönderme hatası:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'SMS gönderilemedi: ' + error.message 
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 TravelKit Backend server is running on port ${PORT}`);
   console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
   console.log(`💳 Payment API: http://localhost:${PORT}/api/payments`);
+  console.log(`📱 SMS API: http://localhost:${PORT}/api/send-sms`);
 });
 
 // Graceful shutdown

@@ -715,3 +715,177 @@
 .dark .satin-al__payment-text li {
   color: #7dd3fc;
 }
+
+/* Geri sayım stili */
+.satin-al__countdown {
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  color: #0369a1;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  margin: 20px 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Dark mode için geri sayım */
+.dark .satin-al__countdown {
+  background: rgba(3, 105, 161, 0.1);
+  border-color: rgba(3, 105, 161, 0.3);
+  color: #7dd3fc;
+}
+
+/* Başarılı sipariş sayfası - 404 tarzı tasarım */
+.satin-al-success {
+  min-height: 100vh;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.dark .satin-al-success {
+  color: #ffffff;
+}
+
+.satin-al-success-container {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.satin-al-success-icon {
+  font-size: 120px;
+  font-weight: 700;
+  color: #10b981;
+  margin: 0 0 24px 0;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.satin-al-success__title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0 0 16px 0;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -1px;
+}
+
+.satin-al-success__subtitle {
+  font-size: 18px;
+  color: #64748b;
+  margin: 0 0 40px 0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.satin-al-success__info {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 0 0 32px 0;
+  text-align: left;
+}
+
+.satin-al-success__info p {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #475569;
+  font-family: 'Inter', sans-serif;
+}
+
+.satin-al-success__info p:last-child {
+  margin-bottom: 0;
+}
+
+.satin-al-success__countdown {
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  color: #0369a1;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  animation: pulse 2s infinite;
+}
+
+/* Dark mode styles */
+.dark .satin-al-success__title {
+  color: #ffffff;
+}
+
+.dark .satin-al-success__subtitle {
+  color: #a0a0a0;
+}
+
+.dark .satin-al-success__info {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .satin-al-success__info p {
+  color: #e2e8f0;
+}
+
+.dark .satin-al-success__countdown {
+  background: rgba(3, 105, 161, 0.1);
+  border-color: rgba(3, 105, 161, 0.3);
+  color: #7dd3fc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .satin-al-success {
+    padding: 20px;
+  }
+  
+  .satin-al-success__title {
+    font-size: 36px;
+  }
+  
+  .satin-al-success__subtitle {
+    font-size: 16px;
+  }
+  
+  .satin-al-success-icon {
+    font-size: 80px;
+  }
+  
+  .satin-al-success__countdown {
+    font-size: 14px;
+    padding: 12px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .satin-al-success {
+    padding: 16px;
+  }
+  
+  .satin-al-success__title {
+    font-size: 28px;
+  }
+  
+  .satin-al-success-icon {
+    font-size: 60px;
+  }
+}
