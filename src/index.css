@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { 
+  margin: 0; 
+  padding: 0; 
+  background: var(--bg); 
+  color: var(--text); 
+  width: 100%; 
+  min-height: 100vh; 
+  overflow-x: hidden; 
+  overflow-y: auto;
+  position: relative;
+}
+
+:root {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: #111;
+  background-color: #ffffff;
+
+  /* Theme variables (light defaults) */
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #64748b;
+  --border: rgba(2, 6, 23, 0.08);
+  --btn-bg: #fb923c; /* orange-400 */
+  --btn-text: #ffffff;
+  --navbar-bg: rgba(255, 255, 255, 0.65);
+  --navbar-bg-strong: rgba(255, 255, 255, 0.85);
+  --navbar-border: rgba(0, 0, 0, 0.06);
+  --navbar-menu-bg: rgba(255, 255, 255, 0.92);
+  --navbar-toggle-border: rgba(0, 0, 0, 0.14);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { font-weight: 500; color: #f97316; text-decoration: inherit; }
+a:hover { color: #ea580c; }
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  color: var(--text);
+  width: 100%;
+  min-height: 100vh;
+}
+
+#root { padding: 0; }
+
+/* Scrollbar (WebKit) */
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #93c5fd, #38bdf8);
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #60a5fa, #22d3ee); }
+
+/* Scrollbar (Firefox) */
+* { scrollbar-width: thin; scrollbar-color: #7dd3fc transparent; }
+
+/* Typography */
+h1, h2, h3, .logo {
+  font-family: 'Poppins', sans-serif;
+}
+
+body, p, li {
+  font-family: 'Inter', sans-serif;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  cursor: pointer;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+button:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(17,17,17,0.15); }
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Keep light appearance even in dark mode preference */
+    color-scheme: light;
+    color: #213547;
+    background-color: #ffffff;
+
+    --bg: #ffffff;
+    --text: #111111;
+    --muted: #64748b;
+    --border: rgba(2, 6, 23, 0.08);
+    --btn-bg: #0ea5e9;
+    --btn-text: #ffffff;
+    --navbar-bg: rgba(12, 16, 22, 0.5);
+    --navbar-bg-strong: rgba(12, 16, 22, 0.8);
+    --navbar-border: rgba(255, 255, 255, 0.08);
+    --navbar-menu-bg: rgba(12, 16, 22, 0.85);
+    --navbar-toggle-border: rgba(255, 255, 255, 0.14);
+  }
+}
+
+/* Dark Mode Styles */
+.dark {
+  color-scheme: dark !important;
+  color: #ffffff !important;
+  background-color: #000000 !important;
+  
+  /* Dark theme variables - Pure black theme */
+  --bg: #000000;
+  --text: #ffffff;
+  --muted: #a0a0a0;
+  --border: rgba(255, 255, 255, 0.15);
+  --btn-bg: #ffffff;
+  --btn-text: #000000;
+  --navbar-bg: rgba(0, 0, 0, 0.9);
+  --navbar-bg-strong: rgba(0, 0, 0, 0.95);
+  --navbar-border: rgba(255, 255, 255, 0.2);
+  --navbar-menu-bg: rgba(0, 0, 0, 0.95);
+  --navbar-toggle-border: rgba(255, 255, 255, 0.3);
+}
+
+/* Force dark mode on body and html */
+.dark body,
+.dark html {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Smooth transitions for dark mode */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
