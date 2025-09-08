@@ -13,7 +13,9 @@ function SatinAl() {
   const searchParams = new URLSearchParams(location.search)
   const packageType = searchParams.get('package') || 'economic'
   const packageTitle = t(`packages.${packageType}.title`)
-  const packagePrice = t(`packages.${packageType}.price`)
+  const packagePriceString = t(`packages.${packageType}.price`)
+  // Price string'den sayıya çevir (₺299 -> 299)
+  const packagePrice = parseFloat(packagePriceString.replace(/[^\d.]/g, ''))
 
   // Form state
   const [formData, setFormData] = useState({
@@ -79,7 +81,7 @@ function SatinAl() {
 
     try {
       // Backend API'ye Iyzico ödeme isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend-lylw6qeuy-cuneyts-projects-a4c33b73.vercel.app');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const response = await fetch(`${API_URL}/api/payments/create-session`, {
         method: 'POST',
         headers: {
@@ -87,8 +89,7 @@ function SatinAl() {
         },
         body: JSON.stringify({
           packageType: packageType,
-          packageTitle: packageTitle,
-          packagePrice: packagePrice,
+          amount: packagePrice, // Backend'te amount bekliyor
           customerInfo: {
             name: formData.name,
             email: formData.email,
@@ -102,10 +103,12 @@ function SatinAl() {
       const result = await response.json()
 
       if (result.success) {
-        // Iyzico ödeme sayfasına yönlendir
-        window.location.href = result.paymentUrl
+        // Mock payment - gerçek ödeme sayfasına yönlendirme yerine başarı sayfasına git
+        console.log('Payment session created:', result.data)
+        setIsSuccess(true)
+        setIsSubmitting(false)
       } else {
-        setPaymentError('Ödeme formu oluşturulamadı: ' + result.error)
+        setPaymentError('Ödeme formu oluşturulamadı: ' + (result.message || 'Bilinmeyen hata'))
         setIsSubmitting(false)
       }
     } catch (error) {
@@ -117,7 +120,7 @@ function SatinAl() {
 
   const handleContact = () => {
     const message = encodeURIComponent(
-      `Merhaba! ${packageTitle} paketini satın almak istiyorum. Fiyat: ${packagePrice}`
+      `Merhaba! ${packageTitle} paketini satın almak istiyorum. Fiyat: ${packagePriceString}`
     )
     window.location.href = `/iletisim?message=${message}`
   }
@@ -143,7 +146,7 @@ function SatinAl() {
               <div className="satin-al__success-info">
                 <p><strong>Sipariş No:</strong> #{Date.now().toString().slice(-6)}</p>
                 <p><strong>Paket:</strong> {packageTitle}</p>
-                <p><strong>Tutar:</strong> {packagePrice}</p>
+                <p><strong>Tutar:</strong> {packagePriceString}</p>
               </div>
               <div className="satin-al__success-actions">
                 <button onClick={handleBack} className="satin-al__btn satin-al__btn--primary">
@@ -177,7 +180,7 @@ function SatinAl() {
         <div className="satin-al__content">
           <div className="satin-al__package-info">
             <h2 className="satin-al__package-title">{packageTitle} Paket</h2>
-            <div className="satin-al__package-price">{packagePrice}</div>
+            <div className="satin-al__package-price">{packagePriceString}</div>
             <p className="satin-al__package-desc">
               {t(`packages.${packageType}.description`)}
             </p>

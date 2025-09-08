@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     base: '/',
     server: {
+      port: 5173,
+      strictPort: true,
       historyApiFallback: true
     },
     build: {
