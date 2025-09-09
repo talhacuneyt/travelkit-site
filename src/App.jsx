@@ -24,7 +24,7 @@ function App() {
   const isAdminPage = location.pathname === '/admin'
   const isNotFoundPage = location.pathname !== '/' && 
     !location.pathname.startsWith('/paket/') && 
-    !['/hakkimizda', '/sss', '/iletisim', '/admin'].includes(location.pathname)
+    !['/hakkimizda', '/sss', '/iletisim', '/admin', '/ekonomik', '/konforlu', '/lux', '/satin-al'].includes(location.pathname)
 
   return (
     <LanguageProvider>
@@ -34,15 +34,17 @@ function App() {
           {!isNotFoundPage && <Navbar />}
           <Routes>
             <Route path="/" element={<HomeContent />} />
-
-            <Route path="/paket/ekonomik" element={<EkonomikDetay />} />
-            <Route path="/paket/konforlu" element={<KonforluDetay />} />
-            <Route path="/paket/lux" element={<LuxDetay />} />
+            <Route path="/ekonomik" element={<EkonomikDetay />} />
+            <Route path="/konforlu" element={<KonforluDetay />} />
+            <Route path="/lux" element={<LuxDetay />} />
             <Route path="/hakkimizda" element={<Hakkimizda />} />
             <Route path="/sss" element={<SSS />} />
             <Route path="/iletisim" element={<Iletisim />} />
             <Route path="/satin-al" element={<SatinAl />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/paket/ekonomik" element={<Admin />} />
+            <Route path="/admin/paket/konforlu" element={<Admin />} />
+            <Route path="/admin/paket/lux" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           {!isAdminPage && !isNotFoundPage && <Footer />}

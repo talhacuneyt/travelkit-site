@@ -327,6 +327,16 @@
   font-weight: 400;
 }
 
+.paket__price {
+  margin: 20px 0 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #3b82f6;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+}
+
 
 /* Layout */
 .paket-layout {
@@ -670,6 +680,10 @@
 /* Dark Mode Styles */
 .dark .paket__title {
   color: #ffffff;
+}
+
+.dark .paket__price {
+  color: #60a5fa;
 }
 
 .dark .paket__subtitle {

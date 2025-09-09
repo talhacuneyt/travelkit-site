@@ -12,17 +12,50 @@ function HomeContent() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [previousTestimonial, setPreviousTestimonial] = useState(-1)
+  const [packages, setPackages] = useState([])
   
   // Refs for scroll animations
   const packagesRef = useRef(null)
   const packagesHeadingRef = useRef(null)
   const testimonialsRef = useRef(null)
 
-  const packages = [
-    { name: t('home.packages.economic.title'), img: ekonomikImg, key: 'economic' },
-    { name: t('home.packages.comfort.title'), img: ortaImg, key: 'comfort' },
-    { name: t('home.packages.luxury.title'), img: luxImg, key: 'luxury' },
-  ]
+  // Load packages data from localStorage or fallback to translation
+  useEffect(() => {
+    const loadPackages = () => {
+      const packageTypes = ['economic', 'comfort', 'luxury']
+      const packageImages = [ekonomikImg, ortaImg, luxImg]
+      
+      const loadedPackages = packageTypes.map((type, index) => {
+        // Try to load from localStorage first
+        const savedPackage = localStorage.getItem(`package_${type}`)
+        if (savedPackage) {
+          try {
+            const parsedData = JSON.parse(savedPackage)
+            return {
+              name: parsedData.title,
+              price: parsedData.price,
+              img: packageImages[index],
+              key: type
+            }
+          } catch (error) {
+            console.error('Error parsing saved package data:', error)
+          }
+        }
+
+        // Fallback to translation data
+        return {
+          name: t(`home.packages.${type}.title`),
+          price: t(`home.packages.${type}.price`),
+          img: packageImages[index],
+          key: type
+        }
+      })
+      
+      setPackages(loadedPackages)
+    }
+
+    loadPackages()
+  }, [t])
 
   const features = [
     {
@@ -198,29 +231,13 @@ function HomeContent() {
         <h2 className="home-grid__heading" ref={packagesHeadingRef} id="paketler">{t('home.packages.title')}</h2>
         <div className="home-grid" aria-label={t('home.ariaLabels.packages')} ref={packagesRef}>
         {packages.map((item) => {
-          const target = item.key === 'economic' ? '/paket/ekonomik' : item.key === 'comfort' ? '/paket/konforlu' : '/paket/lux'
+          const target = item.key === 'economic' ? '/ekonomik' : item.key === 'comfort' ? '/konforlu' : '/lux'
           return (
-          <article
+          <Link
             key={item.name}
+            to={target}
             className="home-card"
-            role="link"
-            tabIndex={0}
             aria-label={`${item.name} package details`}
-            onClick={() => {
-              navigate(target)
-              setTimeout(() => {
-                window.scrollTo(0, 0)
-              }, 0)
-            }}
-            onKeyDown={(e) => { 
-              if (e.key === 'Enter' || e.key === ' ') { 
-                e.preventDefault()
-                navigate(target)
-                setTimeout(() => {
-                  window.scrollTo(0, 0)
-                }, 0)
-              } 
-            }}
           >
             {item.key === 'comfort' && <span className="home-card__badge">{t('home.badges.bestseller')}</span>}
             {item.key === 'luxury' && <span className="home-card__badge badge--accent">{t('home.badges.premium')}</span>}
@@ -232,7 +249,7 @@ function HomeContent() {
             <div className="home-card__center" aria-hidden="true">
               <p className="home-card__center-text">{item.name.toLocaleUpperCase()}</p>
             </div>
-          </article>
+          </Link>
           )})}
         </div>
       </section>

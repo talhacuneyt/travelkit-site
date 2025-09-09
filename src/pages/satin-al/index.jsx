@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useState, useEffect } from 'react'
-import Navbar from '../../components/navbar'
 import DocumentTitle from '../../components/DocumentTitle'
 import './index.css'
 
@@ -13,8 +12,23 @@ function SatinAl() {
   // URL'den paket bilgilerini al
   const searchParams = new URLSearchParams(location.search)
   const packageType = searchParams.get('package') || 'economic'
-  const packageTitle = t(`packages.${packageType}.title`)
-  const packagePriceString = t(`packages.${packageType}.price`)
+  
+  // localStorage'dan paket verilerini oku
+  const getPackageData = (packageType) => {
+    const savedPackage = localStorage.getItem(`package_${packageType}`)
+    if (savedPackage) {
+      try {
+        return JSON.parse(savedPackage)
+      } catch (error) {
+        console.error('Error parsing saved package data:', error)
+      }
+    }
+    return null
+  }
+  
+  const savedPackageData = getPackageData(packageType)
+  const packageTitle = savedPackageData?.title || t(`packages.${packageType}.title`)
+  const packagePriceString = savedPackageData?.price || t(`packages.${packageType}.price`)
   // Price string'den sayıya çevir (₺299 -> 299)
   const packagePrice = parseFloat(packagePriceString.replace(/[^\d.]/g, ''))
 
@@ -59,13 +73,15 @@ function SatinAl() {
   useEffect(() => {
     if (isSuccess) {
       const timer = setTimeout(() => {
-        // Ekonomik detay sayfasına yönlendir
-        navigate(`/paket/ekonomik`)
+        // Paket detay sayfasına yönlendir
+        const packageRoute = packageType === 'economic' ? '/ekonomik' : 
+                           packageType === 'comfort' ? '/konforlu' : '/lux'
+        navigate(packageRoute)
       }, 5000) // 5 saniye
 
       return () => clearTimeout(timer)
     }
-  }, [isSuccess, navigate])
+  }, [isSuccess, navigate, packageType])
 
   // Geri sayım için timer
   useEffect(() => {
@@ -158,7 +174,6 @@ function SatinAl() {
     return (
       <>
         <DocumentTitle title="Siparişiniz Alındı - TravelKit" />
-        <Navbar />
         <main className="satin-al-success">
           <div className="satin-al-success-container">
             <div className="satin-al-success-icon">✓</div>
@@ -173,7 +188,7 @@ function SatinAl() {
               <p><strong>Tutar:</strong> {packagePriceString}</p>
             </div>
             <div className="satin-al-success__countdown">
-              {countdown} saniye sonra ekonomik paket sayfasına yönlendirileceksiniz...
+              {countdown} saniye sonra {packageTitle} paket sayfasına yönlendirileceksiniz...
             </div>
           </div>
         </main>
@@ -184,7 +199,6 @@ function SatinAl() {
   return (
     <>
       <DocumentTitle title={`${packageTitle} Paket - Satın Al - TravelKit`} />
-      <Navbar />
       <main className="satin-al">
         <div className="satin-al__container">
           <div className="satin-al__back-section">
@@ -201,7 +215,7 @@ function SatinAl() {
             <h2 className="satin-al__package-title">{packageTitle} Paket</h2>
             <div className="satin-al__package-price">{packagePriceString}</div>
             <p className="satin-al__package-desc">
-              {t(`packages.${packageType}.description`)}
+              {savedPackageData?.description || t(`packages.${packageType}.description`)}
             </p>
           </div>
 

@@ -16,9 +16,8 @@ export const DarkModeProvider = ({ children }) => {
   // localStorage'dan koyu mod tercihini yükle
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    if (savedTheme === 'dark') {
       setIsDarkMode(true)
       document.documentElement.classList.add('dark')
     } else {
@@ -27,20 +26,12 @@ export const DarkModeProvider = ({ children }) => {
     }
   }, [])
 
-  // Sistem tema tercihini dinle
+  // Sistem tema tercihini dinle (sadece kullanıcı manuel olarak değiştirirse)
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     
     const handleChange = (e) => {
-      const savedTheme = localStorage.getItem('theme')
-      if (!savedTheme) {
-        setIsDarkMode(e.matches)
-        if (e.matches) {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-        }
-      }
+      // Sistem tema değişikliklerini dinleme, sadece manuel değişiklikleri takip et
     }
 
     mediaQuery.addEventListener('change', handleChange)

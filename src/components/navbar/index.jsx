@@ -32,6 +32,31 @@ function Navbar() {
   // Admin ayarları modalı için state'ler
   const [settingsActiveTab, setSettingsActiveTab] = useState('password')
   
+  // Package Management States
+  const [showPackageModal, setShowPackageModal] = useState(false)
+  const [editingPackage, setEditingPackage] = useState(null)
+  const [packageData, setPackageData] = useState({
+    title: '',
+    description: '',
+    price: '',
+    sections: {
+      personalCare: '',
+      comfort: '',
+      technology: '',
+      health: '',
+      additions: ''
+    },
+    items: {
+      personalCare: [],
+      comfort: [],
+      technology: [],
+      health: [],
+      additions: []
+    }
+  })
+  const [packageError, setPackageError] = useState('')
+  const [packageSuccess, setPackageSuccess] = useState('')
+  
   // SMS 2FA States
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -330,6 +355,250 @@ function Navbar() {
     }, 2000)
   }
 
+  // Package Management Functions
+  const getPackageData = (packageType) => {
+    // Önce localStorage'dan kaydedilmiş veriyi kontrol et
+    const savedPackage = localStorage.getItem(`package_${packageType}`)
+    if (savedPackage) {
+      try {
+        const parsedData = JSON.parse(savedPackage)
+        return parsedData
+      } catch (error) {
+        console.error('Error parsing saved package data:', error)
+      }
+    }
+
+    // localStorage'da veri yoksa hardcoded veriyi kullan
+    const packages = {
+      economic: {
+        title: 'Ekonomik',
+        description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
+        price: '₺299',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Ekonomik Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+          ],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
+          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+            'QR Kart, müzik listesi', 'Lavanta kesesi'
+          ]
+        }
+      },
+      comfort: {
+        title: 'Konforlu',
+        description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
+        price: '₺599',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'KONFOR PAKET EKLEMELERİ'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+            'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
+            'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
+          technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
+          ]
+        }
+      },
+      luxury: {
+        title: 'Lüks',
+        description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
+        price: '₺999',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Lüks Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
+            'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+            'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
+            'El Dezenfektanı', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
+          technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici',
+            'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı',
+            'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
+          ]
+        }
+      }
+    }
+    return packages[packageType] || null
+  }
+
+  const openPackageModal = (packageType = null) => {
+    console.log('🚀 openPackageModal çağrıldı:', packageType)
+    
+    if (packageType) {
+      // Mevcut paket verilerini yükle
+      const packageInfo = getPackageData(packageType)
+      console.log('📦 Paket verisi yüklendi:', packageInfo)
+      setPackageData(packageInfo)
+      setEditingPackage(packageType)
+    } else {
+      // Yeni paket oluştur
+      setPackageData({
+        title: '',
+        description: '',
+        price: '',
+        sections: {
+          personalCare: '',
+          comfort: '',
+          technology: '',
+          health: '',
+          additions: ''
+        },
+        items: {
+          personalCare: [],
+          comfort: [],
+          technology: [],
+          health: [],
+          additions: []
+        }
+      })
+      setEditingPackage(null)
+    }
+
+    console.log('✅ showPackageModal true yapılıyor')
+    setShowPackageModal(true)
+    setPackageError('')
+    setPackageSuccess('')
+  }
+
+  const closePackageModal = () => {
+    setShowPackageModal(false)
+    setEditingPackage(null)
+    setPackageData({
+      title: '',
+      description: '',
+      price: '',
+      sections: {
+        personalCare: '',
+        comfort: '',
+        technology: '',
+        health: '',
+        additions: ''
+      },
+      items: {
+        personalCare: [],
+        comfort: [],
+        technology: [],
+        health: [],
+        additions: []
+      }
+    })
+    setPackageError('')
+    setPackageSuccess('')
+  }
+
+  const handlePackageDataChange = (field, value) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.')
+      setPackageData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }))
+    } else {
+      setPackageData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
+  }
+
+  const handleItemChange = (section, index, value) => {
+    setPackageData(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [section]: prev.items[section].map((item, i) =>
+          i === index ? value : item
+        )
+      }
+    }))
+  }
+
+  const addItem = (section) => {
+    setPackageData(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [section]: [...prev.items[section], '']
+      }
+    }))
+  }
+
+  const removeItem = (section, index) => {
+    setPackageData(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [section]: prev.items[section].filter((_, i) => i !== index)
+      }
+    }))
+  }
+
+  const savePackage = () => {
+    // Validation
+    if (!packageData.title || !packageData.description || !packageData.price) {
+      setPackageError('Lütfen tüm temel alanları doldurun!')
+      return
+    }
+
+    // Paket verilerini localStorage'a kaydet
+    const packageKey = editingPackage || 'new_package'
+    localStorage.setItem(`package_${packageKey}`, JSON.stringify(packageData))
+
+    setPackageSuccess('✅ Paket başarıyla kaydedildi!')
+
+    // 3 saniye sonra başarı mesajını temizle
+    setTimeout(() => {
+      setPackageSuccess('')
+    }, 3000)
+  }
+
   // Admin paneli için farklı navbar
   if (location.pathname === '/admin') {
     // Admin giriş sayfası için basit navbar
@@ -528,35 +797,37 @@ function Navbar() {
                       <h4>Paket Yönetimi</h4>
                       <div className="package-management">
                         <div className="package-list">
-                          <div className="package-item">
-                            <div className="package-info">
-                              <h5>Ekonomik Paket</h5>
-                              <p>Fiyat: ₺299</p>
-                            </div>
-                            <button className="edit-package-btn">
-                              ✏️ Düzenle
-                            </button>
-                          </div>
-                          <div className="package-item">
-                            <div className="package-info">
-                              <h5>Konforlu Paket</h5>
-                              <p>Fiyat: ₺599</p>
-                            </div>
-                            <button className="edit-package-btn">
-                              ✏️ Düzenle
-                            </button>
-                          </div>
-                          <div className="package-item">
-                            <div className="package-info">
-                              <h5>Lüks Paket</h5>
-                              <p>Fiyat: ₺999</p>
-                            </div>
-                            <button className="edit-package-btn">
-                              ✏️ Düzenle
-                            </button>
-                          </div>
+                          {['economic', 'comfort', 'luxury'].map((packageType) => {
+                            const packageData = getPackageData(packageType)
+                            const packageNames = {
+                              economic: 'Ekonomik Paket',
+                              comfort: 'Konforlu Paket', 
+                              luxury: 'Lüks Paket'
+                            }
+                            
+                            return (
+                              <div key={packageType} className="package-item">
+                                <div className="package-info">
+                                  <h5>{packageData?.title || packageNames[packageType]}</h5>
+                                  <p>Fiyat: {packageData?.price || '₺299'}</p>
+                                </div>
+                                <button 
+                                  className="edit-package-btn"
+                                  onClick={() => {
+                                    console.log(`🔘 ${packageNames[packageType]} butonuna tıklandı`)
+                                    openPackageModal(packageType)
+                                  }}
+                                >
+                                  ✏️ Düzenle
+                                </button>
+                              </div>
+                            )
+                          })}
                         </div>
-                        <button className="add-package-btn">
+                        <button 
+                          className="add-package-btn"
+                          onClick={() => openPackageModal()}
+                        >
                           ➕ Yeni Paket Ekle
                         </button>
                       </div>
@@ -635,6 +906,122 @@ function Navbar() {
           </div>
         )}
 
+        {/* Package Modal */}
+        {console.log('🔍 Admin sayfasında showPackageModal state:', showPackageModal)}
+        {showPackageModal && (
+          <div className="modal-overlay">
+            <div className="package-modal">
+              <div className="modal-header">
+                <h3>Paket Düzenle</h3>
+                <button className="modal-close" onClick={closePackageModal}>
+                  ✕
+                </button>
+              </div>
+              <div className="modal-content">
+                <form className="package-form">
+                  <div className="form-section">
+                    <h4>Temel Bilgiler</h4>
+                    <div className="form-group">
+                      <label>Paket Adı:</label>
+                      <input
+                        type="text"
+                        value={packageData.title}
+                        onChange={(e) => handlePackageDataChange('title', e.target.value)}
+                        className="form-input"
+                        placeholder="Paket adını girin"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Açıklama:</label>
+                      <textarea
+                        value={packageData.description}
+                        onChange={(e) => handlePackageDataChange('description', e.target.value)}
+                        className="form-textarea"
+                        placeholder="Paket açıklamasını girin"
+                        rows="3"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Fiyat:</label>
+                      <input
+                        type="text"
+                        value={packageData.price}
+                        onChange={(e) => handlePackageDataChange('price', e.target.value)}
+                        className="form-input"
+                        placeholder="₺299"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-section">
+                    {Object.entries(packageData.sections).map(([key, value]) => {
+                      const sectionNames = {
+                        personalCare: 'Kişisel Bakım Ürünleri',
+                        comfort: 'Konfor Ürünleri',
+                        technology: 'Teknoloji Ürünleri',
+                        health: 'Sağlık Ürünleri',
+                        additions: 'Ek Ürünler'
+                      }
+                      
+                      return (
+                        <div key={key} className="section-with-items">
+                          <h4>{sectionNames[key]}</h4>
+                          <div className="form-group">
+                            <label>Bölüm Başlığı:</label>
+                            <input
+                              type="text"
+                              value={value}
+                              onChange={(e) => handlePackageDataChange(`sections.${key}`, e.target.value)}
+                              className="form-input"
+                              placeholder={`${key} bölüm başlığı`}
+                            />
+                          </div>
+                          
+                          <div className="items-section">
+                            <h5>Ürün Listesi:</h5>
+                            <div className="items-list">
+                              {packageData.items[key].map((item, index) => (
+                                <div key={index} className="item-input-group">
+                                  <input
+                                    type="text"
+                                    value={item}
+                                    onChange={(e) => handleItemChange(key, index, e.target.value)}
+                                    className="form-input"
+                                    placeholder={`${key} ürünü`}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="remove-item-btn"
+                                    onClick={() => removeItem(key, index)}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                className="add-item-btn"
+                                onClick={() => addItem(key)}
+                              >
+                                ➕ Ürün Ekle
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </form>
+              </div>
+              <div className="modal-actions">
+                <button className="save-btn" onClick={savePackage}>
+                  Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </header>
     )
   }
@@ -688,6 +1075,122 @@ function Navbar() {
         </nav>
 
       </div>
+
+      {/* Package Modal */}
+      {console.log('🔍 showPackageModal state:', showPackageModal)}
+      {showPackageModal && (
+        <div className="modal-overlay">
+          <div className="package-modal">
+            <div className="modal-header">
+              <h3>Paket Düzenle</h3>
+              <button className="modal-close" onClick={closePackageModal}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-content">
+              <form className="package-form">
+                <div className="form-section">
+                  <h4>Temel Bilgiler</h4>
+                  <div className="form-group">
+                    <label>Paket Adı:</label>
+                    <input
+                      type="text"
+                      value={packageData.title}
+                      onChange={(e) => handlePackageDataChange('title', e.target.value)}
+                      className="form-input"
+                      placeholder="Paket adını girin"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Açıklama:</label>
+                    <textarea
+                      value={packageData.description}
+                      onChange={(e) => handlePackageDataChange('description', e.target.value)}
+                      className="form-textarea"
+                      placeholder="Paket açıklamasını girin"
+                      rows="3"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Fiyat:</label>
+                    <input
+                      type="text"
+                      value={packageData.price}
+                      onChange={(e) => handlePackageDataChange('price', e.target.value)}
+                      className="form-input"
+                      placeholder="₺299"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  {Object.entries(packageData.sections).map(([key, value]) => {
+                    const sectionNames = {
+                      personalCare: 'Kişisel Bakım Ürünleri',
+                      comfort: 'Konfor Ürünleri',
+                      technology: 'Teknoloji Ürünleri',
+                      health: 'Sağlık Ürünleri',
+                      additions: 'Ek Ürünler'
+                    }
+                    
+                    return (
+                      <div key={key} className="section-with-items">
+                        <h4>{sectionNames[key]}</h4>
+                        <div className="form-group">
+                          <label>Bölüm Başlığı:</label>
+                          <input
+                            type="text"
+                            value={value}
+                            onChange={(e) => handlePackageDataChange(`sections.${key}`, e.target.value)}
+                            className="form-input"
+                            placeholder={`${key} bölüm başlığı`}
+                          />
+                        </div>
+                        
+                        <div className="items-section">
+                          <h5>Ürün Listesi:</h5>
+                          <div className="items-list">
+                            {packageData.items[key].map((item, index) => (
+                              <div key={index} className="item-input-group">
+                                <input
+                                  type="text"
+                                  value={item}
+                                  onChange={(e) => handleItemChange(key, index, e.target.value)}
+                                  className="form-input"
+                                  placeholder={`${key} ürünü`}
+                                />
+                                <button
+                                  type="button"
+                                  className="remove-item-btn"
+                                  onClick={() => removeItem(key, index)}
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              className="add-item-btn"
+                              onClick={() => addItem(key)}
+                            >
+                              ➕ Ürün Ekle
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </form>
+            </div>
+            <div className="modal-actions">
+              <button className="save-btn" onClick={savePackage}>
+                Kaydet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

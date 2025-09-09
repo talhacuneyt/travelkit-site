@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useLocation } from 'react-router-dom'
 import { supabase, EMAILJS_CONFIG } from '../../lib/supabase'
 import emailjs from '@emailjs/browser'
 import './index.css'
 
 function Admin() {
+  const location = useLocation()
+  // console.log('Admin component loaded, location:', location.pathname) // Production'da devre dışı
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -44,6 +47,7 @@ function Admin() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [settingsActiveTab, setSettingsActiveTab] = useState('password')
 
+
   // SMS 2FA States
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -65,7 +69,7 @@ function Admin() {
   const sendSMS = async (phoneNumber) => {
     try {
       const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
-      
+
       // Gerçek SMS gönderme - Backend API'sine istek gönder
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const response = await fetch(`${API_URL}/api/send-sms`, {
@@ -123,7 +127,7 @@ function Admin() {
       setTwoFactorEnabled(true)
       setTwoFactorSuccess('SMS 2FA başarıyla etkinleştirildi!')
       setShowTwoFactorSetup(false)
-      
+
       // LocalStorage'a kaydet
       localStorage.setItem('admin_2fa_enabled', 'true')
       localStorage.setItem('admin_2fa_method', 'sms')
@@ -140,7 +144,7 @@ function Admin() {
     setSmsSent(false)
     setSmsError('')
     setTwoFactorSuccess('SMS 2FA devre dışı bırakıldı')
-    
+
     // LocalStorage'dan kaldır
     localStorage.removeItem('admin_2fa_enabled')
     localStorage.removeItem('admin_2fa_method')
@@ -183,8 +187,8 @@ function Admin() {
     }
 
     // Navbar'ı güncellemek için custom event gönder
-    window.dispatchEvent(new CustomEvent('adminLogin', { 
-      detail: { isAuthenticated: true } 
+    window.dispatchEvent(new CustomEvent('adminLogin', {
+      detail: { isAuthenticated: true }
     }))
 
     if (supabase) {
@@ -213,24 +217,21 @@ function Admin() {
     // Session kontrolü
     const session = localStorage.getItem('admin_session')
     const sessionTimestamp = localStorage.getItem('admin_session_timestamp')
-    
+
     // Session süresi kontrolü (24 saat)
     const now = Date.now()
     const sessionAge = sessionTimestamp ? now - parseInt(sessionTimestamp) : Infinity
     const maxSessionAge = 24 * 60 * 60 * 1000 // 24 saat
-    
+
     if (session === 'authenticated' && sessionAge < maxSessionAge) {
       setIsAuthenticated(true)
-      if (supabase) {
-        fetchMessages()
-      }
     } else {
       // Geçersiz veya süresi dolmuş session
       localStorage.removeItem('admin_session')
       localStorage.removeItem('admin_session_timestamp')
       setIsAuthenticated(false)
     }
-    
+
     setLoading(false)
 
     // Dark mode kontrolü
@@ -268,7 +269,51 @@ function Admin() {
     // 2FA durumu kontrolü
     const twoFactorEnabled = localStorage.getItem('admin_2fa_enabled') === 'true'
     setTwoFactorEnabled(twoFactorEnabled)
-  }, [])
+  }, []) // Dependency array'i boş bıraktık
+
+  // fetchMessages fonksiyonunu buraya taşıdık
+  const fetchMessages = useCallback(async () => {
+    if (!supabase) {
+      console.warn('Supabase yapılandırılmamış')
+      setLoading(false)
+      return
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Mesajlar yüklenirken hata:', error)
+      } else {
+        // localStorage'dan okunmuş mesajları al
+        const readMessages = JSON.parse(localStorage.getItem('read_messages') || '[]')
+
+        // Her mesaj için okunmuş durumunu kontrol et
+        // Önce veritabanındaki değeri, sonra localStorage'ı kontrol et
+        const messagesWithReadStatus = (data || []).map(msg => ({
+          ...msg,
+          is_read: msg.is_read || readMessages.includes(msg.id) || false
+        }))
+
+        // console.log('Yüklenen mesajlar:', messagesWithReadStatus)
+        setMessages(messagesWithReadStatus)
+      }
+    } catch (err) {
+      console.error('Veritabanı bağlantı hatası:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, []) // supabase dependency'sini kaldırdık
+
+  // Ayrı bir useEffect ile fetchMessages'ı çağır
+  useEffect(() => {
+    if (isAuthenticated && supabase) {
+      fetchMessages()
+    }
+  }, [isAuthenticated, fetchMessages])
 
   // Session timeout management
   useEffect(() => {
@@ -295,12 +340,26 @@ function Admin() {
     }
   }, [isAuthenticated, sessionDuration])
 
+  // URL'ye göre paket modal'ını aç - Artık kullanılmıyor, onClick handler'lar kullanılıyor
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     const path = location.pathname
+  //     if (path === '/admin/paket/ekonomik') {
+  //       openPackageModal('economic')
+  //     } else if (path === '/admin/paket/konforlu') {
+  //       openPackageModal('comfort')
+  //     } else if (path === '/admin/paket/lux') {
+  //       openPackageModal('luxury')
+  //     }
+  //   }
+  // }, [isAuthenticated, location.pathname])
+
   // Settings modal body scroll prevention
   useEffect(() => {
     if (showSettingsModal) {
       // Mevcut scroll pozisyonunu kaydet
       const scrollY = window.scrollY
-      
+
       // Body'yi tamamen sabitle
       document.body.style.position = 'fixed'
       document.body.style.top = `-${scrollY}px`
@@ -311,18 +370,18 @@ function Admin() {
       document.body.style.overflow = 'hidden'
       document.body.style.overscrollBehavior = 'none'
       document.body.style.touchAction = 'none'
-      
+
       // HTML elementini de sabitle
       document.documentElement.style.overflow = 'hidden'
       document.documentElement.style.overscrollBehavior = 'none'
-      
+
       // Scroll event'lerini engelle
       const preventScroll = (e) => {
         e.preventDefault()
         e.stopPropagation()
         return false
       }
-      
+
       document.addEventListener('wheel', preventScroll, { passive: false })
       document.addEventListener('touchmove', preventScroll, { passive: false })
       document.addEventListener('keydown', (e) => {
@@ -330,7 +389,7 @@ function Admin() {
           e.preventDefault()
         }
       })
-      
+
       return () => {
         // Geri yükle
         document.body.style.position = ''
@@ -342,14 +401,14 @@ function Admin() {
         document.body.style.overflow = ''
         document.body.style.overscrollBehavior = ''
         document.body.style.touchAction = ''
-        
+
         document.documentElement.style.overflow = ''
         document.documentElement.style.overscrollBehavior = ''
-        
+
         // Event listener'ları kaldır
         document.removeEventListener('wheel', preventScroll)
         document.removeEventListener('touchmove', preventScroll)
-        
+
         window.scrollTo(0, scrollY)
       }
     }
@@ -370,7 +429,7 @@ function Admin() {
     if (username === adminUsername && password === adminPassword) {
       // 2FA kontrolü
       const twoFactorEnabled = localStorage.getItem('admin_2fa_enabled') === 'true'
-      
+
       if (twoFactorEnabled) {
         // 2FA etkinse, 2FA kodunu iste
         setShowTwoFactorLogin(true)
@@ -410,13 +469,13 @@ function Admin() {
     setPassword('')
     setUsername('')
     setRememberMe(false)
-    
+
     // Clear session timeout
     if (sessionTimeout) {
       clearTimeout(sessionTimeout)
       setSessionTimeout(null)
     }
-    
+
     // Sayfayı yenile ve login sayfasına yönlendir
     window.location.reload()
   }
@@ -533,42 +592,6 @@ function Admin() {
     setRememberMe(false)
     localStorage.removeItem('admin_login_attempts')
     localStorage.removeItem('admin_remember_me')
-  }
-
-  async function fetchMessages() {
-    if (!supabase) {
-      console.warn('Supabase yapılandırılmamış')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Mesajlar yüklenirken hata:', error)
-      } else {
-        // localStorage'dan okunmuş mesajları al
-        const readMessages = JSON.parse(localStorage.getItem('read_messages') || '[]')
-
-        // Her mesaj için okunmuş durumunu kontrol et
-        // Önce veritabanındaki değeri, sonra localStorage'ı kontrol et
-        const messagesWithReadStatus = (data || []).map(msg => ({
-          ...msg,
-          is_read: msg.is_read || readMessages.includes(msg.id) || false
-        }))
-
-        console.log('Yüklenen mesajlar:', messagesWithReadStatus)
-        setMessages(messagesWithReadStatus)
-      }
-    } catch (err) {
-      console.error('Veritabanı bağlantı hatası:', err)
-    } finally {
-      setLoading(false)
-    }
   }
 
   async function deleteMessage(id) {
@@ -947,6 +970,7 @@ function Admin() {
     return sortOrder === 'asc' ? '↑' : '↓'
   }
 
+
   // Admin Settings Functions
   function openSettingsModal() {
     setShowSettingsModal(true)
@@ -1221,35 +1245,6 @@ function Admin() {
   return (
     <div className="admin-container">
 
-      {/* Özel Tarih Seçici */}
-      {showDatePicker && (
-        <div className="custom-date-picker">
-          <div className="date-inputs">
-            <div className="date-input-group">
-              <label>Başlangıç:</label>
-              <input
-                type="date"
-                value={customStartDate}
-                onChange={(e) => setCustomStartDate(e.target.value)}
-                className="date-input"
-              />
-            </div>
-            <div className="date-input-group">
-              <label>Bitiş:</label>
-              <input
-                type="date"
-                value={customEndDate}
-                onChange={(e) => setCustomEndDate(e.target.value)}
-                className="date-input"
-              />
-            </div>
-            <button onClick={clearDateFilter} className="clear-date-btn">
-              Temizle
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Filtre Bilgisi */}
       {dateFilter !== 'all' && (
         <div className="date-filter-info">
@@ -1352,42 +1347,6 @@ function Admin() {
               onChange={handleSearch}
               className="search-input"
             />
-            <div className="search-filters">
-              <select
-                value={dateFilter}
-                onChange={(e) => handleDateFilterChange(e.target.value)}
-                className="date-filter-select"
-              >
-                <option value="all">Tümü</option>
-                <option value="today">Bugün</option>
-                <option value="week">Bu Hafta</option>
-                <option value="month">Bu Ay</option>
-                <option value="custom">Özel Tarih</option>
-              </select>
-              <div className="sort-buttons">
-                <button
-                  className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
-                  onClick={() => handleSortChange('date')}
-                  title="Tarihe göre sırala"
-                >
-                  📅 {getSortIcon('date')}
-                </button>
-                <button
-                  className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
-                  onClick={() => handleSortChange('name')}
-                  title="İsme göre sırala"
-                >
-                  👤 {getSortIcon('name')}
-                </button>
-                <button
-                  className={`sort-btn ${sortBy === 'email' ? 'active' : ''}`}
-                  onClick={() => handleSortChange('email')}
-                  title="Email'e göre sırala"
-                >
-                  📧 {getSortIcon('email')}
-                </button>
-              </div>
-            </div>
           </div>
           {searchTerm && (
             <div className="search-results-info">
@@ -1395,59 +1354,125 @@ function Admin() {
             </div>
           )}
         </div>
-        <div className="export-buttons">
-          <button onClick={exportToExcel} className="export-btn export-excel">
-            📈 Excel İndir
+        <div className="filters-row">
+          <select
+            value={dateFilter}
+            onChange={(e) => handleDateFilterChange(e.target.value)}
+            className="date-filter-select"
+          >
+            <option value="all">Tümü</option>
+            <option value="today">Bugün</option>
+            <option value="week">Bu Hafta</option>
+            <option value="month">Bu Ay</option>
+            <option value="custom">Özel Tarih</option>
+          </select>
+          <button
+            className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
+            onClick={() => handleSortChange('date')}
+            title="Tarihe göre sırala"
+          >
+            📅 {getSortIcon('date')}
+          </button>
+          <button
+            className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
+            onClick={() => handleSortChange('name')}
+            title="İsme göre sırala"
+          >
+            👤 {getSortIcon('name')}
+          </button>
+          <button
+            className={`sort-btn ${sortBy === 'email' ? 'active' : ''}`}
+            onClick={() => handleSortChange('email')}
+            title="Email'e göre sırala"
+          >
+            📧 {getSortIcon('email')}
           </button>
         </div>
       </div>
 
-      <div className="tabs">
-        <div className="tabs-container">
-          <button
-            className={`tab ${activeTab === 'unread' ? 'tab--active' : ''}`}
-            onClick={() => handleTabChange('unread')}
-          >
-            Okunmamış ({unreadCount})
-          </button>
-          <button
-            className={`tab ${activeTab === 'read' ? 'tab--active' : ''}`}
-            onClick={() => handleTabChange('read')}
-          >
-            Okunmuş ({readCount})
-          </button>
-          <button
-            className={`tab ${activeTab === 'all' ? 'tab--active' : ''}`}
-            onClick={() => handleTabChange('all')}
-          >
-            Tümü ({messages.length})
-          </button>
-        </div>
-      </div>
-
-      {activeTab === 'unread' && unreadCount > 0 && (
-        <div className="bulk-actions">
-          <button
-            className="mark-all-read-btn"
-            onClick={markAllAsRead}
-          >
-            Hepsini Okundu Say
-          </button>
+      {/* Özel Tarih Seçici */}
+      {showDatePicker && (
+        <div className="custom-date-picker">
+          <div className="date-inputs">
+            <div className="date-input-group">
+              <label>Başlangıç:</label>
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                className="date-input"
+              />
+            </div>
+            <div className="date-input-group">
+              <label>Bitiş:</label>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                className="date-input"
+              />
+            </div>
+            <button onClick={clearDateFilter} className="clear-date-btn">
+              Temizle
+            </button>
+          </div>
         </div>
       )}
 
-      {activeTab === 'all' && messages.length > 0 && (
-        <div className="bulk-actions">
-          <button
-            className="delete-all-btn"
-            onClick={openDeleteConfirmModal}
-          >
-            Hepsini Sil
-          </button>
+      <div className="admin-main-content">
+        <div className="tabs">
+          <div className="tabs-container">
+            <button
+              className={`tab ${activeTab === 'unread' ? 'tab--active' : ''}`}
+              onClick={() => handleTabChange('unread')}
+            >
+              Okunmamış ({unreadCount})
+            </button>
+            <button
+              className={`tab ${activeTab === 'read' ? 'tab--active' : ''}`}
+              onClick={() => handleTabChange('read')}
+            >
+              Okunmuş ({readCount})
+            </button>
+            <button
+              className={`tab ${activeTab === 'all' ? 'tab--active' : ''}`}
+              onClick={() => handleTabChange('all')}
+            >
+              Tümü ({messages.length})
+            </button>
+          </div>
+          <div className="tabs-actions">
+            {activeTab === 'unread' && unreadCount > 0 && (
+              <button
+                className="mark-all-read-btn"
+                onClick={markAllAsRead}
+              >
+                Hepsini Okundu Say
+              </button>
+            )}
+            {activeTab === 'read' && readCount > 0 && (
+              <button
+                className="mark-all-read-btn"
+                onClick={markAllAsRead}
+              >
+                Hepsini Okundu Say
+              </button>
+            )}
+            {activeTab === 'all' && messages.length > 0 && (
+              <button
+                className="delete-all-btn"
+                onClick={openDeleteConfirmModal}
+              >
+                Hepsini Sil
+              </button>
+            )}
+            <button onClick={exportToExcel} className="export-btn export-excel">
+              Excel İndir
+            </button>
+          </div>
         </div>
-      )}
 
-      <div className={`messages-list ${isTransitioning ? 'messages-list--transitioning' : ''}`}>
+        <div className={`messages-list ${isTransitioning ? 'messages-list--transitioning' : ''}`}>
         {filteredMessages.length === 0 ? (
           <div className="no-messages">
             {activeTab === 'unread' ? 'Okunmamış mesaj yok' :
@@ -1496,6 +1521,7 @@ function Admin() {
             </div>
           ))
         )}
+        </div>
       </div>
 
       {/* Modal */}
@@ -1598,164 +1624,119 @@ function Admin() {
             <div className="admin-modal-content">
               <div className="admin-settings-layout">
                 <div className="admin-tabs-sidebar">
-                  <button 
+                  <button
                     className={`admin-tab ${settingsActiveTab === 'password' ? 'active' : ''}`}
                     onClick={() => setSettingsActiveTab('password')}
                   >
                     🔐 Şifre Değiştir
                   </button>
-                  <button 
+                  <button
                     className={`admin-tab ${settingsActiveTab === '2fa' ? 'active' : ''}`}
                     onClick={() => setSettingsActiveTab('2fa')}
                   >
                     🔒 2FA Ayarları
                   </button>
-                  <button 
-                    className={`admin-tab ${settingsActiveTab === 'packages' ? 'active' : ''}`}
-                    onClick={() => setSettingsActiveTab('packages')}
-                  >
-                    📦 Paket Güncelle
-                  </button>
                 </div>
                 <div className="admin-tab-content">
-                {settingsActiveTab === 'password' && (
-                  <div className="tab-panel">
-                    <h4>Şifre Değiştir</h4>
-                    <form onSubmit={handlePasswordChange} className="password-form">
-                      <div className="form-group">
-                        <label>Mevcut Şifre:</label>
-                        <div className="password-input-wrapper">
-                          <input
-                            type={showCurrentPassword ? "text" : "password"}
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                            className="form-input"
-                            placeholder="Mevcut şifrenizi girin"
-                          />
-                          <button
-                            type="button"
-                            className="password-toggle-btn"
-                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          >
-                            {showCurrentPassword ? "🙈" : "👁️"}
-                          </button>
+                  {settingsActiveTab === 'password' && (
+                    <div className="tab-panel">
+                      <h4>Şifre Değiştir</h4>
+                      <form onSubmit={handlePasswordChange} className="password-form">
+                        <div className="form-group">
+                          <label>Mevcut Şifre:</label>
+                          <div className="password-input-wrapper">
+                            <input
+                              type={showCurrentPassword ? "text" : "password"}
+                              value={currentPassword}
+                              onChange={(e) => setCurrentPassword(e.target.value)}
+                              className="form-input"
+                              placeholder="Mevcut şifrenizi girin"
+                            />
+                            <button
+                              type="button"
+                              className="password-toggle-btn"
+                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            >
+                              {showCurrentPassword ? "🙈" : "👁️"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="form-group">
-                        <label>Yeni Şifre:</label>
-                        <div className="password-input-wrapper">
-                          <input
-                            type={showNewPassword ? "text" : "password"}
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="form-input"
-                            placeholder="Yeni şifrenizi girin (min 6 karakter)"
-                          />
-                          <button
-                            type="button"
-                            className="password-toggle-btn"
-                            onClick={() => setShowNewPassword(!showNewPassword)}
-                          >
-                            {showNewPassword ? "🙈" : "👁️"}
-                          </button>
+                        <div className="form-group">
+                          <label>Yeni Şifre:</label>
+                          <div className="password-input-wrapper">
+                            <input
+                              type={showNewPassword ? "text" : "password"}
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              className="form-input"
+                              placeholder="Yeni şifrenizi girin (min 6 karakter)"
+                            />
+                            <button
+                              type="button"
+                              className="password-toggle-btn"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                            >
+                              {showNewPassword ? "🙈" : "👁️"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="form-group">
-                        <label>Yeni Şifre Tekrar:</label>
-                        <div className="password-input-wrapper">
-                          <input
-                            type={showConfirmPassword ? "text" : "password"}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="form-input"
-                            placeholder="Yeni şifrenizi tekrar girin"
-                          />
-                          <button
-                            type="button"
-                            className="password-toggle-btn"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          >
-                            {showConfirmPassword ? "🙈" : "👁️"}
-                          </button>
+                        <div className="form-group">
+                          <label>Yeni Şifre Tekrar:</label>
+                          <div className="password-input-wrapper">
+                            <input
+                              type={showConfirmPassword ? "text" : "password"}
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              className="form-input"
+                              placeholder="Yeni şifrenizi tekrar girin"
+                            />
+                            <button
+                              type="button"
+                              className="password-toggle-btn"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              {showConfirmPassword ? "🙈" : "👁️"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      {passwordError && <div className="error-message">{passwordError}</div>}
-                      {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
-                      <button type="submit" className="change-password-btn">
-                        Şifre Değiştir
-                      </button>
-                    </form>
-                  </div>
-                )}
+                        {passwordError && <div className="error-message">{passwordError}</div>}
+                        {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+                        <button type="submit" className="change-password-btn">
+                          Şifre Değiştir
+                        </button>
+                      </form>
+                    </div>
+                  )}
 
-                {settingsActiveTab === '2fa' && (
-                  <div className="tab-panel">
-                    <h4>İki Faktörlü Kimlik Doğrulama (2FA)</h4>
-                    <div className="twofa-status">
-                      <div className="status-indicator">
-                        <span className="status-dot active"></span>
-                        <span>2FA Aktif</span>
+                  {settingsActiveTab === '2fa' && (
+                    <div className="tab-panel">
+                      <h4>İki Faktörlü Kimlik Doğrulama (2FA)</h4>
+                      <div className="twofa-status">
+                        <div className="status-indicator">
+                          <span className="status-dot active"></span>
+                          <span>2FA Aktif</span>
+                        </div>
+                        <p className="twofa-description">
+                          Hesabınızı daha güvenli hale getirmek için 2FA'yı etkinleştirin.
+                        </p>
                       </div>
-                      <p className="twofa-description">
-                        Hesabınızı daha güvenli hale getirmek için 2FA'yı etkinleştirin.
-                      </p>
-                    </div>
-                    <div className="twofa-actions">
-                      <button className="twofa-btn enable-btn">
-                        📱 2FA'yı Etkinleştir
-                      </button>
-                      <button className="twofa-btn disable-btn">
-                        ❌ 2FA'yı Devre Dışı Bırak
-                      </button>
-                    </div>
-                    <div className="twofa-qr">
-                      <p>QR Kodu tarayarak 2FA'yı etkinleştirin:</p>
-                      <div className="qr-placeholder">
-                        <div className="qr-code">📱 QR KOD</div>
+                      <div className="twofa-actions">
+                        <button className="twofa-btn enable-btn">
+                          📱 2FA'yı Etkinleştir
+                        </button>
+                        <button className="twofa-btn disable-btn">
+                          ❌ 2FA'yı Devre Dışı Bırak
+                        </button>
+                      </div>
+                      <div className="twofa-qr">
+                        <p>QR Kodu tarayarak 2FA'yı etkinleştirin:</p>
+                        <div className="qr-placeholder">
+                          <div className="qr-code">📱 QR KOD</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {settingsActiveTab === 'packages' && (
-                  <div className="tab-panel">
-                    <h4>Paket Yönetimi</h4>
-                    <div className="package-management">
-                      <div className="package-list">
-                        <div className="package-item">
-                          <div className="package-info">
-                            <h5>Ekonomik Paket</h5>
-                            <p>Fiyat: ₺299</p>
-                          </div>
-                          <button className="edit-package-btn">
-                            ✏️ Düzenle
-                          </button>
-                        </div>
-                        <div className="package-item">
-                          <div className="package-info">
-                            <h5>Konforlu Paket</h5>
-                            <p>Fiyat: ₺599</p>
-                          </div>
-                          <button className="edit-package-btn">
-                            ✏️ Düzenle
-                          </button>
-                        </div>
-                        <div className="package-item">
-                          <div className="package-info">
-                            <h5>Lüks Paket</h5>
-                            <p>Fiyat: ₺999</p>
-                          </div>
-                          <button className="edit-package-btn">
-                            ✏️ Düzenle
-                          </button>
-                        </div>
-                      </div>
-                      <button className="add-package-btn">
-                        ➕ Yeni Paket Ekle
-                      </button>
-                    </div>
-                  </div>
-                )}
                 </div>
               </div>
             </div>
@@ -1782,7 +1763,7 @@ function Admin() {
                     placeholder="+90 5XX XXX XX XX"
                     className="two-factor-input"
                   />
-                  <button 
+                  <button
                     className="send-sms-btn"
                     onClick={enableSMS2FA}
                     disabled={smsSent}
@@ -1803,7 +1784,7 @@ function Admin() {
                       maxLength="6"
                       className="two-factor-input"
                     />
-                    <button 
+                    <button
                       className="verify-2fa-btn"
                       onClick={confirmSMS2FA}
                     >
@@ -1848,13 +1829,13 @@ function Admin() {
                   maxLength="6"
                   className="two-factor-input"
                 />
-                <button 
+                <button
                   className="verify-login-2fa-btn"
                   onClick={verifyLoginTwoFactor}
                 >
                   Doğrula ve Giriş Yap
                 </button>
-                
+
                 {loginError && (
                   <div className="error-message">{loginError}</div>
                 )}
@@ -1875,6 +1856,7 @@ function Admin() {
           </div>
         </div>
       )}
+
     </div>
   )
 }

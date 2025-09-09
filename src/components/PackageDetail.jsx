@@ -45,18 +45,16 @@ const FloatingParticles = () => (
 )
 
 // Feature section component
-const FeatureSection = ({ icon: Icon, sectionKey, itemsKey, isEven = false }) => {
-  const { t } = useTranslation()
-
+const FeatureSection = ({ icon: Icon, sectionTitle, items, isEven = false }) => {
   return (
     <article className={`paket-feature ${isEven ? 'is-even' : ''}`}>
       <div className="paket-feature__icon" aria-hidden>
         <Icon />
       </div>
       <div className="paket-feature__body">
-        <h3 className="paket__group-title">{t(sectionKey)}</h3>
+        <h3 className="paket__group-title">{sectionTitle}</h3>
         <div className="paket__chips">
-          {t(itemsKey).map((item, index) => (
+          {items.map((item, index) => (
             <span key={index} className="paket__chip">{item}</span>
           ))}
         </div>
@@ -69,12 +67,117 @@ const FeatureSection = ({ icon: Icon, sectionKey, itemsKey, isEven = false }) =>
 const PackageDetail = ({ packageType }) => {
   const { t } = useTranslation()
 
-  // Handle purchase functionality
-  const handlePurchase = (packageType) => {
-    // Redirect to purchase page with package info
-    window.location.href = `/satin-al?package=${packageType}`
+  // Hardcoded package data
+  const hardcodedData = {
+    economic: {
+      title: 'Ekonomik',
+      description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
+      price: '₺299',
+      sections: {
+        personalCare: 'Kişisel Bakım Ürünleri',
+        comfort: 'Konfor',
+        technology: 'Teknoloji',
+        health: 'Sağlık / İlk Yardım',
+        additions: 'Ekonomik Paket Eklemeleri'
+      },
+      items: {
+        personalCare: [
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi', 
+          'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+        ],
+        comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
+        technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
+        health: [
+          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Burun Spreyi', 'Maske', 'Sineksavar'
+        ],
+        additions: [
+          'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği', 
+          'QR Kart, müzik listesi', 'Lavanta kesesi'
+        ]
+      }
+    },
+    comfort: {
+      title: 'Konforlu',
+      description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı.',
+      price: '₺599',
+      sections: {
+        personalCare: 'Kişisel Bakım Ürünleri',
+        comfort: 'Konfor',
+        technology: 'Teknoloji',
+        health: 'Sağlık / İlk Yardım',
+        additions: 'Konfor Paket Eklemeleri'
+      },
+      items: {
+        personalCare: [
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay', 
+          'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu', 
+          'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
+        ],
+        comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
+        technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
+        health: [
+          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Burun Spreyi', 'Maske', 'Sineksavar'
+        ],
+        additions: [
+          'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü', 
+          'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi', 
+          'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
+        ]
+      }
+    },
+    luxury: {
+      title: 'Lüks',
+      description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
+      price: '₺999',
+      sections: {
+        personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
+        comfort: 'Konfor',
+        technology: 'Teknoloji',
+        health: 'Sağlık / İlk Yardım',
+        additions: 'Lüks Paket Eklemeleri'
+      },
+      items: {
+        personalCare: [
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On', 
+          'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası', 
+          'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası', 
+          'El Dezenfektanı', 'Tarak'
+        ],
+        comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
+        technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
+        health: [
+          'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Burun Spreyi', 'Maske', 'Sineksavar'
+        ],
+        additions: [
+          'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü', 
+          'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi', 
+          'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici', 
+          'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı', 
+          'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
+        ]
+      }
+    }
   }
 
+  // Get package data - try localStorage first, then fallback to hardcoded
+  const getPackageData = () => {
+    const savedPackage = localStorage.getItem(`package_${packageType}`)
+    if (savedPackage) {
+      try {
+        return JSON.parse(savedPackage)
+      } catch (error) {
+        console.error('Error parsing saved package data:', error)
+      }
+    }
+    return hardcodedData[packageType] || hardcodedData.economic
+  }
+
+  const packageData = getPackageData()
+
+  // Animation useEffect - must be before conditional returns
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -110,30 +213,37 @@ const PackageDetail = ({ packageType }) => {
     return () => observer.disconnect()
   }, [])
 
+  // Handle purchase functionality
+  const handlePurchase = (packageType) => {
+    // Redirect to purchase page with package info
+    window.location.href = `/satin-al?package=${packageType}`
+  }
+
+
   // Feature sections configuration
   const featureSections = [
     {
       icon: PersonalCareIcon,
-      sectionKey: `packages.${packageType}.sections.personalCare`,
-      itemsKey: `packages.${packageType}.items.personalCare`,
+      sectionTitle: packageData.sections.personalCare,
+      items: packageData.items.personalCare,
       isEven: false
     },
     {
       icon: ComfortIcon,
-      sectionKey: `packages.${packageType}.sections.comfort`,
-      itemsKey: `packages.${packageType}.items.comfort`,
+      sectionTitle: packageData.sections.comfort,
+      items: packageData.items.comfort,
       isEven: true
     },
     {
       icon: TechnologyIcon,
-      sectionKey: `packages.${packageType}.sections.technology`,
-      itemsKey: `packages.${packageType}.items.technology`,
+      sectionTitle: packageData.sections.technology,
+      items: packageData.items.technology,
       isEven: false
     },
     {
       icon: HealthIcon,
-      sectionKey: `packages.${packageType}.sections.health`,
-      itemsKey: `packages.${packageType}.items.health`,
+      sectionTitle: packageData.sections.health,
+      items: packageData.items.health,
       isEven: true
     }
   ]
@@ -143,8 +253,9 @@ const PackageDetail = ({ packageType }) => {
       <section className="paket-hero">
         <FloatingParticles />
         <div className="paket-hero__inner">
-          <h1 className="paket__title">{t(`packages.${packageType}.title`)}</h1>
-          <p className="paket__description">{t(`packages.${packageType}.description`)}</p>
+          <h1 className="paket__title">{packageData.title}</h1>
+          <p className="paket__description">{packageData.description}</p>
+          <div className="paket__price">{packageData.price}</div>
         </div>
       </section>
 
@@ -156,8 +267,8 @@ const PackageDetail = ({ packageType }) => {
                 <FeatureSection
                   key={index}
                   icon={feature.icon}
-                  sectionKey={feature.sectionKey}
-                  itemsKey={feature.itemsKey}
+                  sectionTitle={feature.sectionTitle}
+                  items={feature.items}
                   isEven={feature.isEven}
                 />
               ))}
@@ -165,9 +276,9 @@ const PackageDetail = ({ packageType }) => {
           </section>
 
           <section className="paket__section">
-            <h2 className="paket__section-title">{t(`packages.${packageType}.sections.additions`)}</h2>
+            <h2 className="paket__section-title">{packageData.sections.additions}</h2>
             <div className="paket__chips">
-              {t(`packages.${packageType}.items.additions`).map((item, index) => (
+              {packageData.items.additions.map((item, index) => (
                 <span key={index} className="paket__chip">{item}</span>
               ))}
             </div>
