@@ -75,7 +75,8 @@ function Admin() {
       const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
 
       // Gerçek SMS gönderme - Backend API'sine istek gönder
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const API_URL = import.meta.env.VITE_API_URL || 
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
       const response = await fetch(`${API_URL}/api/send-sms`, {
         method: 'POST',
         headers: {
