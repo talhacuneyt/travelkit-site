@@ -14,11 +14,11 @@ function Navbar() {
   const { language, toggleLanguage } = useLanguage()
   const { isDarkMode, toggleDarkMode } = useDarkMode()
   const { t } = useTranslation()
-  
+
   // Admin paneli için state'ler
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  
+
   // Şifre değiştirme için state'ler
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -28,10 +28,10 @@ function Navbar() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
-  
+
   // Admin ayarları modalı için state'ler
   const [settingsActiveTab, setSettingsActiveTab] = useState('password')
-  
+
   // Package Management States
   const [showPackageModal, setShowPackageModal] = useState(false)
   const [editingPackage, setEditingPackage] = useState(null)
@@ -56,7 +56,7 @@ function Navbar() {
   })
   const [packageError, setPackageError] = useState('')
   const [packageSuccess, setPackageSuccess] = useState('')
-  
+
   // SMS 2FA States
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -110,12 +110,12 @@ function Navbar() {
     const checkAuth = () => {
       const session = localStorage.getItem('admin_session')
       const sessionTimestamp = localStorage.getItem('admin_session_timestamp')
-      
+
       // Session süresi kontrolü (24 saat)
       const now = Date.now()
       const sessionAge = sessionTimestamp ? now - parseInt(sessionTimestamp) : Infinity
       const maxSessionAge = 24 * 60 * 60 * 1000 // 24 saat
-      
+
       if (session === 'authenticated' && sessionAge < maxSessionAge) {
         setIsAuthenticated(true)
       } else {
@@ -125,26 +125,26 @@ function Navbar() {
         setIsAuthenticated(false)
       }
     }
-    
+
     // İlk kontrol
     checkAuth()
-    
+
     // localStorage değişikliklerini dinle
     const handleStorageChange = (e) => {
       if (e.key === 'admin_session' || e.key === 'admin_session_timestamp') {
         checkAuth()
       }
     }
-    
+
     window.addEventListener('storage', handleStorageChange)
-    
+
     // Custom event dinle (aynı sayfa içinde localStorage değişiklikleri için)
     const handleCustomStorageChange = () => {
       checkAuth()
     }
-    
+
     window.addEventListener('adminSessionChange', handleCustomStorageChange)
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('adminSessionChange', handleCustomStorageChange)
@@ -198,7 +198,7 @@ function Navbar() {
   const sendSMS = async (phoneNumber) => {
     try {
       const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
-      
+
       // Gerçek SMS gönderme - Backend API'sine istek gönder
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const response = await fetch(`${API_URL}/api/send-sms`, {
@@ -256,7 +256,7 @@ function Navbar() {
       setTwoFactorEnabled(true)
       setTwoFactorSuccess('SMS 2FA başarıyla etkinleştirildi!')
       setShowTwoFactorSetup(false)
-      
+
       // LocalStorage'a kaydet
       localStorage.setItem('admin_2fa_enabled', 'true')
       localStorage.setItem('admin_2fa_method', 'sms')
@@ -273,7 +273,7 @@ function Navbar() {
     setSmsSent(false)
     setSmsError('')
     setTwoFactorSuccess('SMS 2FA devre dışı bırakıldı')
-    
+
     // LocalStorage'dan kaldır
     localStorage.removeItem('admin_2fa_enabled')
     localStorage.removeItem('admin_2fa_method')
@@ -339,10 +339,10 @@ function Navbar() {
 
     // Yeni şifreyi localStorage'a kaydet
     localStorage.setItem('admin_password', newPassword)
-    
+
     // Başarılı şifre değişikliği
     setPasswordSuccess('Şifre başarıyla değiştirildi!')
-    
+
     // Form'u temizle
     setTimeout(() => {
       setCurrentPassword('')
@@ -467,7 +467,7 @@ function Navbar() {
 
   const openPackageModal = (packageType = null) => {
     console.log('🚀 openPackageModal çağrıldı:', packageType)
-    
+
     if (packageType) {
       // Mevcut paket verilerini yükle
       const packageInfo = getPackageData(packageType)
@@ -603,7 +603,7 @@ function Navbar() {
   if (location.pathname === '/admin') {
     // Admin giriş sayfası için basit navbar
     // State'i kullan (event ile güncellenir)
-    
+
     if (!isAuthenticated) {
       return (
         <header className="admin-login-navbar">
@@ -621,7 +621,7 @@ function Navbar() {
         </header>
       )
     }
-    
+
     // Admin paneli için tam navbar
     return (
       <header className="admin-navbar">
@@ -632,22 +632,22 @@ function Navbar() {
           </div>
 
           <div className="admin-navbar__actions">
-            <button 
-              onClick={openSettingsModal} 
+            <button
+              onClick={openSettingsModal}
               className="admin-navbar__settings-btn"
               title="Admin Ayarları"
             >
               ⚙️
             </button>
-            <button 
-              onClick={toggleDarkMode} 
+            <button
+              onClick={toggleDarkMode}
               className="admin-navbar__theme-btn"
               title={isDarkMode ? 'Açık Tema' : 'Karanlık Tema'}
             >
               {isDarkMode ? '☀️' : '🌙'}
             </button>
-            <button 
-              onClick={handleLogout} 
+            <button
+              onClick={handleLogout}
               className="admin-navbar__logout-btn"
             >
               Çıkış Yap
@@ -663,26 +663,26 @@ function Navbar() {
                 <h3>⚙️ Admin Ayarları</h3>
                 <button className="admin-settings-modal__close" onClick={closeSettingsModal}>
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               </div>
               <div className="admin-settings-modal__body">
                 <div className="admin-settings-layout">
                   <div className="admin-tabs-sidebar">
-                    <button 
+                    <button
                       className={`admin-tab ${settingsActiveTab === 'password' ? 'active' : ''}`}
                       onClick={() => setSettingsActiveTab('password')}
                     >
                       🔐 Şifre Değiştir
                     </button>
-                    <button 
+                    <button
                       className={`admin-tab ${settingsActiveTab === '2fa' ? 'active' : ''}`}
                       onClick={() => setSettingsActiveTab('2fa')}
                     >
                       🔒 2FA Ayarları
                     </button>
-                    <button 
+                    <button
                       className={`admin-tab ${settingsActiveTab === 'packages' ? 'active' : ''}`}
                       onClick={() => setSettingsActiveTab('packages')}
                     >
@@ -690,149 +690,149 @@ function Navbar() {
                     </button>
                   </div>
                   <div className="admin-tab-content">
-                  {settingsActiveTab === 'password' && (
-                    <div className="tab-panel">
-                      <h4>Şifre Değiştir</h4>
-                      <form onSubmit={handlePasswordChange} className="password-form">
-                        <div className="form-group">
-                          <label>Mevcut Şifre:</label>
-                          <div className="password-input-wrapper">
-                            <input
-                              type={showCurrentPassword ? "text" : "password"}
-                              value={currentPassword}
-                              onChange={(e) => setCurrentPassword(e.target.value)}
-                              className="form-input"
-                              placeholder="Mevcut şifrenizi girin"
-                            />
-                            <button
-                              type="button"
-                              className="password-toggle-btn"
-                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                              title={showCurrentPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                            >
-                              {showCurrentPassword ? "🙈" : "👁️"}
-                            </button>
+                    {settingsActiveTab === 'password' && (
+                      <div className="tab-panel">
+                        <h4>Şifre Değiştir</h4>
+                        <form onSubmit={handlePasswordChange} className="password-form">
+                          <div className="form-group">
+                            <label>Mevcut Şifre:</label>
+                            <div className="password-input-wrapper">
+                              <input
+                                type={showCurrentPassword ? "text" : "password"}
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                className="form-input"
+                                placeholder="Mevcut şifrenizi girin"
+                              />
+                              <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                title={showCurrentPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
+                              >
+                                {showCurrentPassword ? "🙈" : "👁️"}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="form-group">
-                          <label>Yeni Şifre:</label>
-                          <div className="password-input-wrapper">
-                            <input
-                              type={showNewPassword ? "text" : "password"}
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              className="form-input"
-                              placeholder="Yeni şifrenizi girin (min 6 karakter)"
-                            />
-                            <button
-                              type="button"
-                              className="password-toggle-btn"
-                              onClick={() => setShowNewPassword(!showNewPassword)}
-                              title={showNewPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                            >
-                              {showNewPassword ? "🙈" : "👁️"}
-                            </button>
+                          <div className="form-group">
+                            <label>Yeni Şifre:</label>
+                            <div className="password-input-wrapper">
+                              <input
+                                type={showNewPassword ? "text" : "password"}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="form-input"
+                                placeholder="Yeni şifrenizi girin (min 6 karakter)"
+                              />
+                              <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                title={showNewPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
+                              >
+                                {showNewPassword ? "🙈" : "👁️"}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="form-group">
-                          <label>Yeni Şifre Tekrar:</label>
-                          <div className="password-input-wrapper">
-                            <input
-                              type={showConfirmPassword ? "text" : "password"}
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              className="form-input"
-                              placeholder="Yeni şifrenizi tekrar girin"
-                            />
-                            <button
-                              type="button"
-                              className="password-toggle-btn"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              title={showConfirmPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                            >
-                              {showConfirmPassword ? "🙈" : "👁️"}
-                            </button>
+                          <div className="form-group">
+                            <label>Yeni Şifre Tekrar:</label>
+                            <div className="password-input-wrapper">
+                              <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="form-input"
+                                placeholder="Yeni şifrenizi tekrar girin"
+                              />
+                              <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                title={showConfirmPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
+                              >
+                                {showConfirmPassword ? "🙈" : "👁️"}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        {passwordError && <div className="error-message">{passwordError}</div>}
-                        {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
-                        <button type="submit" className="change-password-btn">
-                          Şifre Değiştir
-                        </button>
-                      </form>
-                    </div>
-                  )}
-
-                  {settingsActiveTab === '2fa' && (
-                    <div className="tab-panel">
-                      <h4>İki Faktörlü Kimlik Doğrulama (2FA)</h4>
-                      <div className="twofa-status">
-                        <div className="status-indicator">
-                          <span className={`status-dot ${twoFactorEnabled ? 'active' : ''}`}></span>
-                          <span>2FA {twoFactorEnabled ? 'Aktif' : 'Pasif'}</span>
-                        </div>
-                        <p className="twofa-description">
-                          Hesabınızı daha güvenli hale getirmek için 2FA'yı etkinleştirin.
-                        </p>
+                          {passwordError && <div className="error-message">{passwordError}</div>}
+                          {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+                          <button type="submit" className="change-password-btn">
+                            Şifre Değiştir
+                          </button>
+                        </form>
                       </div>
-                      <div className="twofa-actions">
-                        {!twoFactorEnabled ? (
-                          <button className="twofa-btn enable-btn" onClick={enableTwoFactor}>
-                            📱 2FA'yı Etkinleştir
-                          </button>
-                        ) : (
-                          <button className="twofa-btn disable-btn" onClick={disableTwoFactor}>
-                            ❌ 2FA'yı Devre Dışı Bırak
-                          </button>
+                    )}
+
+                    {settingsActiveTab === '2fa' && (
+                      <div className="tab-panel">
+                        <h4>İki Faktörlü Kimlik Doğrulama (2FA)</h4>
+                        <div className="twofa-status">
+                          <div className="status-indicator">
+                            <span className={`status-dot ${twoFactorEnabled ? 'active' : ''}`}></span>
+                            <span>2FA {twoFactorEnabled ? 'Aktif' : 'Pasif'}</span>
+                          </div>
+                          <p className="twofa-description">
+                            Hesabınızı daha güvenli hale getirmek için 2FA'yı etkinleştirin.
+                          </p>
+                        </div>
+                        <div className="twofa-actions">
+                          {!twoFactorEnabled ? (
+                            <button className="twofa-btn enable-btn" onClick={enableTwoFactor}>
+                              📱 2FA'yı Etkinleştir
+                            </button>
+                          ) : (
+                            <button className="twofa-btn disable-btn" onClick={disableTwoFactor}>
+                              ❌ 2FA'yı Devre Dışı Bırak
+                            </button>
+                          )}
+                        </div>
+                        {twoFactorSuccess && (
+                          <div className="success-message">{twoFactorSuccess}</div>
                         )}
                       </div>
-                      {twoFactorSuccess && (
-                        <div className="success-message">{twoFactorSuccess}</div>
-                      )}
-                    </div>
-                  )}
+                    )}
 
-                  {settingsActiveTab === 'packages' && (
-                    <div className="tab-panel">
-                      <h4>Paket Yönetimi</h4>
-                      <div className="package-management">
-                        <div className="package-list">
-                          {['economic', 'comfort', 'luxury'].map((packageType) => {
-                            const packageData = getPackageData(packageType)
-                            const packageNames = {
-                              economic: 'Ekonomik Paket',
-                              comfort: 'Konforlu Paket', 
-                              luxury: 'Lüks Paket'
-                            }
-                            
-                            return (
-                              <div key={packageType} className="package-item">
-                                <div className="package-info">
-                                  <h5>{packageData?.title || packageNames[packageType]}</h5>
-                                  <p>Fiyat: {packageData?.price || '₺299'}</p>
+                    {settingsActiveTab === 'packages' && (
+                      <div className="tab-panel">
+                        <h4>Paket Yönetimi</h4>
+                        <div className="package-management">
+                          <div className="package-list">
+                            {['economic', 'comfort', 'luxury'].map((packageType) => {
+                              const packageData = getPackageData(packageType)
+                              const packageNames = {
+                                economic: 'Ekonomik Paket',
+                                comfort: 'Konforlu Paket',
+                                luxury: 'Lüks Paket'
+                              }
+
+                              return (
+                                <div key={packageType} className="package-item">
+                                  <div className="package-info">
+                                    <h5>{packageData?.title || packageNames[packageType]}</h5>
+                                    <p>Fiyat: {packageData?.price || '₺299'}</p>
+                                  </div>
+                                  <button
+                                    className="edit-package-btn"
+                                    onClick={() => {
+                                      console.log(`🔘 ${packageNames[packageType]} butonuna tıklandı`)
+                                      openPackageModal(packageType)
+                                    }}
+                                  >
+                                    ✏️ Düzenle
+                                  </button>
                                 </div>
-                                <button 
-                                  className="edit-package-btn"
-                                  onClick={() => {
-                                    console.log(`🔘 ${packageNames[packageType]} butonuna tıklandı`)
-                                    openPackageModal(packageType)
-                                  }}
-                                >
-                                  ✏️ Düzenle
-                                </button>
-                              </div>
-                            )
-                          })}
+                              )
+                            })}
+                          </div>
+                          <button
+                            className="add-package-btn"
+                            onClick={() => openPackageModal()}
+                          >
+                            ➕ Yeni Paket Ekle
+                          </button>
                         </div>
-                        <button 
-                          className="add-package-btn"
-                          onClick={() => openPackageModal()}
-                        >
-                          ➕ Yeni Paket Ekle
-                        </button>
                       </div>
-                    </div>
-                  )}
+                    )}
                   </div>
                 </div>
               </div>
@@ -859,7 +859,7 @@ function Navbar() {
                       placeholder="+90 5XX XXX XX XX"
                       className="two-factor-input"
                     />
-                    <button 
+                    <button
                       className="send-sms-btn"
                       onClick={enableSMS2FA}
                       disabled={smsSent}
@@ -880,7 +880,7 @@ function Navbar() {
                         maxLength="6"
                         className="two-factor-input"
                       />
-                      <button 
+                      <button
                         className="verify-2fa-btn"
                         onClick={confirmSMS2FA}
                       >
@@ -962,7 +962,7 @@ function Navbar() {
                         health: 'Sağlık Ürünleri',
                         additions: 'Ek Ürünler'
                       }
-                      
+
                       return (
                         <div key={key} className="section-with-items">
                           <h4>{sectionNames[key]}</h4>
@@ -976,7 +976,7 @@ function Navbar() {
                               placeholder={`${key} bölüm başlığı`}
                             />
                           </div>
-                          
+
                           <div className="items-section">
                             <h5>Ürün Listesi:</h5>
                             <div className="items-list">
@@ -1052,9 +1052,9 @@ function Navbar() {
           <NavLink to="/hakkimizda" className="navbar__link" onClick={closeMenu}>{t('nav.about')}</NavLink>
           <NavLink to="/sss" className="navbar__link" onClick={closeMenu}>{t('nav.faq')}</NavLink>
           <NavLink to="/iletisim" className="navbar__cta" role="button" onClick={closeMenu}>{t('nav.contact')}</NavLink>
-          
+
           <div className="navbar__button-group">
-            <button 
+            <button
               className="navbar__dark-mode-toggle"
               onClick={toggleDarkMode}
               aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
@@ -1062,8 +1062,8 @@ function Navbar() {
             >
               {isDarkMode ? '☀️' : '🌙'}
             </button>
-            
-            <button 
+
+            <button
               className="navbar__language-toggle"
               onClick={handleLanguageChange}
               aria-label={`Switch to ${language === 'tr' ? 'English' : 'Türkçe'}`}
@@ -1132,7 +1132,7 @@ function Navbar() {
                       health: 'Sağlık Ürünleri',
                       additions: 'Ek Ürünler'
                     }
-                    
+
                     return (
                       <div key={key} className="section-with-items">
                         <h4>{sectionNames[key]}</h4>
@@ -1146,7 +1146,7 @@ function Navbar() {
                             placeholder={`${key} bölüm başlığı`}
                           />
                         </div>
-                        
+
                         <div className="items-section">
                           <h5>Ürün Listesi:</h5>
                           <div className="items-list">

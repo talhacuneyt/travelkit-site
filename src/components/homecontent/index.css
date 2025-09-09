@@ -633,7 +633,7 @@
   position: relative;
   background: transparent;
   border: none;
-  border-radius: 16px;
+  border-radius: none !important;
   overflow: hidden;
   box-shadow: none;
   opacity: 1;
@@ -671,7 +671,6 @@
   width: 100%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  border-radius: 16px;
   isolation: isolate; /* allow blend modes to work as expected */
 }
 

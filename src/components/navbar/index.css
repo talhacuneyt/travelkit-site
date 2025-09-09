@@ -347,8 +347,9 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: none !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid #111111 !important;
 }
 
 .dark .form-input {
@@ -555,7 +556,7 @@
 .navbar__title { 
   font-weight: 600; 
   font-size: 20px; 
-  color: #1f2937;
+  color: #111111;
   letter-spacing: -0.5px;
 }
 
@@ -581,7 +582,7 @@
 }
 
 .navbar__link {
-  color: #6b7280;
+  color: #111111;
   padding: 10px 0;
   text-decoration: none;
   font-weight: 500;
@@ -610,7 +611,7 @@
 }
 
 .navbar__cta {
-  color: #6b7280;
+  color: #111;
   padding: 10px 0;
   text-decoration: none;
   font-weight: 500;
@@ -895,13 +896,13 @@
 
 /* Language Toggle */
 .navbar__language-toggle {
-  color: #6b7280;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #ffffff;
+  background: #111111;
   padding: 8px 16px;
-  border-radius: 12px;
+  border-radius: 0 !important;
   font-weight: 600;
   font-size: 12px;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #111111;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   min-width: 50px;
@@ -917,22 +918,20 @@
 }
 
 .navbar__language-toggle:hover {
-  color: #f97316;
-  border-color: #f97316;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
-  background: linear-gradient(135deg, #fef7f0 0%, #fed7aa 100%);
+  transform: none !important;
+  background: #ffffff;
+  color: #111111;
 }
 
 /* Dark Mode Toggle */
 .navbar__dark-mode-toggle {
-  color: #6b7280;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #ffffff;
+  background: #111111;
   padding: 8px 12px;
-  border-radius: 12px;
+  border-radius: 0 !important;
   font-weight: 600;
   font-size: 16px;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #111111;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   min-width: 44px;
@@ -947,11 +946,9 @@
 }
 
 .navbar__dark-mode-toggle:hover {
-  color: #f97316;
-  border-color: #f97316;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
-  background: linear-gradient(135deg, #fef7f0 0%, #fed7aa 100%);
+  transform: none !important;
+  background: #ffffff;
+  color: #111111;
 }
 
 .dark .navbar__dark-mode-toggle {
