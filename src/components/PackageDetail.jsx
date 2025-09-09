@@ -255,7 +255,6 @@ const PackageDetail = ({ packageType }) => {
         <div className="paket-hero__inner">
           <h1 className="paket__title">{packageData.title}</h1>
           <p className="paket__description">{packageData.description}</p>
-          <div className="paket__price">{packageData.price}</div>
         </div>
       </section>
 
