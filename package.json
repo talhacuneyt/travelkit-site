@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "backend": "cd backend && npm start",
     "backend:dev": "cd backend && npm run dev",
-    "dev:full": "concurrently \"npm run dev\" \"npm run backend:dev\""
+    "dev:full": "concurrently \"npm run dev\" \"npm run backend:dev\"",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

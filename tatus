@@ -1,0 +1,20 @@
+[33mcaef185[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m asd
+[33ma9a0e36[m yeni
+[33m6f77ede[m asd
+[33md98b068[m Backend URL'lerini environment variable ile değiştir ve Vercel config ekle
+[33m5213343[m fix sms
+[33m18953f1[m Backend yeniden yazıldı ve payment sistemi düzeltildi
+[33mdc0fa0e[m Fix CORS settings for Vercel deployment - Add Vercel subdomain patterns - Support all Vercel deployment URLs
+[33m81ba7f5[m Merge remote changes and resolve conflicts - Keep local fixes for payment system and CORS
+[33m9298bf1[m Fix payment system and CORS issues - Add concurrently package - Update backend CORS settings - Fix dev:full command
+[33maebc71c[m Console hatalarını düzelt ve backend bağlantısını test et
+[33mcaef185[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m asd
+[33ma9a0e36[m yeni
+[33m6f77ede[m asd
+[33md98b068[m Backend URL'lerini environment variable ile değiştir ve Vercel config ekle
+[33m5213343[m fix sms
+[33m18953f1[m Backend yeniden yazıldı ve payment sistemi düzeltildi
+[33mdc0fa0e[m Fix CORS settings for Vercel deployment - Add Vercel subdomain patterns - Support all Vercel deployment URLs
+[33m81ba7f5[m Merge remote changes and resolve conflicts - Keep local fixes for payment system and CORS
+[33m9298bf1[m Fix payment system and CORS issues - Add concurrently package - Update backend CORS settings - Fix dev:full command
+[33maebc71c[m Console hatalarını düzelt ve backend bağlantısını test et

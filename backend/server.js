@@ -1,13 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://travelkit-site.vercel.app'],
+  origin: [
+    'http://localhost:5173', 
+    'http://localhost:3000', 
+    'https://travelkit-site.vercel.app',
+    'https://travelkit-site-git-main.vercel.app',
+    'https://travelkit-site.vercel.app'
+  ],
   credentials: true
 }));
 app.use(express.json());
@@ -178,7 +186,7 @@ app.post('/api/send-sms', async (req, res) => {
 
     // Twilio SMS gönderme (gerçek implementasyon)
     if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-      const twilio = require('twilio');
+      const twilio = (await import('twilio')).default;
       const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
       
       const result = await client.messages.create({

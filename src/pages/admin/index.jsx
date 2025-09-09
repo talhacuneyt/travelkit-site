@@ -18,6 +18,9 @@ function Admin() {
   const [resetEmail, setResetEmail] = useState('')
   const [showResetForm, setShowResetForm] = useState(false)
   const [resetMessage, setResetMessage] = useState('')
+  const [resetNewPassword, setResetNewPassword] = useState('')
+  const [confirmResetPassword, setConfirmResetPassword] = useState('')
+  const [showNewPasswordForm, setShowNewPasswordForm] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [activeTab, setActiveTab] = useState('unread')
   const [selectedMessage, setSelectedMessage] = useState(null)
@@ -46,6 +49,7 @@ function Admin() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [settingsActiveTab, setSettingsActiveTab] = useState('password')
+  
 
 
   // SMS 2FA States
@@ -205,11 +209,8 @@ function Admin() {
     // URL parametrelerini kontrol et
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('reset') === 'true') {
-      // Şifre sıfırlama sayfasına yönlendir
-      setShowResetForm(true)
-      setIsLocked(true)
-      setLoginAttempts(3)
-      setResetMessage('✅ Şifre sıfırlama linkine tıkladınız. Yeni şifre: travelkit2024')
+      // Yeni şifre belirleme formunu göster
+      setShowNewPasswordForm(true)
       setLoading(false)
       return
     }
@@ -503,12 +504,10 @@ function Admin() {
           
           Admin hesabınız için şifre sıfırlama talebinde bulundunuz.
           
-          Yeni şifre: ${localStorage.getItem('admin_password') || 'travelkit2024'}
-          
-          Aşağıdaki linke tıklayarak şifre sıfırlama sayfasına gidebilirsiniz:
+          Aşağıdaki linke tıklayarak yeni şifrenizi belirleyebilirsiniz:
           {{reset_link}}
           
-          Güvenliğiniz için lütfen bu şifreyi ilk girişinizde değiştirin.
+          Bu link 24 saat geçerlidir ve sadece bir kez kullanılabilir.
           
           Bu email otomatik olarak gönderilmiştir.
           
@@ -580,6 +579,52 @@ function Admin() {
     } catch (error) {
       console.error('Email gönderme hatası:', error)
       setResetMessage('❌ Email gönderilemedi. Lütfen tekrar deneyin.')
+    }
+  }
+
+  // Yeni şifre belirleme fonksiyonu
+  async function handleNewPassword(e) {
+    e.preventDefault()
+
+    // Validation
+    if (!resetNewPassword || !confirmResetPassword) {
+      setResetMessage('Tüm alanları doldurun!')
+      return
+    }
+
+    if (resetNewPassword.length < 6) {
+      setResetMessage('Yeni şifre en az 6 karakter olmalıdır!')
+      return
+    }
+
+    if (resetNewPassword !== confirmResetPassword) {
+      setResetMessage('Şifreler eşleşmiyor!')
+      return
+    }
+
+    try {
+      // Yeni şifreyi localStorage'a kaydet
+      localStorage.setItem('admin_password', resetNewPassword)
+      
+      // Otomatik login yap
+      setIsAuthenticated(true)
+      localStorage.setItem('admin_session', 'authenticated')
+      localStorage.setItem('admin_session_timestamp', Date.now().toString())
+      
+      setResetMessage('✅ Şifre başarıyla değiştirildi! Otomatik giriş yapılıyor...')
+      
+      // URL'den reset parametresini kaldır
+      window.history.replaceState({}, document.title, '/admin')
+      
+      // 2 saniye sonra mesajı temizle
+      setTimeout(() => {
+        setResetMessage('')
+        setShowNewPasswordForm(false)
+      }, 2000)
+      
+    } catch (error) {
+      console.error('Şifre değiştirme hatası:', error)
+      setResetMessage('❌ Şifre değiştirilemedi. Lütfen tekrar deneyin.')
     }
   }
 
@@ -1040,6 +1085,7 @@ function Admin() {
     }, 3000)
   }
 
+
   function handleSessionDurationChange(duration) {
     setSessionDuration(duration)
     localStorage.setItem('admin_session_duration', duration.toString())
@@ -1135,19 +1181,60 @@ function Admin() {
     return (
       <div className="admin-container">
         <div className="loading">Yükleniyor...</div>
+        <div style={{color: 'red', marginTop: '20px'}}>
+          Debug: loading={loading.toString()}, isAuthenticated={isAuthenticated.toString()}
+        </div>
       </div>
     )
   }
 
 
   // Login formu
+
   if (!isAuthenticated) {
     return (
       <div className="admin-container">
         <div className="login-form">
           <h1>Admin Girişi</h1>
 
-          {!showResetForm ? (
+          {showNewPasswordForm ? (
+            <form onSubmit={handleNewPassword}>
+              <div className="reset-form">
+                <h3>🔐 Yeni Şifre Belirle</h3>
+                <p>Şifre sıfırlama linkine tıkladınız. Yeni şifrenizi belirleyin.</p>
+                <div className="form-group">
+                  <input
+                    type="password"
+                    placeholder="Yeni Şifre (min 6 karakter)"
+                    value={resetNewPassword}
+                    onChange={(e) => setResetNewPassword(e.target.value)}
+                    required
+                    className="email-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <input
+                    type="password"
+                    placeholder="Yeni Şifre Tekrar"
+                    value={confirmResetPassword}
+                    onChange={(e) => setConfirmResetPassword(e.target.value)}
+                    required
+                    className="email-input"
+                  />
+                </div>
+                {resetMessage && (
+                  <div className={`message ${resetMessage.includes('başarıyla') ? 'success-message' : 'error-message'}`}>
+                    {resetMessage}
+                  </div>
+                )}
+                <div className="reset-actions">
+                  <button type="submit" className="reset-btn">
+                    Şifreyi Değiştir ve Giriş Yap
+                  </button>
+                </div>
+              </div>
+            </form>
+          ) : !showResetForm ? (
             <form onSubmit={handleLogin}>
               <div className="form-group">
                 <input

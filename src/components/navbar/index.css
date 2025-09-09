@@ -1,4 +1,7 @@
-:root { --navbar-h: 12vh; }
+:root {
+  --navbar-h: 12vh;
+}
+
 
 /* Admin Login Navbar Styles */
 .admin-login-navbar {
@@ -230,7 +233,7 @@
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   margin: 0 !important;
   position: relative !important;
@@ -239,6 +242,8 @@
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
+  display: flex;
+  flex-direction: column;
 }
 
 .dark .admin-settings-modal {
@@ -279,6 +284,8 @@
 .admin-settings-modal__body {
   color: #6b7280;
   line-height: 1.6;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .dark .admin-settings-modal__body {
@@ -431,43 +438,43 @@
   .admin-login-navbar__inner {
     padding: 0 20px;
   }
-  
+
   .admin-login-navbar__brand {
     gap: 8px;
   }
-  
+
   .admin-login-navbar__title {
     font-size: 16px;
   }
-  
+
   .admin-login-navbar__home-link {
     padding: 6px 12px;
     font-size: 13px;
   }
-  
+
   .admin-navbar__inner {
     padding: 0 20px;
   }
-  
+
   .admin-navbar__brand {
     gap: 8px;
   }
-  
+
   .admin-navbar__title {
     font-size: 16px;
   }
-  
+
   .admin-navbar__actions {
     gap: 12px;
   }
-  
+
   .admin-navbar__settings-btn,
   .admin-navbar__theme-btn {
     min-width: 36px;
     height: 36px;
     font-size: 14px;
   }
-  
+
   .admin-navbar__logout-btn {
     padding: 8px 16px;
     font-size: 13px;
@@ -536,7 +543,7 @@
   color: #f97316;
 }
 
-.navbar__logo { 
+.navbar__logo {
   width: 75px;
   height: 75px;
   object-fit: contain;
@@ -547,37 +554,37 @@
   transform: scale(1.05);
 }
 
-.navbar__brand-text { 
-  display: flex; 
-  flex-direction: column; 
-  line-height: 1.2; 
+.navbar__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
-.navbar__title { 
-  font-weight: 600; 
-  font-size: 20px; 
+.navbar__title {
+  font-weight: 600;
+  font-size: 20px;
   color: #111111;
   letter-spacing: -0.5px;
 }
 
-.navbar__tag { 
-  color: #6b7280; 
-  font-size: 12px; 
+.navbar__tag {
+  color: #6b7280;
+  font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 /* Desktop Navigation */
-.navbar__nav { 
-  display: none; 
-  align-items: center; 
-  gap: 20px; 
+.navbar__nav {
+  display: none;
+  align-items: center;
+  gap: 20px;
 }
 
 @media (min-width: 768px) {
-  .navbar__nav { 
-    display: inline-flex; 
+  .navbar__nav {
+    display: inline-flex;
   }
 }
 
@@ -602,7 +609,7 @@
   transition: width 0.2s ease;
 }
 
-.navbar__link:hover { 
+.navbar__link:hover {
   color: #f97316;
 }
 
@@ -632,7 +639,7 @@
   transition: width 0.2s ease;
 }
 
-.navbar__cta:hover { 
+.navbar__cta:hover {
   color: #f97316;
 }
 
@@ -730,6 +737,7 @@
     opacity: 0;
     transform: scaleY(0);
   }
+
   to {
     opacity: 1;
     transform: scaleY(1);
@@ -741,6 +749,7 @@
     opacity: 1;
     transform: scaleY(1);
   }
+
   to {
     opacity: 0;
     transform: scaleY(0);
@@ -1131,6 +1140,7 @@
   padding: 40px;
   overflow-y: auto;
   background: #ffffff;
+  max-height: 400px;
 }
 
 .dark .admin-tab-content {
@@ -1534,8 +1544,10 @@
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
 }
 
 .dark .two-factor-setup-modal {
@@ -1636,6 +1648,8 @@
 
 .two-factor-setup-modal .modal-content {
   padding: 0 24px 24px 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .two-factor-setup-modal .modal-actions {
@@ -1739,8 +1753,7 @@
   padding: 24px;
   overflow-y: auto;
   flex: 1;
-  max-height: calc(100vh - 200px);
-  height: calc(100vh - 200px);
+  max-height: calc(90vh - 200px);
 }
 
 .package-modal .modal-actions {
@@ -1907,14 +1920,20 @@
 .add-item-btn {
   background: #10b981;
   color: white;
-  border: none;
-  padding: 8px 16px;
+  border: none !important;
+  outline: none !important;
+  padding: 8px 15px;
   border-radius: 0;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
+  font-weight: 600;
   margin-top: 8px;
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  min-width: fit-content;
 }
 
 .add-item-btn:hover {
@@ -1954,20 +1973,20 @@
     width: 98%;
     max-height: 95vh;
   }
-  
+
   .package-modal .modal-header {
     padding: 16px;
   }
-  
+
   .package-modal .modal-content {
     padding: 16px;
   }
-  
+
   .package-modal .modal-actions {
     padding: 16px;
     flex-direction: column;
   }
-  
+
   .package-modal .save-btn {
     width: 100%;
     justify-content: center;

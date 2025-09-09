@@ -44,7 +44,6 @@
   border: 1px solid #e5e7eb;
   border-radius: 0;
   padding: 0;
-  margin: 20px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -3818,14 +3817,19 @@ padding-right: 24px;
 .add-item-btn {
   background: #10b981;
   color: white;
-  border: none;
-  padding: 10px 16px;
+  border: none !important;
+  outline: none !important;
+  padding: 10px 15px;
   border-radius: 0;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  min-width: fit-content;
 }
 
 .add-item-btn:hover {
