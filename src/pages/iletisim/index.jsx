@@ -3,7 +3,7 @@ import emailjs from '@emailjs/browser'
 import './index.css'
 import { useTranslation } from '../../hooks/useTranslation'
 import { supabase } from '../../lib/supabase'
-import Toast from '../../components/Toast'
+import Toast from '../../components/toast'
 
 function Iletisim() {
   const { t } = useTranslation()

@@ -1,6 +1,6 @@
-import { useTranslation } from '../hooks/useTranslation'
+import { useTranslation } from '../../hooks/useTranslation'
 import { Link } from 'react-router-dom'
-import './NotFound.css'
+import './index.css'
 
 const NotFound = () => {
   const { t } = useTranslation()

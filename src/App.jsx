@@ -17,7 +17,7 @@ import KonforluDetay from './pages/konforlu'
 import LuxDetay from './pages/lux'
 import SatinAl from './pages/satin-al'
 import Admin from './pages/admin'
-import NotFound from './pages/NotFound'
+import NotFound from './pages/notfound'
 
 function App() {
   const location = useLocation()
