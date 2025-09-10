@@ -95,33 +95,53 @@ function Navbar() {
     setIsOpen(false)
   }, [location.pathname])
 
-  // Admin login event'ini dinle
+  // Admin login/logout event'lerini dinle
   useEffect(() => {
     const handleAdminLogin = (event) => {
       setIsAuthenticated(event.detail.isAuthenticated)
     }
 
+    const handleAdminLogout = (event) => {
+      setIsAuthenticated(event.detail.isAuthenticated)
+    }
+
     window.addEventListener('adminLogin', handleAdminLogin)
-    return () => window.removeEventListener('adminLogin', handleAdminLogin)
+    window.addEventListener('adminLogout', handleAdminLogout)
+
+    return () => {
+      window.removeEventListener('adminLogin', handleAdminLogin)
+      window.removeEventListener('adminLogout', handleAdminLogout)
+    }
   }, [])
 
-  // Session kontrolü - localStorage değişikliklerini dinle
+  // JWT Token kontrolü - localStorage değişikliklerini dinle
   useEffect(() => {
     const checkAuth = () => {
-      const session = localStorage.getItem('admin_session')
-      const sessionTimestamp = localStorage.getItem('admin_session_timestamp')
+      const token = localStorage.getItem('admin_token')
 
-      // Session süresi kontrolü (24 saat)
-      const now = Date.now()
-      const sessionAge = sessionTimestamp ? now - parseInt(sessionTimestamp) : Infinity
-      const maxSessionAge = 24 * 60 * 60 * 1000 // 24 saat
+      if (token) {
+        // JWT token'ı decode et ve kontrol et
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          const now = Math.floor(Date.now() / 1000)
 
-      if (session === 'authenticated' && sessionAge < maxSessionAge) {
-        setIsAuthenticated(true)
+          if (payload.exp && payload.exp > now) {
+            setIsAuthenticated(true)
+          } else {
+            // Token süresi dolmuş
+            localStorage.removeItem('admin_token')
+            localStorage.removeItem('admin_session')
+            localStorage.removeItem('admin_session_timestamp')
+            setIsAuthenticated(false)
+          }
+        } catch (error) {
+          // Geçersiz token
+          localStorage.removeItem('admin_token')
+          localStorage.removeItem('admin_session')
+          localStorage.removeItem('admin_session_timestamp')
+          setIsAuthenticated(false)
+        }
       } else {
-        // Geçersiz veya süresi dolmuş session
-        localStorage.removeItem('admin_session')
-        localStorage.removeItem('admin_session_timestamp')
         setIsAuthenticated(false)
       }
     }
@@ -131,7 +151,7 @@ function Navbar() {
 
     // localStorage değişikliklerini dinle
     const handleStorageChange = (e) => {
-      if (e.key === 'admin_session' || e.key === 'admin_session_timestamp') {
+      if (e.key === 'admin_token' || e.key === 'admin_session' || e.key === 'admin_session_timestamp') {
         checkAuth()
       }
     }
@@ -200,7 +220,7 @@ function Navbar() {
       const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
 
       // Gerçek SMS gönderme - Backend API'sine istek gönder
-      const API_URL = import.meta.env.VITE_API_URL || 
+      const API_URL = import.meta.env.VITE_API_URL ||
         (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
       const response = await fetch(`${API_URL}/api/send-sms`, {
         method: 'POST',
@@ -282,8 +302,24 @@ function Navbar() {
   }
 
   const handleLogout = () => {
+    // Tüm admin verilerini temizle
+    localStorage.removeItem('admin_token')
     localStorage.removeItem('admin_session')
+    localStorage.removeItem('admin_session_timestamp')
     localStorage.removeItem('admin_remember_me')
+    localStorage.removeItem('admin_login_attempts')
+    localStorage.removeItem('admin_2fa_enabled')
+    localStorage.removeItem('admin_2fa_method')
+    localStorage.removeItem('admin_2fa_phone')
+    
+    // State'i güncelle
+    setIsAuthenticated(false)
+    
+    // Custom event gönder (admin sayfası için)
+    window.dispatchEvent(new CustomEvent('adminLogout', {
+      detail: { isAuthenticated: false }
+    }))
+    
     // Sayfayı yenile ve login sayfasına yönlendir
     window.location.href = '/admin'
   }

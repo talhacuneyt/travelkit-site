@@ -16,6 +16,9 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.57.2",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.1.0",
+    "nodemailer": "^7.0.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^6.27.0"

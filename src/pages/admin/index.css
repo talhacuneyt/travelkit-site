@@ -47,6 +47,58 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Unlock Section Styles */
+.unlock-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.dark .unlock-section {
+  background: #451a03;
+  border-color: #f59e0b;
+}
+
+.unlock-info p {
+  margin: 0 0 15px 0;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.dark .unlock-info p {
+  color: #fbbf24;
+}
+
+.unlock-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.reset-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.reset-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.reset-btn:active {
+  transform: translateY(0);
+}
+
 .dark .admin-main-content {
   background: #1e293b;
   border-color: #334155;

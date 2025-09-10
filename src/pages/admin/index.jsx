@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase, EMAILJS_CONFIG } from '../../lib/supabase'
 import emailjs from '@emailjs/browser'
+import bcrypt from 'bcryptjs'
+import { SignJWT, jwtVerify } from 'jose'
 import './index.css'
 
 function Admin() {
@@ -49,7 +51,7 @@ function Admin() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [settingsActiveTab, setSettingsActiveTab] = useState('password')
-  
+
 
 
   // SMS 2FA States
@@ -63,6 +65,54 @@ function Admin() {
   const [loginTwoFactorCode, setLoginTwoFactorCode] = useState('')
   const [showTwoFactorLogin, setShowTwoFactorLogin] = useState(false)
 
+  // JWT Secret (production'da environment variable kullanılmalı)
+  const JWT_SECRET = new TextEncoder().encode(import.meta.env.VITE_JWT_SECRET || 'fallback-secret-key')
+
+  // Şifre hash'leme fonksiyonları
+  const hashPassword = async (password) => {
+    const saltRounds = 12
+    return await bcrypt.hash(password, saltRounds)
+  }
+
+  const verifyPassword = async (password, hashedPassword) => {
+    return await bcrypt.compare(password, hashedPassword)
+  }
+
+  // JWT Token fonksiyonları (browser uyumlu)
+  const generateToken = async (payload) => {
+    const token = await new SignJWT(payload)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('24h')
+      .sign(JWT_SECRET)
+    return token
+  }
+
+  const verifyToken = async (token) => {
+    try {
+      // Basit JWT token doğrulama (sadece varlık kontrolü)
+      if (!token) return null
+      
+      // Token'ı decode et (basit kontrol)
+      const parts = token.split('.')
+      if (parts.length !== 3) return null
+      
+      // Payload'ı decode et
+      const payload = JSON.parse(atob(parts[1]))
+      
+      // Süre kontrolü
+      const now = Math.floor(Date.now() / 1000)
+      if (payload.exp && payload.exp < now) {
+        return null
+      }
+      
+      return payload
+    } catch (error) {
+      console.error('Token verification error:', error)
+      return null
+    }
+  }
+
   // SMS 2FA Functions
   const enableTwoFactor = () => {
     setShowTwoFactorSetup(true)
@@ -75,7 +125,7 @@ function Admin() {
       const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
 
       // Gerçek SMS gönderme - Backend API'sine istek gönder
-      const API_URL = import.meta.env.VITE_API_URL || 
+      const API_URL = import.meta.env.VITE_API_URL ||
         (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
       const response = await fetch(`${API_URL}/api/send-sms`, {
         method: 'POST',
@@ -172,24 +222,27 @@ function Admin() {
     }
   }
 
-  const completeLogin = () => {
+  const completeLogin = async () => {
+    // JWT token oluştur
+    const tokenPayload = {
+      username: 'admin',
+      role: 'admin',
+      loginTime: Date.now(),
+      sessionId: Math.random().toString(36).substring(2, 15)
+    }
+
+    const token = await generateToken(tokenPayload)
+
     // Başarılı giriş
     setIsAuthenticated(true)
-    localStorage.setItem('admin_session', 'authenticated')
-    localStorage.setItem('admin_session_timestamp', Date.now().toString())
+    localStorage.setItem('admin_token', token)
     localStorage.removeItem('admin_login_attempts')
     setLoginError('')
     setLoginAttempts(0)
 
-    // Beni hatırla özelliği
-    if (rememberMe) {
-      localStorage.setItem('admin_remember_me', JSON.stringify({
-        username: username,
-        password: password
-      }))
-    } else {
-      localStorage.removeItem('admin_remember_me')
-    }
+    // Eski session sistemini temizle
+    localStorage.removeItem('admin_session')
+    localStorage.removeItem('admin_session_timestamp')
 
     // Navbar'ı güncellemek için custom event gönder
     window.dispatchEvent(new CustomEvent('adminLogin', {
@@ -201,40 +254,109 @@ function Admin() {
     }
   }
 
+  // Admin login/logout event'lerini dinle
   useEffect(() => {
-    // EmailJS'i başlat (sadece public key varsa)
-    if (EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY_HERE') {
-      emailjs.init(EMAILJS_CONFIG.publicKey)
+    const handleAdminLogin = (event) => {
+      setIsAuthenticated(event.detail.isAuthenticated)
     }
 
-    // URL parametrelerini kontrol et
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('reset') === 'true') {
-      // Yeni şifre belirleme formunu göster
-      setShowNewPasswordForm(true)
+    const handleAdminLogout = (event) => {
+      setIsAuthenticated(event.detail.isAuthenticated)
+      // Çıkış yapıldığında tüm state'leri temizle
+      setMessages([])
+      setPassword('')
+      setUsername('')
+      setRememberMe(false)
+      setLoginError('')
+      setLoginAttempts(0)
+    }
+
+    window.addEventListener('adminLogin', handleAdminLogin)
+    window.addEventListener('adminLogout', handleAdminLogout)
+
+    return () => {
+      window.removeEventListener('adminLogin', handleAdminLogin)
+      window.removeEventListener('adminLogout', handleAdminLogout)
+    }
+  }, [])
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      // EmailJS'i başlat (sadece public key varsa)
+      if (EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY_HERE') {
+        emailjs.init(EMAILJS_CONFIG.publicKey)
+      }
+
+      // URL parametrelerini kontrol et
+      const urlParams = new URLSearchParams(window.location.search)
+      const resetToken = urlParams.get('reset')
+
+      if (resetToken) {
+        // Reset token'ı kontrol et
+        const storedResetToken = localStorage.getItem('admin_reset_token')
+        const tokenExpiry = localStorage.getItem('admin_reset_token_expiry')
+
+        if (storedResetToken === resetToken && tokenExpiry && Date.now() < parseInt(tokenExpiry)) {
+          // Geçerli reset token - yeni şifre formunu göster
+          setShowNewPasswordForm(true)
+          setLoading(false)
+          return
+        } else {
+          // Geçersiz veya süresi dolmuş token
+          setResetMessage('❌ Geçersiz veya süresi dolmuş şifre sıfırlama linki!')
+          localStorage.removeItem('admin_reset_token')
+          localStorage.removeItem('admin_reset_token_expiry')
+        }
+      }
+
+      // JWT Token kontrolü
+      const token = localStorage.getItem('admin_token')
+
+      if (token) {
+        try {
+          const decodedToken = await verifyToken(token)
+
+          if (decodedToken) {
+            // Geçerli token - giriş yap
+            setIsAuthenticated(true)
+            console.log('✅ Geçerli JWT token bulundu, admin paneline yönlendiriliyor')
+          } else {
+            // Geçersiz token - tüm verileri temizle
+            console.log('❌ Geçersiz JWT token, login sayfasına yönlendiriliyor')
+            localStorage.removeItem('admin_token')
+            localStorage.removeItem('admin_session')
+            localStorage.removeItem('admin_session_timestamp')
+            localStorage.removeItem('admin_login_attempts')
+            localStorage.removeItem('admin_2fa_enabled')
+            localStorage.removeItem('admin_2fa_method')
+            localStorage.removeItem('admin_2fa_phone')
+            localStorage.removeItem('admin_remember_me')
+            setIsAuthenticated(false)
+          }
+        } catch (error) {
+          // Token doğrulama hatası - tüm verileri temizle
+          console.log('❌ JWT token doğrulama hatası, login sayfasına yönlendiriliyor:', error)
+          localStorage.removeItem('admin_token')
+          localStorage.removeItem('admin_session')
+          localStorage.removeItem('admin_session_timestamp')
+          localStorage.removeItem('admin_login_attempts')
+          localStorage.removeItem('admin_2fa_enabled')
+          localStorage.removeItem('admin_2fa_method')
+          localStorage.removeItem('admin_2fa_phone')
+          localStorage.removeItem('admin_remember_me')
+          setIsAuthenticated(false)
+        }
+      } else {
+        // Token yok - login sayfası göster
+        setIsAuthenticated(false)
+        console.log('❌ JWT token bulunamadı, login sayfası gösteriliyor')
+      }
+
+      // Loading'i son olarak false yap
       setLoading(false)
-      return
     }
 
-    // Session kontrolü
-    const session = localStorage.getItem('admin_session')
-    const sessionTimestamp = localStorage.getItem('admin_session_timestamp')
-
-    // Session süresi kontrolü (24 saat)
-    const now = Date.now()
-    const sessionAge = sessionTimestamp ? now - parseInt(sessionTimestamp) : Infinity
-    const maxSessionAge = 24 * 60 * 60 * 1000 // 24 saat
-
-    if (session === 'authenticated' && sessionAge < maxSessionAge) {
-      setIsAuthenticated(true)
-    } else {
-      // Geçersiz veya süresi dolmuş session
-      localStorage.removeItem('admin_session')
-      localStorage.removeItem('admin_session_timestamp')
-      setIsAuthenticated(false)
-    }
-
-    setLoading(false)
+    initializeAuth()
 
     // Dark mode kontrolü
     const savedTheme = localStorage.getItem('admin_theme')
@@ -249,24 +371,30 @@ function Admin() {
       setSessionDuration(parseInt(savedSessionDuration))
     }
 
-    // Login attempts kontrolü
-    const attempts = localStorage.getItem('admin_login_attempts')
-    if (attempts) {
-      const parsedAttempts = parseInt(attempts)
-      setLoginAttempts(parsedAttempts)
-      if (parsedAttempts >= 3) {
-        setIsLocked(true)
-      }
+    // Login attempts kontrolü - Hesap kilidini sıfırla
+    localStorage.removeItem('admin_login_attempts')
+    setLoginAttempts(0)
+    setIsLocked(false)
+    
+    // Backend'deki failed attempts'ı da sıfırla
+    try {
+      const API_URL = import.meta.env.VITE_API_URL ||
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
+      
+      await fetch(`${API_URL}/api/auth/reset-attempts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: 'admin' })
+      })
+    } catch (error) {
+      console.log('Failed to reset backend attempts:', error)
     }
 
-    // Beni hatırla kontrolü
-    const savedCredentials = localStorage.getItem('admin_remember_me')
-    if (savedCredentials) {
-      const credentials = JSON.parse(savedCredentials)
-      setUsername(credentials.username)
-      setPassword(credentials.password)
-      setRememberMe(true)
-    }
+    // Beni hatırla özelliği güvenlik nedeniyle kaldırıldı
+    // Eski kayıtlı bilgileri temizle
+    localStorage.removeItem('admin_remember_me')
 
     // 2FA durumu kontrolü
     const twoFactorEnabled = localStorage.getItem('admin_2fa_enabled') === 'true'
@@ -327,6 +455,7 @@ function Admin() {
 
       // Set new timeout
       const timeout = setTimeout(() => {
+        // console.log('⏰ Session timeout - otomatik çıkış yapılıyor')
         handleLogout()
         alert('Oturum süresi doldu. Lütfen tekrar giriş yapın.')
       }, sessionDuration * 60 * 1000) // Convert minutes to milliseconds
@@ -341,6 +470,46 @@ function Admin() {
       }
     }
   }, [isAuthenticated, sessionDuration])
+
+  // Token validation on page focus/visibility change
+  useEffect(() => {
+    const validateTokenOnFocus = async () => {
+      if (isAuthenticated) {
+        const token = localStorage.getItem('admin_token')
+        if (token) {
+          try {
+            const decodedToken = await verifyToken(token)
+            if (!decodedToken) {
+              console.log('🔒 Token geçersiz hale geldi, çıkış yapılıyor')
+              handleLogout()
+            }
+          } catch (error) {
+            console.log('🔒 Token doğrulama hatası, çıkış yapılıyor:', error)
+            handleLogout()
+          }
+        } else {
+          console.log('🔒 Token bulunamadı, çıkış yapılıyor')
+          handleLogout()
+        }
+      }
+    }
+
+    // Sayfa odaklandığında token'ı kontrol et
+    window.addEventListener('focus', validateTokenOnFocus)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        validateTokenOnFocus()
+      }
+    })
+
+    // Sayfa yüklendiğinde de kontrol et
+    validateTokenOnFocus()
+
+    return () => {
+      window.removeEventListener('focus', validateTokenOnFocus)
+      document.removeEventListener('visibilitychange', validateTokenOnFocus)
+    }
+  }, [isAuthenticated])
 
   // URL'ye göre paket modal'ını aç - Artık kullanılmıyor, onClick handler'lar kullanılıyor
   // useEffect(() => {
@@ -416,7 +585,7 @@ function Admin() {
     }
   }, [showSettingsModal])
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault()
 
     if (isLocked) {
@@ -424,25 +593,73 @@ function Admin() {
       return
     }
 
-    const adminUsername = 'admin'
-    // Şifreyi localStorage'dan al, yoksa varsayılan şifreyi kullan
-    const adminPassword = localStorage.getItem('admin_password') || 'travelkit2024'
+    try {
+      setLoginError('')
+      
+      // Backend API'sine login isteği gönder
+      const API_URL = import.meta.env.VITE_API_URL ||
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
+      
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      })
 
-    if (username === adminUsername && password === adminPassword) {
-      // 2FA kontrolü
-      const twoFactorEnabled = localStorage.getItem('admin_2fa_enabled') === 'true'
+      const data = await response.json()
 
-      if (twoFactorEnabled) {
-        // 2FA etkinse, 2FA kodunu iste
-        setShowTwoFactorLogin(true)
+      if (data.success) {
+        // Başarılı giriş - backend'den gelen token'ı kullan
+        const token = data.token
+        localStorage.setItem('admin_token', token)
+        
+        // Başarısız giriş sayacını sıfırla
+        localStorage.removeItem('admin_login_attempts')
+        setLoginAttempts(0)
+        setIsLocked(false)
+        
+        // Backend'den gelen token ile doğrudan giriş yap
+        setIsAuthenticated(true)
         setLoginError('')
-        return
+        setUsername('')
+        setPassword('')
+        
+        // Navbar'ı güncellemek için custom event gönder
+        window.dispatchEvent(new CustomEvent('adminLogin', {
+          detail: { isAuthenticated: true }
+        }))
+
+        if (supabase) {
+          fetchMessages()
+        }
+        
+        console.log('✅ Admin girişi başarılı!')
       } else {
-        // 2FA etkin değilse, normal giriş yap
-        completeLogin()
+        // Hatalı giriş
+        handleBackendLoginError(data.message, username)
       }
-    } else {
-      // Hatalı giriş
+    } catch (error) {
+      console.error('Login error:', error)
+      if (error.message.includes('rate limit') || error.message.includes('Çok fazla')) {
+        setLoginError('Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.')
+      } else {
+        setLoginError('Sunucu hatası. Lütfen tekrar deneyin.')
+      }
+    }
+  }
+
+  // Backend'den gelen hata mesajlarını işle
+  function handleBackendLoginError(message, username) {
+    if (message === 'Böyle bir kullanıcı yok') {
+      // Kullanıcı yoksa counter artırma, sadece mesaj göster
+      setLoginError(message)
+    } else if (message === 'Kullanıcı adı veya şifre hatalı') {
+      // Yanlış şifre - counter artır
       const newAttempts = loginAttempts + 1
       setLoginAttempts(newAttempts)
       localStorage.setItem('admin_login_attempts', newAttempts.toString())
@@ -455,28 +672,55 @@ function Admin() {
         const remainingAttempts = 3 - newAttempts
         setLoginError(`Yanlış kullanıcı adı veya şifre! Kalan deneme hakkı: ${remainingAttempts}`)
       }
-
-      setUsername('')
-      setPassword('')
+    } else if (message.includes('Çok fazla giriş denemesi')) {
+      // Rate limit hatası - counter artırma
+      setLoginError(message)
+    } else {
+      // Diğer hatalar
+      setLoginError(message)
     }
+
+    setUsername('')
+    setPassword('')
+  }
+
+  function handleLoginError() {
+    // Eski fonksiyon - artık kullanılmıyor
+    console.warn('handleLoginError is deprecated, use handleBackendLoginError instead')
   }
 
   function handleLogout() {
+    // console.log('🚪 Admin çıkış yapılıyor...')
+
+    // State'leri temizle
     setIsAuthenticated(false)
-    localStorage.removeItem('admin_session')
-    localStorage.removeItem('admin_session_timestamp')
-    localStorage.removeItem('admin_remember_me')
-    localStorage.removeItem('admin_login_attempts')
     setMessages([])
     setPassword('')
     setUsername('')
     setRememberMe(false)
+    setLoginError('')
+    setLoginAttempts(0)
+
+    // Tüm admin verilerini temizle
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_session')
+    localStorage.removeItem('admin_session_timestamp')
+    localStorage.removeItem('admin_login_attempts')
+    localStorage.removeItem('admin_2fa_enabled')
+    localStorage.removeItem('admin_2fa_method')
+    localStorage.removeItem('admin_2fa_phone')
+    localStorage.removeItem('admin_remember_me')
 
     // Clear session timeout
     if (sessionTimeout) {
       clearTimeout(sessionTimeout)
       setSessionTimeout(null)
     }
+
+    // Navbar'ı güncellemek için custom event gönder
+    window.dispatchEvent(new CustomEvent('adminLogout', {
+      detail: { isAuthenticated: false }
+    }))
 
     // Sayfayı yenile ve login sayfasına yönlendir
     window.location.reload()
@@ -495,91 +739,42 @@ function Admin() {
     try {
       setResetMessage('Email gönderiliyor...')
 
-      // EmailJS ile email gönderme
-      const emailData = {
-        to_email: resetEmail,
-        from_name: 'TravelKit Admin',
-        subject: 'Admin Şifre Sıfırlama',
-        message: `
-          Merhaba,
-          
-          Admin hesabınız için şifre sıfırlama talebinde bulundunuz.
-          
-          Aşağıdaki linke tıklayarak yeni şifrenizi belirleyebilirsiniz:
-          {{reset_link}}
-          
-          Bu link 24 saat geçerlidir ve sadece bir kez kullanılabilir.
-          
-          Bu email otomatik olarak gönderilmiştir.
-          
-          İyi günler,
-          TravelKit Ekibi
-        `,
-        reset_link: `${window.location.origin}/admin?reset=true`
-      }
+      // Backend API'sine reset isteği gönder
+      const API_URL = import.meta.env.VITE_API_URL ||
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
+      
+      const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: resetEmail
+        })
+      })
 
-      // EmailJS kullanarak email gönder
-      if (EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY_HERE') {
-        try {
-          await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, emailData, EMAILJS_CONFIG.publicKey)
-          setResetMessage('✅ Şifre sıfırlama linki email adresinize gönderildi!')
-        } catch (emailError) {
-          console.error('EmailJS hatası:', emailError)
+      const data = await response.json()
 
-          // Detailed error analysis
-          const status = emailError?.status || emailError?.response?.status
-          const text = emailError?.text || emailError?.message || ''
-
-          console.log('EmailJS Error Details:', {
-            status,
-            text,
-            config: EMAILJS_CONFIG,
-            error: emailError
-          })
-
-          // Check for specific error types
-          if (status === 400) {
-            if (text.includes('Public Key is invalid') || text.includes('Invalid public key')) {
-              setResetMessage('❌ EmailJS Public Key geçersiz! Lütfen .env dosyasında VITE_EMAILJS_PUBLIC_KEY değerini kontrol edin.')
-            } else if (text.includes('Service not found') || text.includes('Invalid service')) {
-              setResetMessage('❌ EmailJS Service ID geçersiz! Lütfen .env dosyasında VITE_EMAILJS_SERVICE_ID değerini kontrol edin.')
-            } else if (text.includes('Template not found') || text.includes('Invalid template')) {
-              setResetMessage('❌ EmailJS Template ID geçersiz! Lütfen .env dosyasında VITE_EMAILJS_TEMPLATE_ID değerini kontrol edin.')
-            } else {
-              setResetMessage(`❌ EmailJS Hatası (${status}): ${text || 'Bilinmeyen hata'}`)
-            }
-          } else {
-            setResetMessage(`❌ EmailJS Hatası (${status || 'Bilinmeyen'}): ${text || 'Email gönderilemedi'}`)
-          }
-
-          // Fallback: Console'a bilgi yazdır
-          console.log('Email gönderilecek:', emailData)
-        }
+      if (data.success) {
+        setResetMessage(data.message)
+        
+        // Reset form after 10 seconds
+        setTimeout(() => {
+          setResetMessage('')
+          setResetEmail('')
+          setShowResetForm(false)
+          setIsLocked(false)
+          setLoginAttempts(0)
+          localStorage.removeItem('admin_login_attempts')
+          console.log('🔓 Hesap kilidi otomatik olarak kaldırıldı')
+        }, 10000)
       } else {
-        // EmailJS yapılandırılmamış - detaylı bilgi göster
-        console.log('=== EMAIL BİLGİLERİ ===')
-        console.log('Alıcı:', resetEmail)
-        console.log('Konu:', emailData.subject)
-        console.log('Mesaj:', emailData.message)
-        console.log('Sıfırlama Linki:', emailData.reset_link)
-        console.log('========================')
-
-        setResetMessage('✅ EmailJS yapılandırılmamış! Yeni şifre: travelkit2024 (Detaylar konsola yazdırıldı)')
+        setResetMessage(`❌ ${data.message}`)
       }
-
-      // Reset form after 5 seconds
-      setTimeout(() => {
-        setResetMessage('')
-        setResetEmail('')
-        setShowResetForm(false)
-        setIsLocked(false)
-        setLoginAttempts(0)
-        localStorage.removeItem('admin_login_attempts')
-      }, 5000)
 
     } catch (error) {
-      console.error('Email gönderme hatası:', error)
-      setResetMessage('❌ Email gönderilemedi. Lütfen tekrar deneyin.')
+      console.error('Password reset error:', error)
+      setResetMessage('❌ Sunucu hatası. Lütfen tekrar deneyin.')
     }
   }
 
@@ -604,25 +799,40 @@ function Admin() {
     }
 
     try {
-      // Yeni şifreyi localStorage'a kaydet
-      localStorage.setItem('admin_password', resetNewPassword)
-      
-      // Otomatik login yap
+      // Yeni şifreyi hash'le ve localStorage'a kaydet
+      const hashedNewPassword = await hashPassword(resetNewPassword)
+      localStorage.setItem('admin_password_hash', hashedNewPassword)
+
+      // Eski düz metin şifreyi temizle (güvenlik)
+      localStorage.removeItem('admin_password')
+
+      // JWT token oluştur ve otomatik login yap
+      const tokenPayload = {
+        username: 'admin',
+        role: 'admin',
+        loginTime: Date.now(),
+        sessionId: Math.random().toString(36).substring(2, 15)
+      }
+      const token = await generateToken(tokenPayload)
+
       setIsAuthenticated(true)
-      localStorage.setItem('admin_session', 'authenticated')
-      localStorage.setItem('admin_session_timestamp', Date.now().toString())
-      
+      localStorage.setItem('admin_token', token)
+
       setResetMessage('✅ Şifre başarıyla değiştirildi! Otomatik giriş yapılıyor...')
-      
+
+      // Reset token'ı temizle (tek kullanımlık)
+      localStorage.removeItem('admin_reset_token')
+      localStorage.removeItem('admin_reset_token_expiry')
+
       // URL'den reset parametresini kaldır
       window.history.replaceState({}, document.title, '/admin')
-      
+
       // 2 saniye sonra mesajı temizle
       setTimeout(() => {
         setResetMessage('')
         setShowNewPasswordForm(false)
       }, 2000)
-      
+
     } catch (error) {
       console.error('Şifre değiştirme hatası:', error)
       setResetMessage('❌ Şifre değiştirilemedi. Lütfen tekrar deneyin.')
@@ -637,8 +847,8 @@ function Admin() {
     setResetMessage('')
     setRememberMe(false)
     localStorage.removeItem('admin_login_attempts')
-    localStorage.removeItem('admin_remember_me')
   }
+
 
   async function deleteMessage(id) {
     if (!supabase) {
@@ -1042,7 +1252,7 @@ function Admin() {
     setShowConfirmPassword(false)
   }
 
-  function handlePasswordChange(e) {
+  async function handlePasswordChange(e) {
     e.preventDefault()
     setPasswordError('')
     setPasswordSuccess('')
@@ -1050,11 +1260,6 @@ function Admin() {
     // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordError('Tüm alanları doldurun!')
-      return
-    }
-
-    if (currentPassword !== 'travelkit2024') {
-      setPasswordError('Mevcut şifre yanlış!')
       return
     }
 
@@ -1073,17 +1278,36 @@ function Admin() {
       return
     }
 
-    // In a real application, you would update the password in the database
-    // For now, we'll just show success message
-    setPasswordSuccess('Şifre başarıyla değiştirildi!')
+    try {
+      // Mevcut şifreyi kontrol et
+      const currentHashedPassword = localStorage.getItem('admin_password_hash')
+      const isCurrentPasswordValid = await verifyPassword(currentPassword, currentHashedPassword)
 
-    // Clear form
-    setTimeout(() => {
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-      setPasswordSuccess('')
-    }, 3000)
+      if (!isCurrentPasswordValid) {
+        setPasswordError('Mevcut şifre yanlış!')
+        return
+      }
+
+      // Yeni şifreyi hash'le ve kaydet
+      const hashedNewPassword = await hashPassword(newPassword)
+      localStorage.setItem('admin_password_hash', hashedNewPassword)
+
+      // Eski düz metin şifreyi temizle (güvenlik)
+      localStorage.removeItem('admin_password')
+
+      setPasswordSuccess('Şifre başarıyla değiştirildi!')
+
+      // Clear form
+      setTimeout(() => {
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+        setPasswordSuccess('')
+      }, 3000)
+    } catch (error) {
+      console.error('Şifre değiştirme hatası:', error)
+      setPasswordError('Şifre değiştirilemedi. Lütfen tekrar deneyin.')
+    }
   }
 
 
@@ -1181,10 +1405,7 @@ function Admin() {
   if (loading) {
     return (
       <div className="admin-container">
-        <div className="loading">Yükleniyor...</div>
-        <div style={{color: 'red', marginTop: '20px'}}>
-          Debug: loading={loading.toString()}, isAuthenticated={isAuthenticated.toString()}
-        </div>
+        <div className="loading">Güvenlik kontrolü yapılıyor...</div>
       </div>
     )
   }
@@ -1265,18 +1486,23 @@ function Admin() {
                   ⚠️ Kalan deneme hakkı: {3 - loginAttempts}
                 </div>
               )}
-              <div className="remember-me-container">
-                <label className="remember-me-label">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="remember-me-checkbox"
-                    disabled={isLocked}
-                  />
-                  <span className="remember-me-text">Beni Hatırla</span>
-                </label>
-              </div>
+              {isLocked && (
+                <div className="unlock-section">
+                  <div className="unlock-info">
+                    <p>🔒 Hesap kilitlendi! Şifre sıfırlama için email gönderin.</p>
+                  </div>
+                  <div className="unlock-buttons">
+                    <button 
+                      type="button" 
+                      className="reset-btn"
+                      onClick={() => setShowResetForm(true)}
+                    >
+                      📧 Email ile Reset
+                    </button>
+                  </div>
+                </div>
+              )}
+              {/* Beni Hatırla özelliği güvenlik nedeniyle kaldırıldı */}
               <button type="submit" className="login-btn" disabled={isLocked}>
                 {isLocked ? 'Hesap Kilitli' : 'Giriş Yap'}
               </button>
@@ -1561,54 +1787,54 @@ function Admin() {
         </div>
 
         <div className={`messages-list ${isTransitioning ? 'messages-list--transitioning' : ''}`}>
-        {filteredMessages.length === 0 ? (
-          <div className="no-messages">
-            {activeTab === 'unread' ? 'Okunmamış mesaj yok' :
-              activeTab === 'read' ? 'Okunmuş mesaj yok' :
-                'Henüz mesaj yok'}
-          </div>
-        ) : (
-          filteredMessages.map((message) => (
-            <div
-              key={message.id}
-              className={`message-card ${!message.is_read ? 'message-card--unread' : ''}`}
-              onClick={() => openModal(message)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className="message-header">
-                <h3>{highlightSearchTerm(message.name, searchTerm)}</h3>
-                <div className="message-header-right">
-                  <span className="message-date">
-                    {new Date(message.created_at).toLocaleDateString('tr-TR')} - {new Date(message.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-              </div>
-              <div className="message-email">{highlightSearchTerm(message.email, searchTerm)}</div>
-              <div className="message-content-wrapper">
-                <div className="message-content">
-                  {highlightSearchTerm(message.message.split(' ').slice(0, 6).join(' '), searchTerm)}
-                  {message.message.split(' ').length > 6 && '...'}
-                </div>
-                <div className="message-actions" onClick={(e) => e.stopPropagation()}>
-                  {!message.is_read && (
-                    <button
-                      className="mark-read-btn"
-                      onClick={() => markAsRead(message.id)}
-                    >
-                      Okundu İşaretle
-                    </button>
-                  )}
-                  <button
-                    className="delete-btn"
-                    onClick={() => deleteMessage(message.id)}
-                  >
-                    Sil
-                  </button>
-                </div>
-              </div>
+          {filteredMessages.length === 0 ? (
+            <div className="no-messages">
+              {activeTab === 'unread' ? 'Okunmamış mesaj yok' :
+                activeTab === 'read' ? 'Okunmuş mesaj yok' :
+                  'Henüz mesaj yok'}
             </div>
-          ))
-        )}
+          ) : (
+            filteredMessages.map((message) => (
+              <div
+                key={message.id}
+                className={`message-card ${!message.is_read ? 'message-card--unread' : ''}`}
+                onClick={() => openModal(message)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="message-header">
+                  <h3>{highlightSearchTerm(message.name, searchTerm)}</h3>
+                  <div className="message-header-right">
+                    <span className="message-date">
+                      {new Date(message.created_at).toLocaleDateString('tr-TR')} - {new Date(message.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+                <div className="message-email">{highlightSearchTerm(message.email, searchTerm)}</div>
+                <div className="message-content-wrapper">
+                  <div className="message-content">
+                    {highlightSearchTerm(message.message.split(' ').slice(0, 6).join(' '), searchTerm)}
+                    {message.message.split(' ').length > 6 && '...'}
+                  </div>
+                  <div className="message-actions" onClick={(e) => e.stopPropagation()}>
+                    {!message.is_read && (
+                      <button
+                        className="mark-read-btn"
+                        onClick={() => markAsRead(message.id)}
+                      >
+                        Okundu İşaretle
+                      </button>
+                    )}
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteMessage(message.id)}
+                    >
+                      Sil
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
