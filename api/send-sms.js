@@ -20,33 +20,63 @@ export default async function handler(req, res) {
     if (!phoneNumber || !message) {
       return res.status(400).json({
         success: false,
-        message: 'Phone number and message are required'
+        message: 'Telefon numarası ve mesaj gerekli'
       });
     }
 
-    // Mock SMS sending
-    console.log('SMS would be sent to:', phoneNumber);
-    console.log('Message:', message);
+    // Phone number validation
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Geçerli bir telefon numarası girin'
+      });
+    }
 
-    // Simulate SMS sending delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Twilio SMS gönderme (gerçek implementasyon)
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const twilio = (await import('twilio')).default;
+      const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-    res.status(200).json({
-      success: true,
-      message: 'SMS sent successfully',
-      data: {
-        phoneNumber,
-        message,
-        sentAt: new Date().toISOString()
-      }
-    });
+      const result = await client.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: phoneNumber
+      });
+
+      console.log(`SMS gönderildi: ${phoneNumber} - SID: ${result.sid}`);
+
+      res.status(200).json({
+        success: true,
+        message: 'SMS başarıyla gönderildi',
+        data: {
+          phoneNumber,
+          message,
+          sentAt: new Date().toISOString(),
+          sid: result.sid
+        }
+      });
+    } else {
+      // Twilio yapılandırılmamışsa simüle et
+      console.log(`[SIMÜLE] SMS gönderildi: ${phoneNumber} - Mesaj: ${message}`);
+
+      res.status(200).json({
+        success: true,
+        message: 'SMS simüle edildi (Twilio yapılandırılmamış)',
+        data: {
+          phoneNumber,
+          message,
+          sentAt: new Date().toISOString(),
+          simulated: true
+        }
+      });
+    }
 
   } catch (error) {
-    console.error('SMS sending error:', error);
+    console.error('SMS gönderme hatası:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to send SMS',
-      error: error.message
+      message: 'SMS gönderilemedi: ' + error.message
     });
   }
 }

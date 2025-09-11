@@ -41,14 +41,14 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Token verification error:', error);
-    
+
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({
         success: false,
         message: 'Geçersiz token'
       });
     }
-    
+
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,

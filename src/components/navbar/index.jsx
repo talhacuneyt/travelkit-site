@@ -248,7 +248,7 @@ function Navbar() {
     try {
       // Backend'e şifre değiştirme isteği gönder
       const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : '');
       
       const token = localStorage.getItem('admin_token')
       
