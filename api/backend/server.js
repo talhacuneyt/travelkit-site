@@ -106,8 +106,7 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:3000',
     'https://travelkit-site.vercel.app',
-    'https://travelkit-site-git-main.vercel.app',
-    'https://travelkit-backend.vercel.app'
+    'https://travelkit-site-git-main.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

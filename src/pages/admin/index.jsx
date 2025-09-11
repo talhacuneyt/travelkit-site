@@ -264,7 +264,7 @@ function Admin() {
     const resetBackendAttempts = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL ||
-          (window.location.hostname === 'localhost' ? 'http://localhost:3001' : '');
+          (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3001');
         
         await fetch(`${API_URL}/api/auth/reset-attempts`, {
           method: 'POST',
@@ -486,7 +486,7 @@ function Admin() {
       
       // Backend API'sine login isteği gönder
       const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : '');
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3001');
       
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
@@ -1004,7 +1004,7 @@ function Admin() {
     try {
       // Backend'e şifre değiştirme isteği gönder
       const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : '');
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3001');
       
       const token = localStorage.getItem('admin_token')
       
