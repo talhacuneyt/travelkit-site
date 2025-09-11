@@ -106,6 +106,8 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:3000',
     'https://travelkit-site.vercel.app',
+    'https://travelkit.com.tr',
+    'https://www.travelkit.com.tr',
     /\.vercel\.app$/  // Tüm Vercel preview domain'leri için regex
   ],
   credentials: true,

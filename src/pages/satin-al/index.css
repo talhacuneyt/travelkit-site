@@ -34,36 +34,9 @@
   margin: 0 auto;
 }
 
-.satin-al__back-section {
-  margin-bottom: 20px;
-  padding-top: 20px;
-}
-
 .satin-al__header {
   margin-bottom: 40px;
   text-align: center;
-}
-
-.satin-al__back-btn {
-  background: transparent;
-  border: 1px solid #f97316;
-  color: #f97316;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 12px 20px;
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.satin-al__back-btn:hover {
-  color: white;
-  background: #f97316;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
 
@@ -82,25 +55,24 @@
 }
 
 .satin-al__package-info {
-  background: rgba(249, 115, 22, 0.05);
-  border: 1px solid rgba(249, 115, 22, 0.1);
-  border-radius: 12px;
+  border-radius: 0 !important;
   padding: 32px;
   text-align: center;
+  margin-top: 20px;
+  background: transparent;
 }
 
 .satin-al__package-title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 34px;
+  font-weight: 700;
   color: #111111;
-  margin: 0 0 16px 0;
   font-family: 'Poppins', sans-serif;
 }
 
 .satin-al__package-price {
-  font-size: 32px;
+  font-size: 42px;
   font-weight: 700;
-  color: #f97316;
+  color: #111111;
   margin: 0 0 16px 0;
   font-family: 'Poppins', sans-serif;
 }
@@ -130,14 +102,13 @@
 .satin-al__option {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
   padding: 24px;
   transition: all 0.3s ease;
 }
 
 .satin-al__option:hover {
-  border-color: #f97316;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+  cursor: pointer;
 }
 
 .satin-al__option-header {
@@ -155,15 +126,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.satin-al__option-badge {
-  background: #f97316;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-family: 'Inter', sans-serif;
-}
+
 
 .satin-al__option p {
   font-size: 14px;
@@ -174,51 +137,57 @@
 }
 
 .satin-al__option-btn {
-  background: #f97316;
+  background: #000000;
   color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 500;
+  border: 1px solid #000000;
+  border-radius: 0;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
   font-family: 'Inter', sans-serif;
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .satin-al__option-btn:hover {
-  background: #ea580c;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  background: #ffffff;
+  color: #000000;
 }
 
 .satin-al__option-btn--whatsapp {
-  background: #25d366;
+  background: #000000;
 }
 
 .satin-al__option-btn--whatsapp:hover {
-  background: #128c7e;
+  background: #ffffff;
+  color: #000000;
 }
 
 .satin-al__option-btn--email {
-  background: #3b82f6;
+  background: #000000;
 }
 
 .satin-al__option-btn--email:hover {
-  background: #2563eb;
+  background: #ffffff;
+  color: #000000;
 }
 
 .satin-al__option-btn--phone {
-  background: #6b7280;
+  background: #000000;
 }
 
 .satin-al__option-btn--phone:hover {
-  background: #4b5563;
+  background: #ffffff;
+  color: #000000;
 }
 
 .satin-al__info {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 24px;
 }
@@ -249,8 +218,9 @@
   content: '✓';
   position: absolute;
   left: -20px;
-  color: #f97316;
+  color: #111111;
   font-weight: bold;
+  font-size: 20px;
 }
 
 /* Dark Mode */
@@ -266,6 +236,7 @@
 .dark .satin-al__package-info {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
+  height: 40;
 }
 
 .dark .satin-al__package-title {
@@ -592,7 +563,7 @@
   .satin-al__card-section .satin-al__form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .satin-al__input--cvv {
     max-width: 100%;
   }
@@ -733,9 +704,11 @@
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.02);
   }
+
   100% {
     transform: scale(1);
   }
@@ -857,19 +830,19 @@
   .satin-al-success {
     padding: 20px;
   }
-  
+
   .satin-al-success__title {
     font-size: 36px;
   }
-  
+
   .satin-al-success__subtitle {
     font-size: 16px;
   }
-  
+
   .satin-al-success-icon {
     font-size: 80px;
   }
-  
+
   .satin-al-success__countdown {
     font-size: 14px;
     padding: 12px 20px;
@@ -880,11 +853,11 @@
   .satin-al-success {
     padding: 16px;
   }
-  
+
   .satin-al-success__title {
     font-size: 28px;
   }
-  
+
   .satin-al-success-icon {
     font-size: 60px;
   }

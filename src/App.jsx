@@ -8,6 +8,7 @@ import { LanguageProvider } from './contexts/LanguageContext'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 
 import Hakkimizda from './pages/hakkimizda'
 import Iletisim from './pages/iletisim'
@@ -25,6 +26,11 @@ function App() {
   const isNotFoundPage = location.pathname !== '/' && 
     !location.pathname.startsWith('/paket/') && 
     !['/hakkimizda', '/sss', '/iletisim', '/admin', '/ekonomik', '/konforlu', '/lux', '/satin-al'].includes(location.pathname)
+
+  // Sayfa değişimlerinde scroll'u en üste götür
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   return (
     <LanguageProvider>

@@ -2,7 +2,7 @@
   "admin": {
     "username": "admin",
     "email": "cuneytosmanlioglu@gmail.com",
-    "passwordHash": "$2a$10$5ash5UjanfkdSdU2a9rJ2Oc2gvQY5m0hwOVDZv2bHZtPp.Tza1CBi",
+    "passwordHash": "$2a$10$sDClTtjI9.HLl5.c1DIz/OAMH9o47tTPlCFbJx8Msgp5v8VxCFCOu",
     "isActive": true,
     "role": "admin"
   }
