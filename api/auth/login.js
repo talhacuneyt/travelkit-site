@@ -32,14 +32,14 @@ export default async function handler(req, res) {
       'admin': {
         username: 'admin',
         email: 'cuneytosmanlioglu@gmail.com',
-        passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', // travelkit2024
+        passwordHash: '$2a$10$qvfNmGtdCToH6sxPiQl70On1lYVxbJdww9ZC/0/psThHPQynh2.5q',
         isActive: true,
         role: 'admin'
       }
     };
 
     const user = users[username];
-    
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-    
+
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,

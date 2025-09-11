@@ -1844,11 +1844,13 @@ function Admin() {
                               onChange={(e) => setCurrentPassword(e.target.value)}
                               className="form-input"
                               placeholder="Mevcut şifrenizi girin"
+                              tabIndex={1}
                             />
                             <button
                               type="button"
                               className="password-toggle-btn"
                               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                              tabIndex={-1}
                             >
                               {showCurrentPassword ? "🙈" : "👁️"}
                             </button>
@@ -1863,11 +1865,13 @@ function Admin() {
                               onChange={(e) => setNewPassword(e.target.value)}
                               className="form-input"
                               placeholder="Yeni şifrenizi girin (min 6 karakter)"
+                              tabIndex={2}
                             />
                             <button
                               type="button"
                               className="password-toggle-btn"
                               onClick={() => setShowNewPassword(!showNewPassword)}
+                              tabIndex={-1}
                             >
                               {showNewPassword ? "🙈" : "👁️"}
                             </button>
@@ -1882,11 +1886,13 @@ function Admin() {
                               onChange={(e) => setConfirmPassword(e.target.value)}
                               className="form-input"
                               placeholder="Yeni şifrenizi tekrar girin"
+                              tabIndex={3}
                             />
                             <button
                               type="button"
                               className="password-toggle-btn"
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              tabIndex={-1}
                             >
                               {showConfirmPassword ? "🙈" : "👁️"}
                             </button>
@@ -1894,7 +1900,7 @@ function Admin() {
                         </div>
                         {passwordError && <div className="error-message">{passwordError}</div>}
                         {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
-                        <button type="submit" className="change-password-btn">
+                        <button type="submit" className="change-password-btn" tabIndex={4}>
                           Şifre Değiştir
                         </button>
                       </form>

@@ -36,7 +36,7 @@ function loadUsers() {
         'admin': {
           username: 'admin',
           email: 'cuneytosmanlioglu@gmail.com',
-          passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', // travelkit2024
+          passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', 
           isActive: true,
           role: 'admin'
         }
@@ -51,7 +51,7 @@ function loadUsers() {
       'admin': {
         username: 'admin',
         email: 'cuneytosmanlioglu@gmail.com',
-        passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', // travelkit2024
+        passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', 
         isActive: true,
         role: 'admin'
       }
@@ -73,7 +73,7 @@ loadUsers();
 
 
 // Email transporter oluştur
-const emailTransporter = nodemailer.createTransporter({
+const emailTransporter = nodemailer.createTransport({
   service: 'gmail', // Gmail kullanıyoruz
   auth: {
     user: process.env.EMAIL_USER || 'travelkit.admin@gmail.com',
@@ -273,6 +273,24 @@ app.post('/api/auth/verify-token', async (req, res) => {
   }
 });
 
+// Reset attempts endpoint (admin için)
+app.post('/api/auth/reset-attempts', async (req, res) => {
+  try {
+    // Bu endpoint sadece admin panelinde kullanılıyor
+    // Gerçek implementasyon gerekirse buraya eklenebilir
+    res.json({
+      success: true,
+      message: 'Reset attempts endpoint - not implemented yet'
+    });
+  } catch (error) {
+    console.error('Reset attempts error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Sunucu hatası'
+    });
+  }
+});
+
 // Şifre değiştirme endpoint
 app.post('/api/auth/change-password', async (req, res) => {
   try {
@@ -330,6 +348,7 @@ app.post('/api/auth/change-password', async (req, res) => {
     saveUsers();
 
     console.log(`✅ Şifre değiştirildi - Kullanıcı: ${username}`);
+    console.log(`🔐 Yeni şifre hash: ${hashedNewPassword}`);
 
     res.json({
       success: true,
