@@ -124,7 +124,7 @@ function SatinAl() {
     try {
       // Backend API'ye Iyzico ödeme isteği gönder
       const API_URL = import.meta.env.VITE_API_URL || 
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : '');
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
       const response = await fetch(`${API_URL}/api/payments/create-session`, {
         method: 'POST',
         headers: {
