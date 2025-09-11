@@ -36,7 +36,7 @@ function loadUsers() {
         'admin': {
           username: 'admin',
           email: 'cuneytosmanlioglu@gmail.com',
-          passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', 
+          passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe',
           isActive: true,
           role: 'admin'
         }
@@ -51,7 +51,7 @@ function loadUsers() {
       'admin': {
         username: 'admin',
         email: 'cuneytosmanlioglu@gmail.com',
-        passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', 
+        passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe',
         isActive: true,
         role: 'admin'
       }
@@ -106,12 +106,15 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:3000',
     'https://travelkit-site.vercel.app',
-    'https://travelkit-site-git-main.vercel.app'
+    /\.vercel\.app$/  // Tüm Vercel preview domain'leri için regex
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
+
+// OPTIONS preflight isteği için özel handler
+app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -277,12 +280,6 @@ app.post('/api/auth/verify-token', async (req, res) => {
 // Reset attempts endpoint (admin için)
 app.post('/api/auth/reset-attempts', async (req, res) => {
   try {
-    // CORS headers
-    res.header('Access-Control-Allow-Origin', 'https://travelkit-site.vercel.app');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-
     // Bu endpoint sadece admin panelinde kullanılıyor
     // Gerçek implementasyon gerekirse buraya eklenebilir
     res.json({
