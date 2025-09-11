@@ -15,7 +15,7 @@ const ComfortIcon = () => (
 )
 
 const TechnologyIcon = () => (
-  
+
   <svg viewBox="0 0 24 24" fill="none">
     <rect x="4" y="6" width="16" height="10" rx="2" stroke="currentColor" />
     <path d="M2 18h20" stroke="currentColor" strokeLinecap="round" />
@@ -82,17 +82,17 @@ const PackageDetail = ({ packageType }) => {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi', 
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
           'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
         ],
         comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
         technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
         health: [
-          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
           'Burun Spreyi', 'Maske', 'Sineksavar'
         ],
         additions: [
-          'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği', 
+          'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
           'QR Kart, müzik listesi', 'Lavanta kesesi'
         ]
       }
@@ -110,19 +110,19 @@ const PackageDetail = ({ packageType }) => {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay', 
-          'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu', 
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+          'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
           'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
         ],
         comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
         technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
         health: [
-          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
           'Burun Spreyi', 'Maske', 'Sineksavar'
         ],
         additions: [
-          'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü', 
-          'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi', 
+          'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+          'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi',
           'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
         ]
       }
@@ -140,22 +140,22 @@ const PackageDetail = ({ packageType }) => {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On', 
-          'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası', 
-          'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası', 
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
+          'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+          'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
           'El Dezenfektanı', 'Tarak'
         ],
         comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
         technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
         health: [
-          'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
           'Burun Spreyi', 'Maske', 'Sineksavar'
         ],
         additions: [
-          'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü', 
-          'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi', 
-          'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici', 
-          'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı', 
+          'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+          'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi',
+          'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici',
+          'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı',
           'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
         ]
       }
@@ -282,7 +282,7 @@ const PackageDetail = ({ packageType }) => {
               ))}
             </div>
             <div className="paket__cta">
-              <button 
+              <button
                 className="paket__btn paket__btn--purchase"
                 onClick={() => handlePurchase(packageType)}
               >

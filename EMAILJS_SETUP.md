@@ -26,11 +26,18 @@ Admin panelinde şifre sıfırlama email gönderme özelliği için EmailJS kuru
 ```
 Subject: {{subject}}
 
+Merhaba {{username}},
+
 {{message}}
 
-Şifre Sıfırlama Linki: {{reset_link}}
+🔐 Şifre Sıfırlama Linki:
+{{reset_link}}
+
+⚠️ Bu link 1 saat geçerlidir.
+⚠️ Eğer bu talebi siz yapmadıysanız, bu emaili görmezden gelebilirsiniz.
 
 Bu email otomatik olarak gönderilmiştir.
+Email sent via EmailJS.com
 ```
 
 ## 4. Public Key Alma

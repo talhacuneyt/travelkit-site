@@ -57,43 +57,13 @@ function Navbar() {
   const [packageError, setPackageError] = useState('')
   const [packageSuccess, setPackageSuccess] = useState('')
 
-  // SMS 2FA States
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [smsCode, setSmsCode] = useState('')
-  const [smsSent, setSmsSent] = useState(false)
-  const [smsError, setSmsError] = useState('')
-  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false)
-  const [twoFactorSuccess, setTwoFactorSuccess] = useState('')
-  const [twoFactorError, setTwoFactorError] = useState('')
-  const [showBackupCodes, setShowBackupCodes] = useState(false)
-  const [twoFactorCode, setTwoFactorCode] = useState('')
 
+  // showPackageModal state değişikliklerini yakala (sadece development'ta)
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
-    onScroll()
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  // Dark mode kontrolü
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('admin_theme')
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true)
-      document.documentElement.classList.add('dark')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Navbar sayfasında showPackageModal state değişti:', showPackageModal)
     }
-  }, [])
-
-  // 2FA durumu kontrolü
-  useEffect(() => {
-    const twoFactorEnabled = localStorage.getItem('admin_2fa_enabled') === 'true'
-    setTwoFactorEnabled(twoFactorEnabled)
-  }, [])
-
-  useEffect(() => {
-    setIsOpen(false)
-  }, [location.pathname])
+  }, [showPackageModal])
 
   // Admin login/logout event'lerini dinle
   useEffect(() => {
@@ -207,100 +177,6 @@ function Navbar() {
   }
 
   // Admin paneli fonksiyonları
-
-  // SMS 2FA Functions
-  const enableTwoFactor = () => {
-    setShowTwoFactorSetup(true)
-    setSmsError('')
-  }
-
-  // SMS 2FA Fonksiyonları
-  const sendSMS = async (phoneNumber) => {
-    try {
-      const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
-
-      // Gerçek SMS gönderme - Backend API'sine istek gönder
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
-      const response = await fetch(`${API_URL}/api/send-sms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber,
-          message: `TravelKit Admin 2FA Kodu: ${smsCode}. Bu kodu kimseyle paylaşmayın.`
-        })
-      })
-
-      if (response.ok) {
-        setSmsCode(smsCode)
-        setSmsSent(true)
-        setSmsError('')
-        console.log(`SMS gönderildi: ${phoneNumber} - Kod: ${smsCode}`)
-        return true
-      } else {
-        const errorData = await response.json()
-        setSmsError(errorData.message || 'SMS gönderilemedi. Lütfen tekrar deneyin.')
-        return false
-      }
-    } catch (error) {
-      console.error('SMS gönderme hatası:', error)
-      setSmsError('SMS gönderilemedi. Lütfen tekrar deneyin.')
-      return false
-    }
-  }
-
-  const verifySMSCode = (inputCode) => {
-    return inputCode === smsCode
-  }
-
-  const enableSMS2FA = async () => {
-    if (!phoneNumber || phoneNumber.length < 10) {
-      setSmsError('Lütfen geçerli bir telefon numarası girin')
-      return
-    }
-
-    const success = await sendSMS(phoneNumber)
-    if (success) {
-      // SMS gönderildi
-    }
-  }
-
-  const confirmSMS2FA = () => {
-    if (!smsCode || smsCode.length !== 6) {
-      setSmsError('Lütfen 6 haneli SMS kodunu girin')
-      return
-    }
-
-    if (verifySMSCode(smsCode)) {
-      setTwoFactorEnabled(true)
-      setTwoFactorSuccess('SMS 2FA başarıyla etkinleştirildi!')
-      setShowTwoFactorSetup(false)
-
-      // LocalStorage'a kaydet
-      localStorage.setItem('admin_2fa_enabled', 'true')
-      localStorage.setItem('admin_2fa_method', 'sms')
-      localStorage.setItem('admin_2fa_phone', phoneNumber)
-    } else {
-      setSmsError('Geçersiz SMS kodu. Lütfen tekrar deneyin.')
-    }
-  }
-
-  const disableTwoFactor = () => {
-    setTwoFactorEnabled(false)
-    setPhoneNumber('')
-    setSmsCode('')
-    setSmsSent(false)
-    setSmsError('')
-    setTwoFactorSuccess('SMS 2FA devre dışı bırakıldı')
-
-    // LocalStorage'dan kaldır
-    localStorage.removeItem('admin_2fa_enabled')
-    localStorage.removeItem('admin_2fa_method')
-    localStorage.removeItem('admin_2fa_phone')
-  }
-
   const handleLogout = () => {
     // Tüm admin verilerini temizle
     localStorage.removeItem('admin_token')
@@ -308,18 +184,15 @@ function Navbar() {
     localStorage.removeItem('admin_session_timestamp')
     localStorage.removeItem('admin_remember_me')
     localStorage.removeItem('admin_login_attempts')
-    localStorage.removeItem('admin_2fa_enabled')
-    localStorage.removeItem('admin_2fa_method')
-    localStorage.removeItem('admin_2fa_phone')
-    
+
     // State'i güncelle
     setIsAuthenticated(false)
-    
+
     // Custom event gönder (admin sayfası için)
     window.dispatchEvent(new CustomEvent('adminLogout', {
       detail: { isAuthenticated: false }
     }))
-    
+
     // Sayfayı yenile ve login sayfasına yönlendir
     window.location.href = '/admin'
   }
@@ -346,7 +219,7 @@ function Navbar() {
   }
 
   // Şifre değiştirme fonksiyonu
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault()
     setPasswordError('')
     setPasswordSuccess('')
@@ -367,29 +240,54 @@ function Navbar() {
       return
     }
 
-    // Mevcut şifre kontrolü - localStorage'dan al
-    const currentStoredPassword = localStorage.getItem('admin_password') || 'travelkit2024'
-    if (currentPassword !== currentStoredPassword) {
-      setPasswordError('Mevcut şifre yanlış!')
+    if (newPassword === currentPassword) {
+      setPasswordError('Yeni şifre mevcut şifre ile aynı olamaz!')
       return
     }
 
-    // Yeni şifreyi localStorage'a kaydet
-    localStorage.setItem('admin_password', newPassword)
+    try {
+      // Backend'e şifre değiştirme isteği gönder
+      const API_URL = import.meta.env.VITE_API_URL ||
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
+      
+      const token = localStorage.getItem('admin_token')
+      
+      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          token: token
+        })
+      })
 
-    // Başarılı şifre değişikliği
-    setPasswordSuccess('Şifre başarıyla değiştirildi!')
+      const data = await response.json()
 
-    // Form'u temizle
-    setTimeout(() => {
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-      setShowCurrentPassword(false)
-      setShowNewPassword(false)
-      setShowConfirmPassword(false)
-      setPasswordSuccess('')
-    }, 2000)
+      if (data.success) {
+        setPasswordSuccess('Şifre başarıyla değiştirildi!')
+        
+        // Form'u temizle
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+        setShowCurrentPassword(false)
+        setShowNewPassword(false)
+        setShowConfirmPassword(false)
+        
+        // 3 saniye sonra success mesajını temizle
+        setTimeout(() => {
+          setPasswordSuccess('')
+        }, 3000)
+      } else {
+        setPasswordError(data.message || 'Şifre değiştirilemedi!')
+      }
+    } catch (error) {
+      console.error('Şifre değiştirme hatası:', error)
+      setPasswordError('Sunucu hatası. Lütfen tekrar deneyin.')
+    }
   }
 
   // Package Management Functions
@@ -713,12 +611,7 @@ function Navbar() {
                     >
                       🔐 Şifre Değiştir
                     </button>
-                    <button
-                      className={`admin-tab ${settingsActiveTab === '2fa' ? 'active' : ''}`}
-                      onClick={() => setSettingsActiveTab('2fa')}
-                    >
-                      🔒 2FA Ayarları
-                    </button>
+
                     <button
                       className={`admin-tab ${settingsActiveTab === 'packages' ? 'active' : ''}`}
                       onClick={() => setSettingsActiveTab('packages')}
@@ -739,7 +632,7 @@ function Navbar() {
                                 value={currentPassword}
                                 onChange={(e) => setCurrentPassword(e.target.value)}
                                 className="form-input"
-                                placeholder="Mevcut şifrenizi girin"
+                                placeholder=""
                               />
                               <button
                                 type="button"
@@ -759,7 +652,7 @@ function Navbar() {
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 className="form-input"
-                                placeholder="Yeni şifrenizi girin (min 6 karakter)"
+                                placeholder=""
                               />
                               <button
                                 type="button"
@@ -779,7 +672,7 @@ function Navbar() {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="form-input"
-                                placeholder="Yeni şifrenizi tekrar girin"
+                                placeholder=""
                               />
                               <button
                                 type="button"
@@ -800,34 +693,6 @@ function Navbar() {
                       </div>
                     )}
 
-                    {settingsActiveTab === '2fa' && (
-                      <div className="tab-panel">
-                        <h4>İki Faktörlü Kimlik Doğrulama (2FA)</h4>
-                        <div className="twofa-status">
-                          <div className="status-indicator">
-                            <span className={`status-dot ${twoFactorEnabled ? 'active' : ''}`}></span>
-                            <span>2FA {twoFactorEnabled ? 'Aktif' : 'Pasif'}</span>
-                          </div>
-                          <p className="twofa-description">
-                            Hesabınızı daha güvenli hale getirmek için 2FA'yı etkinleştirin.
-                          </p>
-                        </div>
-                        <div className="twofa-actions">
-                          {!twoFactorEnabled ? (
-                            <button className="twofa-btn enable-btn" onClick={enableTwoFactor}>
-                              📱 2FA'yı Etkinleştir
-                            </button>
-                          ) : (
-                            <button className="twofa-btn disable-btn" onClick={disableTwoFactor}>
-                              ❌ 2FA'yı Devre Dışı Bırak
-                            </button>
-                          )}
-                        </div>
-                        {twoFactorSuccess && (
-                          <div className="success-message">{twoFactorSuccess}</div>
-                        )}
-                      </div>
-                    )}
 
                     {settingsActiveTab === 'packages' && (
                       <div className="tab-panel">
@@ -877,74 +742,8 @@ function Navbar() {
           </div>
         )}
 
-        {/* 2FA Setup Modal */}
-        {showTwoFactorSetup && (
-          <div className="two-factor-modal-overlay">
-            <div className="modal two-factor-setup-modal">
-              <div className="modal-header">
-                <h3>🔐 2FA Kurulumu</h3>
-              </div>
-              <div className="modal-content">
-                <div className="two-factor-setup">
-                  <div className="setup-step">
-                    <h4>1. Telefon Numarası</h4>
-                    <p>Telefon numaranızı girin (ülke kodu ile birlikte):</p>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="+90 5XX XXX XX XX"
-                      className="two-factor-input"
-                    />
-                    <button
-                      className="send-sms-btn"
-                      onClick={enableSMS2FA}
-                      disabled={smsSent}
-                    >
-                      {smsSent ? 'SMS Gönderildi' : 'SMS Gönder'}
-                    </button>
-                  </div>
-
-                  {smsSent && (
-                    <div className="setup-step">
-                      <h4>2. SMS Kodunu Doğrulayın</h4>
-                      <p>Telefonunuza gönderilen 6 haneli kodu girin:</p>
-                      <input
-                        type="text"
-                        value={smsCode}
-                        onChange={(e) => setSmsCode(e.target.value)}
-                        placeholder="123456"
-                        maxLength="6"
-                        className="two-factor-input"
-                      />
-                      <button
-                        className="verify-2fa-btn"
-                        onClick={confirmSMS2FA}
-                      >
-                        Doğrula ve Etkinleştir
-                      </button>
-                    </div>
-                  )}
-
-                  {smsError && (
-                    <div className="error-message">{smsError}</div>
-                  )}
-                </div>
-              </div>
-              <div className="modal-actions">
-                <button
-                  className="cancel-btn"
-                  onClick={() => setShowTwoFactorSetup(false)}
-                >
-                  İptal
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
+       
         {/* Package Modal */}
-        {console.log('🔍 Admin sayfasında showPackageModal state:', showPackageModal)}
         {showPackageModal && (
           <div className="modal-overlay">
             <div className="package-modal">

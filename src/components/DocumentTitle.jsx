@@ -9,12 +9,12 @@ const DocumentTitle = ({ title }) => {
   useEffect(() => {
     const getPageTitle = () => {
       const baseTitle = 'TravelKit'
-      
+
       // Eğer title prop'u varsa onu kullan
       if (title) {
         return title
       }
-      
+
       // Sayfa başlıkları
       const pageTitles = {
         '/': language === 'en' ? 'Home' : 'Anasayfa',
@@ -29,16 +29,16 @@ const DocumentTitle = ({ title }) => {
       }
 
       const pageTitle = pageTitles[location.pathname]
-      
+
       if (pageTitle) {
         return `${baseTitle} | ${pageTitle}`
       }
-      
+
       // 404 sayfası için
       if (location.pathname !== '/' && !Object.keys(pageTitles).includes(location.pathname)) {
         return language === 'en' ? `${baseTitle} | Page Not Found` : `${baseTitle} | Sayfa Bulunamadı`
       }
-      
+
       // Ana sayfa için
       return baseTitle
     }

@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase, EMAILJS_CONFIG } from '../../lib/supabase'
 import emailjs from '@emailjs/browser'
-import bcrypt from 'bcryptjs'
 import { SignJWT, jwtVerify } from 'jose'
 import './index.css'
 
@@ -15,14 +14,6 @@ function Admin() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
-  const [loginAttempts, setLoginAttempts] = useState(0)
-  const [isLocked, setIsLocked] = useState(false)
-  const [resetEmail, setResetEmail] = useState('')
-  const [showResetForm, setShowResetForm] = useState(false)
-  const [resetMessage, setResetMessage] = useState('')
-  const [resetNewPassword, setResetNewPassword] = useState('')
-  const [confirmResetPassword, setConfirmResetPassword] = useState('')
-  const [showNewPasswordForm, setShowNewPasswordForm] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [activeTab, setActiveTab] = useState('unread')
   const [selectedMessage, setSelectedMessage] = useState(null)
@@ -52,31 +43,37 @@ function Admin() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [settingsActiveTab, setSettingsActiveTab] = useState('password')
 
+  // Package Management States
+  const [showPackageModal, setShowPackageModal] = useState(false)
+  const [editingPackage, setEditingPackage] = useState(null)
+  const [packageData, setPackageData] = useState({
+    title: '',
+    description: '',
+    price: '',
+    sections: {
+      personalCare: '',
+      comfort: '',
+      technology: '',
+      health: '',
+      additions: ''
+    },
+    items: {
+      personalCare: [],
+      comfort: [],
+      technology: [],
+      health: [],
+      additions: []
+    }
+  })
+  const [packageError, setPackageError] = useState('')
+  const [packageSuccess, setPackageSuccess] = useState('')
 
 
-  // SMS 2FA States
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [smsCode, setSmsCode] = useState('')
-  const [smsSent, setSmsSent] = useState(false)
-  const [smsError, setSmsError] = useState('')
-  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false)
-  const [twoFactorSuccess, setTwoFactorSuccess] = useState('')
-  const [loginTwoFactorCode, setLoginTwoFactorCode] = useState('')
-  const [showTwoFactorLogin, setShowTwoFactorLogin] = useState(false)
+
 
   // JWT Secret (production'da environment variable kullanılmalı)
   const JWT_SECRET = new TextEncoder().encode(import.meta.env.VITE_JWT_SECRET || 'fallback-secret-key')
 
-  // Şifre hash'leme fonksiyonları
-  const hashPassword = async (password) => {
-    const saltRounds = 12
-    return await bcrypt.hash(password, saltRounds)
-  }
-
-  const verifyPassword = async (password, hashedPassword) => {
-    return await bcrypt.compare(password, hashedPassword)
-  }
 
   // JWT Token fonksiyonları (browser uyumlu)
   const generateToken = async (payload) => {
@@ -113,114 +110,11 @@ function Admin() {
     }
   }
 
-  // SMS 2FA Functions
-  const enableTwoFactor = () => {
-    setShowTwoFactorSetup(true)
-    setSmsError('')
-  }
 
-  // SMS 2FA Fonksiyonları
-  const sendSMS = async (phoneNumber) => {
-    try {
-      const smsCode = Math.floor(100000 + Math.random() * 900000).toString()
 
-      // Gerçek SMS gönderme - Backend API'sine istek gönder
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
-      const response = await fetch(`${API_URL}/api/send-sms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber,
-          message: `TravelKit Admin 2FA Kodu: ${smsCode}. Bu kodu kimseyle paylaşmayın.`
-        })
-      })
 
-      if (response.ok) {
-        setSmsCode(smsCode)
-        setSmsSent(true)
-        setSmsError('')
-        console.log(`SMS gönderildi: ${phoneNumber} - Kod: ${smsCode}`)
-        return true
-      } else {
-        const errorData = await response.json()
-        setSmsError(errorData.message || 'SMS gönderilemedi. Lütfen tekrar deneyin.')
-        return false
-      }
-    } catch (error) {
-      console.error('SMS gönderme hatası:', error)
-      setSmsError('SMS gönderilemedi. Lütfen tekrar deneyin.')
-      return false
-    }
-  }
 
-  const verifySMSCode = (inputCode) => {
-    return inputCode === smsCode
-  }
 
-  const enableSMS2FA = async () => {
-    if (!phoneNumber || phoneNumber.length < 10) {
-      setSmsError('Lütfen geçerli bir telefon numarası girin')
-      return
-    }
-
-    const success = await sendSMS(phoneNumber)
-    if (success) {
-      // SMS gönderildi
-    }
-  }
-
-  const confirmSMS2FA = () => {
-    if (!smsCode || smsCode.length !== 6) {
-      setSmsError('Lütfen 6 haneli SMS kodunu girin')
-      return
-    }
-
-    if (verifySMSCode(smsCode)) {
-      setTwoFactorEnabled(true)
-      setTwoFactorSuccess('SMS 2FA başarıyla etkinleştirildi!')
-      setShowTwoFactorSetup(false)
-
-      // LocalStorage'a kaydet
-      localStorage.setItem('admin_2fa_enabled', 'true')
-      localStorage.setItem('admin_2fa_method', 'sms')
-      localStorage.setItem('admin_2fa_phone', phoneNumber)
-    } else {
-      setSmsError('Geçersiz SMS kodu. Lütfen tekrar deneyin.')
-    }
-  }
-
-  const disableTwoFactor = () => {
-    setTwoFactorEnabled(false)
-    setPhoneNumber('')
-    setSmsCode('')
-    setSmsSent(false)
-    setSmsError('')
-    setTwoFactorSuccess('SMS 2FA devre dışı bırakıldı')
-
-    // LocalStorage'dan kaldır
-    localStorage.removeItem('admin_2fa_enabled')
-    localStorage.removeItem('admin_2fa_method')
-    localStorage.removeItem('admin_2fa_phone')
-  }
-
-  const verifyLoginTwoFactor = () => {
-    if (!loginTwoFactorCode || loginTwoFactorCode.length !== 6) {
-      setLoginError('Lütfen 6 haneli 2FA kodunu girin')
-      return
-    }
-
-    const secret = localStorage.getItem('admin_2fa_secret')
-    if (secret && verifyTwoFactorCode(secret, loginTwoFactorCode)) {
-      setShowTwoFactorLogin(false)
-      setLoginError('')
-      completeLogin()
-    } else {
-      setLoginError('Geçersiz 2FA kodu')
-    }
-  }
 
   const completeLogin = async () => {
     // JWT token oluştur
@@ -238,7 +132,6 @@ function Admin() {
     localStorage.setItem('admin_token', token)
     localStorage.removeItem('admin_login_attempts')
     setLoginError('')
-    setLoginAttempts(0)
 
     // Eski session sistemini temizle
     localStorage.removeItem('admin_session')
@@ -268,7 +161,6 @@ function Admin() {
       setUsername('')
       setRememberMe(false)
       setLoginError('')
-      setLoginAttempts(0)
     }
 
     window.addEventListener('adminLogin', handleAdminLogin)
@@ -327,9 +219,6 @@ function Admin() {
             localStorage.removeItem('admin_session')
             localStorage.removeItem('admin_session_timestamp')
             localStorage.removeItem('admin_login_attempts')
-            localStorage.removeItem('admin_2fa_enabled')
-            localStorage.removeItem('admin_2fa_method')
-            localStorage.removeItem('admin_2fa_phone')
             localStorage.removeItem('admin_remember_me')
             setIsAuthenticated(false)
           }
@@ -340,9 +229,6 @@ function Admin() {
           localStorage.removeItem('admin_session')
           localStorage.removeItem('admin_session_timestamp')
           localStorage.removeItem('admin_login_attempts')
-          localStorage.removeItem('admin_2fa_enabled')
-          localStorage.removeItem('admin_2fa_method')
-          localStorage.removeItem('admin_2fa_phone')
           localStorage.removeItem('admin_remember_me')
           setIsAuthenticated(false)
         }
@@ -373,32 +259,31 @@ function Admin() {
 
     // Login attempts kontrolü - Hesap kilidini sıfırla
     localStorage.removeItem('admin_login_attempts')
-    setLoginAttempts(0)
-    setIsLocked(false)
     
     // Backend'deki failed attempts'ı da sıfırla
-    try {
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
-      
-      await fetch(`${API_URL}/api/auth/reset-attempts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: 'admin' })
-      })
-    } catch (error) {
-      console.log('Failed to reset backend attempts:', error)
+    const resetBackendAttempts = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL ||
+          (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
+        
+        await fetch(`${API_URL}/api/auth/reset-attempts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: 'admin' })
+        })
+      } catch (error) {
+        console.log('Failed to reset backend attempts:', error)
+      }
     }
+    
+    resetBackendAttempts()
 
     // Beni hatırla özelliği güvenlik nedeniyle kaldırıldı
     // Eski kayıtlı bilgileri temizle
     localStorage.removeItem('admin_remember_me')
 
-    // 2FA durumu kontrolü
-    const twoFactorEnabled = localStorage.getItem('admin_2fa_enabled') === 'true'
-    setTwoFactorEnabled(twoFactorEnabled)
   }, []) // Dependency array'i boş bıraktık
 
   // fetchMessages fonksiyonunu buraya taşıdık
@@ -525,6 +410,13 @@ function Admin() {
   //   }
   // }, [isAuthenticated, location.pathname])
 
+  // showPackageModal state değişikliklerini yakala (sadece development'ta)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Admin sayfasında showPackageModal state değişti:', showPackageModal)
+    }
+  }, [showPackageModal])
+
   // Settings modal body scroll prevention
   useEffect(() => {
     if (showSettingsModal) {
@@ -588,10 +480,6 @@ function Admin() {
   async function handleLogin(e) {
     e.preventDefault()
 
-    if (isLocked) {
-      setLoginError('Hesap kilitlendi! Şifre sıfırlama için email gönderin.')
-      return
-    }
 
     try {
       setLoginError('')
@@ -618,10 +506,6 @@ function Admin() {
         const token = data.token
         localStorage.setItem('admin_token', token)
         
-        // Başarısız giriş sayacını sıfırla
-        localStorage.removeItem('admin_login_attempts')
-        setLoginAttempts(0)
-        setIsLocked(false)
         
         // Backend'den gelen token ile doğrudan giriş yap
         setIsAuthenticated(true)
@@ -641,53 +525,15 @@ function Admin() {
         console.log('✅ Admin girişi başarılı!')
       } else {
         // Hatalı giriş
-        handleBackendLoginError(data.message, username)
+        setLoginError(data.message)
       }
     } catch (error) {
       console.error('Login error:', error)
-      if (error.message.includes('rate limit') || error.message.includes('Çok fazla')) {
-        setLoginError('Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.')
-      } else {
-        setLoginError('Sunucu hatası. Lütfen tekrar deneyin.')
-      }
+      setLoginError('❌ Sunucu hatası. Lütfen tekrar deneyin.')
     }
   }
 
-  // Backend'den gelen hata mesajlarını işle
-  function handleBackendLoginError(message, username) {
-    if (message === 'Böyle bir kullanıcı yok') {
-      // Kullanıcı yoksa counter artırma, sadece mesaj göster
-      setLoginError(message)
-    } else if (message === 'Kullanıcı adı veya şifre hatalı') {
-      // Yanlış şifre - counter artır
-      const newAttempts = loginAttempts + 1
-      setLoginAttempts(newAttempts)
-      localStorage.setItem('admin_login_attempts', newAttempts.toString())
 
-      if (newAttempts >= 3) {
-        setIsLocked(true)
-        setLoginError('3 hatalı deneme! Hesap kilitlendi. Şifre sıfırlama için email gönderin.')
-        setShowResetForm(true)
-      } else {
-        const remainingAttempts = 3 - newAttempts
-        setLoginError(`Yanlış kullanıcı adı veya şifre! Kalan deneme hakkı: ${remainingAttempts}`)
-      }
-    } else if (message.includes('Çok fazla giriş denemesi')) {
-      // Rate limit hatası - counter artırma
-      setLoginError(message)
-    } else {
-      // Diğer hatalar
-      setLoginError(message)
-    }
-
-    setUsername('')
-    setPassword('')
-  }
-
-  function handleLoginError() {
-    // Eski fonksiyon - artık kullanılmıyor
-    console.warn('handleLoginError is deprecated, use handleBackendLoginError instead')
-  }
 
   function handleLogout() {
     // console.log('🚪 Admin çıkış yapılıyor...')
@@ -699,16 +545,13 @@ function Admin() {
     setUsername('')
     setRememberMe(false)
     setLoginError('')
-    setLoginAttempts(0)
 
     // Tüm admin verilerini temizle
     localStorage.removeItem('admin_token')
     localStorage.removeItem('admin_session')
     localStorage.removeItem('admin_session_timestamp')
     localStorage.removeItem('admin_login_attempts')
-    localStorage.removeItem('admin_2fa_enabled')
-    localStorage.removeItem('admin_2fa_method')
-    localStorage.removeItem('admin_2fa_phone')
+    localStorage.removeItem('admin__enabled')
     localStorage.removeItem('admin_remember_me')
 
     // Clear session timeout
@@ -726,128 +569,8 @@ function Admin() {
     window.location.reload()
   }
 
-  async function handlePasswordReset(e) {
-    e.preventDefault()
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(resetEmail)) {
-      setResetMessage('Geçerli bir email adresi girin!')
-      return
-    }
 
-    try {
-      setResetMessage('Email gönderiliyor...')
-
-      // Backend API'sine reset isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
-      
-      const response = await fetch(`${API_URL}/api/auth/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: resetEmail
-        })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setResetMessage(data.message)
-        
-        // Reset form after 10 seconds
-        setTimeout(() => {
-          setResetMessage('')
-          setResetEmail('')
-          setShowResetForm(false)
-          setIsLocked(false)
-          setLoginAttempts(0)
-          localStorage.removeItem('admin_login_attempts')
-          console.log('🔓 Hesap kilidi otomatik olarak kaldırıldı')
-        }, 10000)
-      } else {
-        setResetMessage(`❌ ${data.message}`)
-      }
-
-    } catch (error) {
-      console.error('Password reset error:', error)
-      setResetMessage('❌ Sunucu hatası. Lütfen tekrar deneyin.')
-    }
-  }
-
-  // Yeni şifre belirleme fonksiyonu
-  async function handleNewPassword(e) {
-    e.preventDefault()
-
-    // Validation
-    if (!resetNewPassword || !confirmResetPassword) {
-      setResetMessage('Tüm alanları doldurun!')
-      return
-    }
-
-    if (resetNewPassword.length < 6) {
-      setResetMessage('Yeni şifre en az 6 karakter olmalıdır!')
-      return
-    }
-
-    if (resetNewPassword !== confirmResetPassword) {
-      setResetMessage('Şifreler eşleşmiyor!')
-      return
-    }
-
-    try {
-      // Yeni şifreyi hash'le ve localStorage'a kaydet
-      const hashedNewPassword = await hashPassword(resetNewPassword)
-      localStorage.setItem('admin_password_hash', hashedNewPassword)
-
-      // Eski düz metin şifreyi temizle (güvenlik)
-      localStorage.removeItem('admin_password')
-
-      // JWT token oluştur ve otomatik login yap
-      const tokenPayload = {
-        username: 'admin',
-        role: 'admin',
-        loginTime: Date.now(),
-        sessionId: Math.random().toString(36).substring(2, 15)
-      }
-      const token = await generateToken(tokenPayload)
-
-      setIsAuthenticated(true)
-      localStorage.setItem('admin_token', token)
-
-      setResetMessage('✅ Şifre başarıyla değiştirildi! Otomatik giriş yapılıyor...')
-
-      // Reset token'ı temizle (tek kullanımlık)
-      localStorage.removeItem('admin_reset_token')
-      localStorage.removeItem('admin_reset_token_expiry')
-
-      // URL'den reset parametresini kaldır
-      window.history.replaceState({}, document.title, '/admin')
-
-      // 2 saniye sonra mesajı temizle
-      setTimeout(() => {
-        setResetMessage('')
-        setShowNewPasswordForm(false)
-      }, 2000)
-
-    } catch (error) {
-      console.error('Şifre değiştirme hatası:', error)
-      setResetMessage('❌ Şifre değiştirilemedi. Lütfen tekrar deneyin.')
-    }
-  }
-
-  function resetLoginAttempts() {
-    setLoginAttempts(0)
-    setIsLocked(false)
-    setShowResetForm(false)
-    setResetEmail('')
-    setResetMessage('')
-    setRememberMe(false)
-    localStorage.removeItem('admin_login_attempts')
-  }
 
 
   async function deleteMessage(id) {
@@ -1279,34 +1002,44 @@ function Admin() {
     }
 
     try {
-      // Mevcut şifreyi kontrol et
-      const currentHashedPassword = localStorage.getItem('admin_password_hash')
-      const isCurrentPasswordValid = await verifyPassword(currentPassword, currentHashedPassword)
+      // Backend'e şifre değiştirme isteği gönder
+      const API_URL = import.meta.env.VITE_API_URL ||
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://travelkit-backend.vercel.app');
+      
+      const token = localStorage.getItem('admin_token')
+      
+      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          token: token
+        })
+      })
 
-      if (!isCurrentPasswordValid) {
-        setPasswordError('Mevcut şifre yanlış!')
-        return
-      }
+      const data = await response.json()
 
-      // Yeni şifreyi hash'le ve kaydet
-      const hashedNewPassword = await hashPassword(newPassword)
-      localStorage.setItem('admin_password_hash', hashedNewPassword)
-
-      // Eski düz metin şifreyi temizle (güvenlik)
-      localStorage.removeItem('admin_password')
-
-      setPasswordSuccess('Şifre başarıyla değiştirildi!')
-
-      // Clear form
-      setTimeout(() => {
+      if (data.success) {
+        setPasswordSuccess('Şifre başarıyla değiştirildi!')
+        
+        // Form'u temizle
         setCurrentPassword('')
         setNewPassword('')
         setConfirmPassword('')
-        setPasswordSuccess('')
-      }, 3000)
+        
+        // 3 saniye sonra success mesajını temizle
+        setTimeout(() => {
+          setPasswordSuccess('')
+        }, 3000)
+      } else {
+        setPasswordError(data.message || 'Şifre değiştirilemedi!')
+      }
     } catch (error) {
       console.error('Şifre değiştirme hatası:', error)
-      setPasswordError('Şifre değiştirilemedi. Lütfen tekrar deneyin.')
+      setPasswordError('Sunucu hatası. Lütfen tekrar deneyin.')
     }
   }
 
@@ -1342,6 +1075,249 @@ function Admin() {
         <mark key={index} className="search-highlight">{part}</mark>
       ) : part
     )
+  }
+
+  // Package Management Functions
+  const getPackageData = (packageType) => {
+    // Önce localStorage'dan kaydedilmiş veriyi kontrol et
+    const savedPackage = localStorage.getItem(`package_${packageType}`)
+    if (savedPackage) {
+      try {
+        const parsedData = JSON.parse(savedPackage)
+        return parsedData
+      } catch (error) {
+        console.error('Error parsing saved package data:', error)
+      }
+    }
+
+    // localStorage'da veri yoksa hardcoded veriyi kullan
+    const packages = {
+      economic: {
+        title: 'Ekonomik',
+        description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
+        price: '₺299',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Ekonomik Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+          ],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
+          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+            'QR Kart, müzik listesi', 'Lavanta kesesi'
+          ]
+        }
+      },
+      comfort: {
+        title: 'Konforlu',
+        description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
+        price: '₺599',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'KONFOR PAKET EKLEMELERİ'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+            'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
+            'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
+          technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
+          ]
+        }
+      },
+      luxury: {
+        title: 'Lüks',
+        description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
+        price: '₺999',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Lüks Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
+            'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+            'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
+            'El Dezenfektanı', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
+          technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici',
+            'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı',
+            'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
+          ]
+        }
+      }
+    }
+    return packages[packageType] || null
+  }
+
+  const openPackageModal = (packageType = null) => {
+    console.log('🚀 openPackageModal çağrıldı:', packageType)
+
+    if (packageType) {
+      // Mevcut paket verilerini yükle
+      const packageInfo = getPackageData(packageType)
+      console.log('📦 Paket verisi yüklendi:', packageInfo)
+      setPackageData(packageInfo)
+      setEditingPackage(packageType)
+    } else {
+      // Yeni paket oluştur
+      setPackageData({
+        title: '',
+        description: '',
+        price: '',
+        sections: {
+          personalCare: '',
+          comfort: '',
+          technology: '',
+          health: '',
+          additions: ''
+        },
+        items: {
+          personalCare: [],
+          comfort: [],
+          technology: [],
+          health: [],
+          additions: []
+        }
+      })
+      setEditingPackage(null)
+    }
+
+    setShowPackageModal(true)
+    setPackageError('')
+    setPackageSuccess('')
+  }
+
+  const closePackageModal = () => {
+    setShowPackageModal(false)
+    setEditingPackage(null)
+    setPackageData({
+      title: '',
+      description: '',
+      price: '',
+      sections: {
+        personalCare: '',
+        comfort: '',
+        technology: '',
+        health: '',
+        additions: ''
+      },
+      items: {
+        personalCare: [],
+        comfort: [],
+        technology: [],
+        health: [],
+        additions: []
+      }
+    })
+    setPackageError('')
+    setPackageSuccess('')
+  }
+
+  const handlePackageDataChange = (field, value) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.')
+      setPackageData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }))
+    } else {
+      setPackageData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
+  }
+
+  const handleItemChange = (section, index, value) => {
+    setPackageData(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [section]: prev.items[section].map((item, i) =>
+          i === index ? value : item
+        )
+      }
+    }))
+  }
+
+  const addItem = (section) => {
+    setPackageData(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [section]: [...prev.items[section], '']
+      }
+    }))
+  }
+
+  const removeItem = (section, index) => {
+    setPackageData(prev => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [section]: prev.items[section].filter((_, i) => i !== index)
+      }
+    }))
+  }
+
+  const savePackage = () => {
+    // Validation
+    if (!packageData.title || !packageData.description || !packageData.price) {
+      setPackageError('Lütfen tüm temel alanları doldurun!')
+      return
+    }
+
+    // Paket verilerini localStorage'a kaydet
+    const packageKey = editingPackage || 'new_package'
+    localStorage.setItem(`package_${packageKey}`, JSON.stringify(packageData))
+
+    setPackageSuccess('✅ Paket başarıyla kaydedildi!')
+
+    // 3 saniye sonra başarı mesajını temizle
+    setTimeout(() => {
+      setPackageSuccess('')
+    }, 3000)
   }
 
   // Export fonksiyonu
@@ -1419,44 +1395,7 @@ function Admin() {
         <div className="login-form">
           <h1>Admin Girişi</h1>
 
-          {showNewPasswordForm ? (
-            <form onSubmit={handleNewPassword}>
-              <div className="reset-form">
-                <h3>🔐 Yeni Şifre Belirle</h3>
-                <p>Şifre sıfırlama linkine tıkladınız. Yeni şifrenizi belirleyin.</p>
-                <div className="form-group">
-                  <input
-                    type="password"
-                    placeholder="Yeni Şifre (min 6 karakter)"
-                    value={resetNewPassword}
-                    onChange={(e) => setResetNewPassword(e.target.value)}
-                    required
-                    className="email-input"
-                  />
-                </div>
-                <div className="form-group">
-                  <input
-                    type="password"
-                    placeholder="Yeni Şifre Tekrar"
-                    value={confirmResetPassword}
-                    onChange={(e) => setConfirmResetPassword(e.target.value)}
-                    required
-                    className="email-input"
-                  />
-                </div>
-                {resetMessage && (
-                  <div className={`message ${resetMessage.includes('başarıyla') ? 'success-message' : 'error-message'}`}>
-                    {resetMessage}
-                  </div>
-                )}
-                <div className="reset-actions">
-                  <button type="submit" className="reset-btn">
-                    Şifreyi Değiştir ve Giriş Yap
-                  </button>
-                </div>
-              </div>
-            </form>
-          ) : !showResetForm ? (
+          {!isAuthenticated && (
             <form onSubmit={handleLogin}>
               <div className="form-group">
                 <input
@@ -1466,7 +1405,6 @@ function Admin() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   className="username-input"
-                  disabled={isLocked}
                 />
               </div>
               <div className="form-group">
@@ -1477,65 +1415,12 @@ function Admin() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="password-input"
-                  disabled={isLocked}
                 />
               </div>
               {loginError && <div className="error-message">{loginError}</div>}
-              {loginAttempts > 0 && !isLocked && (
-                <div className="warning-message">
-                  ⚠️ Kalan deneme hakkı: {3 - loginAttempts}
-                </div>
-              )}
-              {isLocked && (
-                <div className="unlock-section">
-                  <div className="unlock-info">
-                    <p>🔒 Hesap kilitlendi! Şifre sıfırlama için email gönderin.</p>
-                  </div>
-                  <div className="unlock-buttons">
-                    <button 
-                      type="button" 
-                      className="reset-btn"
-                      onClick={() => setShowResetForm(true)}
-                    >
-                      📧 Email ile Reset
-                    </button>
-                  </div>
-                </div>
-              )}
-              {/* Beni Hatırla özelliği güvenlik nedeniyle kaldırıldı */}
-              <button type="submit" className="login-btn" disabled={isLocked}>
-                {isLocked ? 'Hesap Kilitli' : 'Giriş Yap'}
+              <button type="submit" className="login-btn">
+                Giriş Yap
               </button>
-            </form>
-          ) : (
-            <form onSubmit={handlePasswordReset}>
-              <div className="reset-form">
-                <h3>🔒 Şifre Sıfırlama</h3>
-                <p>Hesabınız 3 hatalı deneme sonrası kilitlendi. Şifre sıfırlama için email adresinizi girin.</p>
-                <div className="form-group">
-                  <input
-                    type="email"
-                    placeholder="Email Adresiniz"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                    className="email-input"
-                  />
-                </div>
-                {resetMessage && (
-                  <div className={`message ${resetMessage.includes('gönderildi') ? 'success-message' : 'error-message'}`}>
-                    {resetMessage}
-                  </div>
-                )}
-                <div className="reset-actions">
-                  <button type="submit" className="reset-btn">
-                    Şifre Sıfırlama Linki Gönder
-                  </button>
-                  <button type="button" onClick={resetLoginAttempts} className="cancel-btn">
-                    İptal
-                  </button>
-                </div>
-              </div>
             </form>
           )}
 
@@ -1930,8 +1815,8 @@ function Admin() {
             <div className="admin-modal-header">
               <h3>⚙️ Admin Ayarları</h3>
               <button className="admin-modal-close" onClick={closeSettingsModal}>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ width: '30px', height: '30px' }}>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="#111111" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
@@ -1943,12 +1828,6 @@ function Admin() {
                     onClick={() => setSettingsActiveTab('password')}
                   >
                     🔐 Şifre Değiştir
-                  </button>
-                  <button
-                    className={`admin-tab ${settingsActiveTab === '2fa' ? 'active' : ''}`}
-                    onClick={() => setSettingsActiveTab('2fa')}
-                  >
-                    🔒 2FA Ayarları
                   </button>
                 </div>
                 <div className="admin-tab-content">
@@ -2022,34 +1901,6 @@ function Admin() {
                     </div>
                   )}
 
-                  {settingsActiveTab === '2fa' && (
-                    <div className="tab-panel">
-                      <h4>İki Faktörlü Kimlik Doğrulama (2FA)</h4>
-                      <div className="twofa-status">
-                        <div className="status-indicator">
-                          <span className="status-dot active"></span>
-                          <span>2FA Aktif</span>
-                        </div>
-                        <p className="twofa-description">
-                          Hesabınızı daha güvenli hale getirmek için 2FA'yı etkinleştirin.
-                        </p>
-                      </div>
-                      <div className="twofa-actions">
-                        <button className="twofa-btn enable-btn">
-                          📱 2FA'yı Etkinleştir
-                        </button>
-                        <button className="twofa-btn disable-btn">
-                          ❌ 2FA'yı Devre Dışı Bırak
-                        </button>
-                      </div>
-                      <div className="twofa-qr">
-                        <p>QR Kodu tarayarak 2FA'yı etkinleştirin:</p>
-                        <div className="qr-placeholder">
-                          <div className="qr-code">📱 QR KOD</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                 </div>
               </div>
@@ -2058,118 +1909,9 @@ function Admin() {
         </div>
       )}
 
-      {/* 2FA Setup Modal */}
-      {showTwoFactorSetup && (
-        <div className="two-factor-modal-overlay">
-          <div className="modal two-factor-setup-modal">
-            <div className="modal-header">
-              <h3>🔐 2FA Kurulumu</h3>
-            </div>
-            <div className="modal-content">
-              <div className="two-factor-setup">
-                <div className="setup-step">
-                  <h4>1. Telefon Numarası</h4>
-                  <p>Telefon numaranızı girin (ülke kodu ile birlikte):</p>
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+90 5XX XXX XX XX"
-                    className="two-factor-input"
-                  />
-                  <button
-                    className="send-sms-btn"
-                    onClick={enableSMS2FA}
-                    disabled={smsSent}
-                  >
-                    {smsSent ? 'SMS Gönderildi' : 'SMS Gönder'}
-                  </button>
-                </div>
-
-                {smsSent && (
-                  <div className="setup-step">
-                    <h4>2. SMS Kodunu Doğrulayın</h4>
-                    <p>Telefonunuza gönderilen 6 haneli kodu girin:</p>
-                    <input
-                      type="text"
-                      value={smsCode}
-                      onChange={(e) => setSmsCode(e.target.value)}
-                      placeholder="123456"
-                      maxLength="6"
-                      className="two-factor-input"
-                    />
-                    <button
-                      className="verify-2fa-btn"
-                      onClick={confirmSMS2FA}
-                    >
-                      Doğrula ve Etkinleştir
-                    </button>
-                  </div>
-                )}
-
-                {smsError && (
-                  <div className="error-message">{smsError}</div>
-                )}
-              </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={() => setShowTwoFactorSetup(false)}
-              >
-                İptal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
 
-      {/* 2FA Login Modal */}
-      {showTwoFactorLogin && (
-        <div className="modal-overlay">
-          <div className="modal two-factor-login-modal">
-            <div className="modal-header">
-              <h3>🔐 2FA Doğrulaması</h3>
-            </div>
-            <div className="modal-content">
-              <div className="two-factor-login">
-                <p>Google Authenticator uygulamasından 6 haneli kodu girin:</p>
-                <input
-                  type="text"
-                  value={loginTwoFactorCode}
-                  onChange={(e) => setLoginTwoFactorCode(e.target.value)}
-                  placeholder="123456"
-                  maxLength="6"
-                  className="two-factor-input"
-                />
-                <button
-                  className="verify-login-2fa-btn"
-                  onClick={verifyLoginTwoFactor}
-                >
-                  Doğrula ve Giriş Yap
-                </button>
 
-                {loginError && (
-                  <div className="error-message">{loginError}</div>
-                )}
-              </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={() => {
-                  setShowTwoFactorLogin(false)
-                  setLoginTwoFactorCode('')
-                  setLoginError('')
-                }}
-              >
-                İptal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   )

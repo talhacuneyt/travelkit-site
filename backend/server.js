@@ -4,28 +4,73 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Kullanıcı veritabanı (gerçek projede veritabanı kullanılmalı)
-const users = {
-  'admin': {
-    username: 'admin',
-    email: 'admin@travelkit.com',
-    passwordHash: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KzK1a2', // travelkit2024
-    isActive: true,
-    role: 'admin'
-  }
-};
+// __dirname için ES6 modül uyumluluğu
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Başarısız giriş sayacı (kullanıcı bazlı)
-const failedAttempts = new Map();
-const resetTokens = new Map();
+// Users dosya yolu
+const USERS_FILE = path.join(__dirname, 'users.json');
+
+// Kullanıcı veritabanını yükle veya oluştur
+let users = {};
+
+function loadUsers() {
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      const data = fs.readFileSync(USERS_FILE, 'utf8');
+      users = JSON.parse(data);
+      console.log('✅ Kullanıcı veritabanı yüklendi');
+    } else {
+      // Varsayılan admin kullanıcısı oluştur
+      users = {
+        'admin': {
+          username: 'admin',
+          email: 'cuneytosmanlioglu@gmail.com',
+          passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', // travelkit2024
+          isActive: true,
+          role: 'admin'
+        }
+      };
+      saveUsers();
+      console.log('✅ Varsayılan admin kullanıcısı oluşturuldu');
+    }
+  } catch (error) {
+    console.error('❌ Kullanıcı veritabanı yüklenirken hata:', error);
+    // Hata durumunda varsayılan kullanıcı oluştur
+    users = {
+      'admin': {
+        username: 'admin',
+        email: 'cuneytosmanlioglu@gmail.com',
+        passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe', // travelkit2024
+        isActive: true,
+        role: 'admin'
+      }
+    };
+  }
+}
+
+function saveUsers() {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    console.log('✅ Kullanıcı veritabanı kaydedildi');
+  } catch (error) {
+    console.error('❌ Kullanıcı veritabanı kaydedilirken hata:', error);
+  }
+}
+
+// Uygulama başlatıldığında kullanıcıları yükle
+loadUsers();
+
 
 // Email transporter oluştur
 const emailTransporter = nodemailer.createTransport({
@@ -139,8 +184,6 @@ app.get('/api/health', (req, res) => {
 app.post('/api/auth/login', loginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
-    const clientIP = req.ip;
-    const userAgent = req.get('User-Agent');
 
     // Input validation
     if (!username || !password) {
@@ -153,7 +196,6 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
     // Kullanıcı var mı kontrol et
     const user = users[username];
     if (!user || !user.isActive) {
-      // Kullanıcı yoksa açık mesaj dön
       return res.status(401).json({
         success: false,
         message: 'Böyle bir kullanıcı yok'
@@ -164,18 +206,13 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      // Yanlış şifre - kullanıcı bazlı counter
-      await handleFailedPassword(username, clientIP, userAgent);
       return res.status(401).json({
         success: false,
         message: 'Kullanıcı adı veya şifre hatalı'
       });
     }
 
-    // Başarılı giriş - counter'ı sıfırla
-    failedAttempts.delete(username);
-
-    // JWT token oluştur
+    // Başarılı giriş - JWT token oluştur
     const token = jwt.sign(
       {
         username: user.username,
@@ -205,55 +242,6 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
   }
 });
 
-// Password reset endpoint
-app.post('/api/auth/reset-password', resetLimiter, async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email adresi gerekli'
-      });
-    }
-
-    // Kullanıcıyı email ile bul
-    const user = Object.values(users).find(u => u.email === email);
-
-    if (!user || !user.isActive) {
-      // Kullanıcı yoksa genel mesaj (account enumeration koruması)
-      return res.json({
-        success: true,
-        message: 'Eğer bu email adresi sistemde kayıtlıysa, şifre sıfırlama linki gönderilecektir'
-      });
-    }
-
-    // Reset token oluştur
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const tokenExpiry = Date.now() + (60 * 60 * 1000); // 1 saat
-
-    resetTokens.set(resetToken, {
-      username: user.username,
-      email: user.email,
-      expires: tokenExpiry
-    });
-
-    // Email gönder
-    await sendPasswordResetEmail(user.email, user.username, resetToken);
-
-    res.json({
-      success: true,
-      message: 'Eğer bu email adresi sistemde kayıtlıysa, şifre sıfırlama linki gönderilecektir'
-    });
-
-  } catch (error) {
-    console.error('Password reset error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Sunucu hatası'
-    });
-  }
-});
 
 // Token doğrulama endpoint
 app.post('/api/auth/verify-token', async (req, res) => {
@@ -285,24 +273,74 @@ app.post('/api/auth/verify-token', async (req, res) => {
   }
 });
 
-// Reset failed attempts endpoint
-app.post('/api/auth/reset-attempts', async (req, res) => {
+// Şifre değiştirme endpoint
+app.post('/api/auth/change-password', async (req, res) => {
   try {
-    const { username } = req.body;
-    
-    if (username && failedAttempts.has(username)) {
-      failedAttempts.delete(username);
-      console.log(`Failed attempts reset for user: ${username}`);
+    const { currentPassword, newPassword, token } = req.body;
+
+    if (!currentPassword || !newPassword || !token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tüm alanlar gerekli'
+      });
     }
-    
+
+    // Token'ı doğrula
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
+    const username = decoded.username;
+
+    // Kullanıcıyı bul
+    const user = users[username];
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Kullanıcı bulunamadı'
+      });
+    }
+
+    // Mevcut şifreyi kontrol et
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mevcut şifre yanlış'
+      });
+    }
+
+    // Yeni şifre validasyonu
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Yeni şifre en az 6 karakter olmalıdır'
+      });
+    }
+
+    if (newPassword === currentPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Yeni şifre mevcut şifre ile aynı olamaz'
+      });
+    }
+
+    // Yeni şifreyi hash'le ve kaydet
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.passwordHash = hashedNewPassword;
+
+    // Değişiklikleri dosyaya kaydet
+    saveUsers();
+
+    console.log(`✅ Şifre değiştirildi - Kullanıcı: ${username}`);
+
     res.json({
       success: true,
-      message: 'Failed attempts reset successfully'
+      message: 'Şifre başarıyla değiştirildi'
     });
+
   } catch (error) {
+    console.error('Password change error:', error);
     res.status(500).json({
       success: false,
-      message: 'Reset failed'
+      message: 'Sunucu hatası'
     });
   }
 });
@@ -499,94 +537,7 @@ app.post('/api/send-sms', smsLimiter, async (req, res) => {
   }
 });
 
-// Başarısız şifre yönetimi (sadece var olan kullanıcılar için)
-async function handleFailedPassword(username, clientIP, userAgent) {
-  const currentAttempts = failedAttempts.get(username) || 0;
-  const newAttempts = currentAttempts + 1;
-  failedAttempts.set(username, newAttempts);
 
-  console.log(`Failed password attempt for user: ${username} - Attempt ${newAttempts}`);
-
-  // 3 başarısız deneme sonrası reset linki gönder (sadece kullanıcı varsa)
-  if (newAttempts >= 3) {
-    const user = users[username];
-
-    if (user && user.isActive) {
-      // Sadece gerçek kullanıcıya reset linki gönder
-      await sendPasswordResetEmail(user.email, username);
-      console.log(`Password reset email sent to: ${user.email}`);
-
-      // 15 dakika bekleme süresi
-      setTimeout(() => {
-        failedAttempts.delete(username);
-      }, 15 * 60 * 1000);
-    }
-  }
-}
-
-// Email gönderme fonksiyonu
-async function sendPasswordResetEmail(email, username, resetToken = null) {
-  try {
-    const resetLink = resetToken 
-      ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin?reset=${resetToken}`
-      : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin?reset=manual`;
-    
-    console.log(`[EMAIL] Password reset email would be sent to: ${email}`);
-    console.log(`[EMAIL] Reset link: ${resetLink}`);
-    console.log(`[EMAIL] Username: ${username}`);
-    
-    // Her durumda email gönderimini simüle et (gerçek email gönderimi için EMAIL_USER ve EMAIL_PASS gerekli)
-    const subject = 'TravelKit Admin - Şifre Sıfırlama';
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2563eb;">TravelKit Admin Şifre Sıfırlama</h2>
-        <p>Merhaba <strong>${username}</strong>,</p>
-        <p>Admin hesabınız için şifre sıfırlama talebinde bulundunuz.</p>
-        <p>Aşağıdaki butona tıklayarak yeni şifrenizi belirleyebilirsiniz:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetLink}" 
-             style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Şifremi Sıfırla
-          </a>
-        </div>
-        <p><strong>Önemli:</strong></p>
-        <ul>
-          <li>Bu link 1 saat geçerlidir</li>
-          <li>Sadece bir kez kullanılabilir</li>
-          <li>Bu işlemi siz yapmadıysanız, bu emaili görmezden gelin</li>
-        </ul>
-        <p>İyi günler,<br>TravelKit Ekibi</p>
-        <hr style="margin-top: 30px; border: none; border-top: 1px solid #e5e7eb;">
-        <p style="font-size: 12px; color: #6b7280;">
-          Eğer buton çalışmıyorsa, aşağıdaki linki kopyalayıp tarayıcınıza yapıştırın:<br>
-          <a href="${resetLink}" style="color: #2563eb;">${resetLink}</a>
-        </p>
-      </div>
-    `;
-
-    // Gerçek email gönderimi için EMAIL_USER ve EMAIL_PASS environment variables gerekli
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_USER !== 'travelkit.admin@gmail.com') {
-      const result = await sendEmail(email, subject, html);
-      
-      if (result.success) {
-        console.log(`[EMAIL] Password reset email sent successfully to: ${email}`);
-        return { success: true, messageId: result.messageId };
-      } else {
-        console.error(`[EMAIL] Failed to send email to: ${email}`, result.error);
-        return { success: false, error: result.error };
-      }
-    } else {
-      console.log(`[EMAIL] Email configuration not found. Email would be sent to: ${email}`);
-      console.log(`[EMAIL] To enable real email sending, set EMAIL_USER and EMAIL_PASS environment variables`);
-      console.log(`[EMAIL] Reset link for testing: ${resetLink}`);
-      return { success: true, messageId: 'simulated' };
-    }
-    
-  } catch (error) {
-    console.error('Email sending error:', error);
-    return { success: false, error: error.message };
-  }
-}
 
 // Start server
 app.listen(PORT, () => {

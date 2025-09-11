@@ -510,9 +510,17 @@
 }
 
 @keyframes highlightPulse {
-  0% { background: #fbbf24; }
-  50% { background: #fef3c7; }
-  100% { background: #fef3c7; }
+  0% {
+    background: #fbbf24;
+  }
+
+  50% {
+    background: #fef3c7;
+  }
+
+  100% {
+    background: #fef3c7;
+  }
 }
 
 /* Dark Mode Styles */
@@ -1281,7 +1289,7 @@
 .bulk-actions {
   display: flex;
   justify-content: flex-end;
-padding-right: 24px;
+  padding-right: 24px;
 }
 
 .mark-all-read-btn {
@@ -1555,7 +1563,7 @@ padding-right: 24px;
   .admin-container {
     padding: 20px 16px;
   }
-  
+
   .admin-container h1 {
     font-size: 24px;
   }
@@ -1681,8 +1689,8 @@ padding-right: 24px;
   .stat-number {
     font-size: 24px;
   }
-  
-  
+
+
   .message-header {
     flex-direction: column;
     align-items: flex-start;
@@ -1694,7 +1702,7 @@ padding-right: 24px;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .message-card {
     padding: 20px;
   }
@@ -1841,19 +1849,19 @@ padding-right: 24px;
   .modal-overlay {
     padding: 10px;
   }
-  
+
   .modal-content {
     max-height: 90vh;
   }
-  
+
   .modal-header {
     padding: 16px;
   }
-  
+
   .modal-body {
     padding: 16px;
   }
-  
+
   .modal-actions {
     padding: 16px;
     flex-direction: column;
@@ -1990,7 +1998,8 @@ padding-right: 24px;
 }
 
 .password-input-wrapper .form-input {
-  padding-right: 48px; /* Space for toggle button */
+  padding-right: 48px;
+  /* Space for toggle button */
 }
 
 .dark .password-form .form-input {
@@ -2184,227 +2193,41 @@ padding-right: 24px;
     width: 95%;
     max-width: 500px;
   }
-  
+
   .settings-sections {
     gap: 24px;
   }
-  
+
   .settings-section {
     padding: 16px;
   }
-  
+
   .duration-options {
     justify-content: center;
   }
-  
+
   .duration-btn {
     flex: 1;
     min-width: 60px;
   }
-  
+
   .info-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-  
+
   .password-toggle-btn {
     width: 28px;
     height: 28px;
     font-size: 14px;
   }
-  
+
   .password-input-wrapper .form-input {
     padding-right: 44px;
   }
 }
 
-/* 2FA Styles */
-.two-factor-settings {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.status-enabled {
-  color: #10b981;
-  font-weight: 600;
-}
-
-.status-disabled {
-  color: #ef4444;
-  font-weight: 600;
-}
-
-.enable-2fa-btn, .disable-2fa-btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  align-self: flex-start;
-}
-
-.enable-2fa-btn {
-  background: #10b981;
-  color: white;
-}
-
-.enable-2fa-btn:hover {
-  background: #059669;
-  transform: translateY(-1px);
-}
-
-.disable-2fa-btn {
-  background: #ef4444;
-  color: white;
-}
-
-.disable-2fa-btn:hover {
-  background: #dc2626;
-  transform: translateY(-1px);
-}
-
-.two-factor-setup-modal, .backup-codes-modal, .two-factor-login-modal {
-  max-width: 500px;
-}
-
-.two-factor-setup {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.setup-step {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.setup-step h4 {
-  margin: 0;
-  color: #111111;
-  font-size: 18px;
-}
-
-.setup-step p {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
-.qr-code-container {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.qr-code {
-  width: 200px;
-  height: 200px;
-  border-radius: 8px;
-}
-
-.two-factor-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 18px;
-  text-align: center;
-  letter-spacing: 2px;
-  font-family: 'Courier New', monospace;
-}
-
-.two-factor-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.verify-2fa-btn, .verify-login-2fa-btn {
-  padding: 12px 24px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.verify-2fa-btn:hover, .verify-login-2fa-btn:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-}
-
-.backup-codes {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.backup-codes p {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
-.backup-codes-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.backup-code-item {
-  padding: 8px 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  text-align: center;
-  font-weight: 600;
-  color: #111111;
-}
-
-.copy-codes-btn {
-  padding: 10px 20px;
-  background: #6b7280;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  align-self: flex-start;
-}
-
-.copy-codes-btn:hover {
-  background: #4b5563;
-  transform: translateY(-1px);
-}
-
-.two-factor-login {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-align: center;
-}
-
-.two-factor-login p {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-}
 
 /* Dark Mode Updates for New Design */
 .dark .bulk-actions {
@@ -2435,36 +2258,6 @@ padding-right: 24px;
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Dark mode for 2FA */
-.dark .qr-code-container {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.dark .two-factor-input {
-  background: transparent;
-  border-color: #555555;
-  color: #ffffff;
-}
-
-.dark .username-input,
-.dark .password-input,
-.dark .email-input {
-  background: transparent;
-  border-color: #555555;
-  color: #ffffff;
-}
-
-.dark .username-input:disabled,
-.dark .password-input:disabled {
-  background: transparent;
-  color: #666666;
-}
-
-.dark .backup-codes-list {
-  background: #1e293b;
-  border-color: #334155;
-}
 
 /* Login Form Dark Mode */
 .dark .login-form {
@@ -2493,115 +2286,6 @@ padding-right: 24px;
   background: #0f172a;
   border-color: #334155;
   color: #f1f5f9;
-}
-
-/* 2FA Settings Styles */
-.twofa-status {
-  margin-bottom: 20px;
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  font-weight: 500;
-}
-
-.status-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #ef4444;
-}
-
-.status-dot.active {
-  background: #10b981;
-}
-
-.twofa-description {
-  color: #6b7280;
-  font-size: 14px;
-  margin: 0;
-}
-
-.dark .twofa-description {
-  color: #9ca3af;
-}
-
-.twofa-actions {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.twofa-btn {
-  padding: 10px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: white;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.twofa-btn:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.twofa-btn.enable-btn {
-  background: #10b981;
-  color: white;
-  border-color: #10b981;
-}
-
-.twofa-btn.enable-btn:hover {
-  background: #059669;
-}
-
-.twofa-btn.disable-btn {
-  background: #ef4444;
-  color: white;
-  border-color: #ef4444;
-}
-
-.twofa-btn.disable-btn:hover {
-  background: #dc2626;
-}
-
-.twofa-qr {
-  text-align: center;
-}
-
-.twofa-qr p {
-  margin: 0 0 16px 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.dark .twofa-qr p {
-  color: #9ca3af;
-}
-
-.qr-placeholder {
-  display: inline-block;
-  padding: 20px;
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
-  background: #f9fafb;
-}
-
-.dark .qr-placeholder {
-  border-color: #374151;
-  background: #1f2937;
-}
-
-.qr-code {
-  font-size: 24px;
-  color: #6b7280;
 }
 
 /* Package Management Styles */
@@ -2697,37 +2381,75 @@ padding-right: 24px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-radius: none !important;
 }
+
+.admin-settings-modal__close {
+  width: 40px;
+  height: 40px;
+  color: #000;
+  cursor: pointer;
+  border: none;
+}
+
+.admin-settings-modal__close:hover {
+  transform: scale(1.21);
+  box-shadow: none;
+  background-color: transparent;
+  transition: 0.4s ease-in-out;  
+  }
+
 
 .admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: 24px 32px;
   border-bottom: 1px solid #e5e7eb;
   background: #f8fafc;
+  position: relative;
+  z-index: 5;
+  min-height: 80px;
 }
 
 .admin-modal-header h3 {
-  margin: 0;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 600;
   color: #111827;
+  margin: 0;
 }
 
 .admin-modal-close {
-  background: none;
-  border: none;
+  background: #ffffff;
+  border: 2px solid #d1d5db;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  color: #6b7280;
-  transition: all 0.2s;
+  padding: 12px;
+  border-radius: 12px;
+  color: #000000;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .admin-modal-close:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: #ef4444;
+  color: white;
+  border-color: #dc2626;
+  transform: scale(1.15);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.admin-modal-close svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 4;
+  display: block;
 }
 
 .admin-modal-content {
@@ -2764,7 +2486,7 @@ padding-right: 24px;
 .admin-tab:hover {
   background: #f1f5f9;
   color: #374151;
-  box-shadow: none ;
+  box-shadow: none;
   transform: none !important;
 }
 
@@ -2776,7 +2498,8 @@ padding-right: 24px;
 
 .admin-tab-content {
   flex: 1;
-  overflow-y: auto;
+  height: 100%;
+  overflow: visible;
 }
 
 .tab-panel h4 {
@@ -2802,12 +2525,18 @@ padding-right: 24px;
 }
 
 .dark .admin-modal-close {
-  color: #94a3af;
+  background: #1f2937;
+  border-color: #374151;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .dark .admin-modal-close:hover {
-  background: #334155;
-  color: #e2e8f0;
+  background: #ef4444;
+  color: white;
+  border-color: #dc2626;
+  transform: scale(1.15);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
 }
 
 .dark .admin-tabs {
@@ -2841,11 +2570,11 @@ padding-right: 24px;
     width: 98%;
     max-height: 95vh;
   }
-  
+
   .admin-modal-content {
     flex-direction: column;
   }
-  
+
   .admin-tabs {
     width: 100%;
     flex-direction: row;
@@ -2853,19 +2582,19 @@ padding-right: 24px;
     border-right: none;
     border-bottom: 1px solid #e5e7eb;
   }
-  
+
   .admin-tab {
     min-width: 120px;
     text-align: center;
     border-bottom: none;
     border-right: 1px solid #e5e7eb;
   }
-  
+
   .admin-tab.active {
     border-right: none;
     border-bottom: 3px solid #3b82f6;
   }
-  
+
   .admin-tab-content {
     padding: 16px;
   }
@@ -2874,7 +2603,8 @@ padding-right: 24px;
 /* Admin Settings Modal Layout - İletişim Sayfası Tarzı */
 .admin-settings-layout {
   display: flex;
-  height: 600px;
+  height: 100%;
+  min-height: 600px;
   background: #ffffff;
 }
 
@@ -2984,13 +2714,22 @@ padding-right: 24px;
   flex: 1;
   padding: 0 !important;
   padding-left: 20px !important;
-  overflow-y: auto;
+  height: 100%;
+  overflow: visible;
   background: #ffffff;
   border-left: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .dark .admin-tab-content {
   background: #000000;
+}
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .tab-panel h4 {
@@ -3011,7 +2750,9 @@ padding-right: 24px;
   display: flex;
   flex-direction: column;
   gap: 30px;
-  max-width: 500px;
+  max-width: 100%;
+  height: 100%;
+  justify-content: space-between;
 }
 
 .form-group {
@@ -3111,12 +2852,13 @@ padding-right: 24px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  align-self: flex-start;
-  margin-top: 0;
+  align-self: stretch;
+  margin-top: auto;
   border-radius: 0;
   letter-spacing: 1px;
   text-transform: uppercase;
   outline: none;
+  width: 100%;
 }
 
 .change-password-btn:hover {
@@ -3161,104 +2903,11 @@ padding-right: 24px;
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* 2FA Styles - İletişim Sayfası Tarzı */
-.twofa-status {
-  margin-bottom: 30px;
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.status-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #dc2626;
-  transition: all 0.3s ease;
-}
-
-.status-dot.active {
-  background: #059669;
-}
-
-.twofa-description {
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-}
-
-.dark .twofa-description {
-  color: #94a3af;
-}
-
-.twofa-actions {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.twofa-btn {
-  background: #111111;
-  border: 1px solid #111111;
-  color: white;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-radius: 0;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  outline: none;
-}
-
-.twofa-btn:hover {
-  background: #374151;
-  border-color: #374151;
-}
-
-.dark .twofa-btn {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-}
-
-.dark .twofa-btn:hover {
-  background: #f0f0f0;
-  color: #000000;
-}
-
-.twofa-btn.enable-btn {
-  background: #111111;
-  border-color: #111111;
-}
-
-.twofa-btn.enable-btn:hover {
-  background: #374151;
-  border-color: #374151;
-}
-
-.twofa-btn.disable-btn {
-  background: #dc2626;
-  border-color: #dc2626;
-}
-
-.twofa-btn.disable-btn:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
 }
 
 /* Package Management Styles - İletişim Sayfası Tarzı */
@@ -3365,8 +3014,10 @@ padding-right: 24px;
   border-radius: 0;
   letter-spacing: 1px;
   text-transform: uppercase;
-  align-self: flex-start;
+  align-self: stretch;
   outline: none;
+  width: 100%;
+  margin-top: auto;
 }
 
 .add-package-btn:hover {
@@ -3385,90 +3036,8 @@ padding-right: 24px;
   color: #000000;
 }
 
-/* 2FA Modal Overlay - Sayfanın Ortasında */
-.two-factor-modal-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  background: rgba(0, 0, 0, 0.5) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 10001 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  padding: 20px;
-}
-
-.two-factor-setup-modal {
-  background: #ffffff;
-  border-radius: 8px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.dark .two-factor-setup-modal {
-  background: #000000;
-  border: 1px solid #333333;
-}
 
 /* SMS Butonları */
-.send-sms-btn {
-  background: #111111;
-  color: #ffffff;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 0;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  margin-top: 12px;
-}
-
-.send-sms-btn:hover:not(:disabled) {
-  background: #333333;
-}
-
-.send-sms-btn:disabled {
-  background: #6b7280;
-  cursor: not-allowed;
-}
-
-.dark .send-sms-btn {
-  background: #ffffff;
-  color: #000000;
-}
-
-.dark .send-sms-btn:hover:not(:disabled) {
-  background: #f0f0f0;
-}
-
-.two-factor-setup-modal .modal-header {
-  padding: 24px 24px 0 24px;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 24px;
-}
-
-.dark .two-factor-setup-modal .modal-header {
-  border-bottom-color: #333333;
-}
-
-.two-factor-setup-modal .modal-content {
-  padding: 0 24px 24px 24px;
-}
-
-.two-factor-setup-modal .modal-actions {
-  padding: 0 24px 24px 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
 
 /* Package Modal Styles - Ayarlar modal'ı gibi tasarım */
 .package-modal {
@@ -3621,20 +3190,20 @@ padding-right: 24px;
     width: 98%;
     max-height: 95vh;
   }
-  
+
   .package-modal .modal-header {
     padding: 16px;
   }
-  
+
   .package-modal .modal-body {
     padding: 16px;
   }
-  
+
   .package-modal .modal-actions {
     padding: 16px;
     flex-direction: column;
   }
-  
+
   .package-modal .cancel-btn,
   .package-modal .save-btn {
     width: 100%;
@@ -3688,6 +3257,8 @@ padding-right: 24px;
   display: flex;
   flex-direction: column;
   gap: 32px;
+  height: 100%;
+  justify-content: space-between;
   /* Performance optimizations */
   contain: layout style paint;
   will-change: auto;
@@ -3912,7 +3483,7 @@ padding-right: 24px;
     flex-direction: column;
     min-height: auto;
   }
-  
+
   .admin-tabs-sidebar {
     width: 100%;
     flex-direction: row;
@@ -3921,23 +3492,23 @@ padding-right: 24px;
     border-bottom: 1px solid #e2e8f0;
     padding: 0;
   }
-  
+
   .admin-tab {
     min-width: 120px;
     text-align: center;
     border-left: none;
     padding: 12px 16px;
   }
-  
+
   .admin-tab.active {
     border: none !important;
     border-bottom-color: #1d4ed8;
   }
-  
+
   .dark .admin-tab.active {
     border-bottom-color: #60a5fa;
   }
-  
+
   .admin-tab-content {
     padding: 16px;
   }
@@ -3967,3 +3538,79 @@ padding-right: 24px;
   }
 }
 
+/* Reset Link Modal */
+.reset-link-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.reset-link-content {
+  text-align: center;
+}
+
+.reset-link-box {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  align-items: center;
+}
+
+.reset-link-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f9fafb;
+  color: #374151;
+}
+
+.copy-link-btn {
+  padding: 12px 20px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.copy-link-btn:hover {
+  background-color: #2563eb;
+}
+
+.reset-link-info {
+  text-align: left;
+  background-color: #f3f4f6;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.reset-link-info ul {
+  margin: 10px 0 0 20px;
+  padding: 0;
+}
+
+.reset-link-info li {
+  margin: 5px 0;
+  color: #6b7280;
+}
+
+/* Dark mode for reset modal */
+.dark .reset-link-input {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+.dark .reset-link-info {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark .reset-link-info li {
+  color: #9ca3af;
+}
