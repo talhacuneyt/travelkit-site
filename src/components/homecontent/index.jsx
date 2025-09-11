@@ -2,7 +2,7 @@ import ekonomikImg from '/images/ekonomik.png'
 import ortaImg from '/images/orta.jpg'
 import luxImg from '/images/lux.png'
 import { Link, useNavigate } from 'react-router-dom'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslation } from '../../hooks/useTranslation'
 import './index.css'
 
@@ -20,42 +20,42 @@ function HomeContent() {
   const testimonialsRef = useRef(null)
 
   // Load packages data from localStorage or fallback to translation
-  useEffect(() => {
-    const loadPackages = () => {
-      const packageTypes = ['economic', 'comfort', 'luxury']
-      const packageImages = [ekonomikImg, ortaImg, luxImg]
-      
-      const loadedPackages = packageTypes.map((type, index) => {
-        // Try to load from localStorage first
-        const savedPackage = localStorage.getItem(`package_${type}`)
-        if (savedPackage) {
-          try {
-            const parsedData = JSON.parse(savedPackage)
-            return {
-              name: parsedData.title,
-              price: parsedData.price,
-              img: packageImages[index],
-              key: type
-            }
-          } catch (error) {
-            console.error('Error parsing saved package data:', error)
+  const loadPackages = useCallback(() => {
+    const packageTypes = ['economic', 'comfort', 'luxury']
+    const packageImages = [ekonomikImg, ortaImg, luxImg]
+    
+    const loadedPackages = packageTypes.map((type, index) => {
+      // Try to load from localStorage first
+      const savedPackage = localStorage.getItem(`package_${type}`)
+      if (savedPackage) {
+        try {
+          const parsedData = JSON.parse(savedPackage)
+          return {
+            name: parsedData.title,
+            price: parsedData.price,
+            img: packageImages[index],
+            key: type
           }
+        } catch (error) {
+          console.error('Error parsing saved package data:', error)
         }
+      }
 
-        // Fallback to translation data
-        return {
-          name: t(`home.packages.${type}.title`),
-          price: t(`home.packages.${type}.price`),
-          img: packageImages[index],
-          key: type
-        }
-      })
-      
-      setPackages(loadedPackages)
-    }
-
-    loadPackages()
+      // Fallback to translation data
+      return {
+        name: t(`home.packages.${type}.title`),
+        price: t(`home.packages.${type}.price`),
+        img: packageImages[index],
+        key: type
+      }
+    })
+    
+    setPackages(loadedPackages)
   }, [t])
+
+  useEffect(() => {
+    loadPackages()
+  }, [loadPackages])
 
   const features = [
     {

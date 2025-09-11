@@ -107,7 +107,8 @@ app.use(cors({
     'http://localhost:3000',
     'https://travelkit-site.vercel.app',
     'https://travelkit-site-git-main.vercel.app',
-    'https://travelkit-site.vercel.app'
+    'https://travelkit-site.vercel.app',
+    'https://travelkit-backend.vercel.app'
   ],
   credentials: true
 }));
