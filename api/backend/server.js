@@ -107,10 +107,11 @@ app.use(cors({
     'http://localhost:3000',
     'https://travelkit-site.vercel.app',
     'https://travelkit-site-git-main.vercel.app',
-    'https://travelkit-site.vercel.app',
     'https://travelkit-backend.vercel.app'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -277,6 +278,12 @@ app.post('/api/auth/verify-token', async (req, res) => {
 // Reset attempts endpoint (admin için)
 app.post('/api/auth/reset-attempts', async (req, res) => {
   try {
+    // CORS headers
+    res.header('Access-Control-Allow-Origin', 'https://travelkit-site.vercel.app');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+
     // Bu endpoint sadece admin panelinde kullanılıyor
     // Gerçek implementasyon gerekirse buraya eklenebilir
     res.json({
