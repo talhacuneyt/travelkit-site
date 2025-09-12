@@ -2,7 +2,7 @@ import { useState } from 'react'
 import emailjs from '@emailjs/browser'
 import './index.css'
 import { useTranslation } from '../../hooks/useTranslation'
-import { supabase } from '../../lib/supabase'
+import { supabase, CONTACT_EMAILJS_CONFIG } from '../../lib/supabase'
 import Toast from '../../components/toast'
 
 function Iletisim() {
@@ -67,9 +67,9 @@ function Iletisim() {
     async function sendWithSimpleAPI() {
       try {
         // EmailJS'i direkt kullan (hardcoded keys)
-        const serviceId = 'service_gkqoexj'
-        const templateId = 'template_mlpj99e'
-        const publicKey = 'YHkV0_Y_204JXzOSm'
+        const serviceId = CONTACT_EMAILJS_CONFIG.serviceId
+        const templateId = CONTACT_EMAILJS_CONFIG.templateId
+        const publicKey = CONTACT_EMAILJS_CONFIG.publicKey
         
         const templateParams = {
           from_name: name,

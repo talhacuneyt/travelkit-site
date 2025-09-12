@@ -27,6 +27,13 @@ function SatinAl() {
       }
 
       const response = await fetch(`${API_URL}/api/packages/${packageType}`);
+      
+      // Response'un JSON olup olmadığını kontrol et
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`API returned non-JSON response: ${response.status} ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success && data.data) {
@@ -53,7 +60,93 @@ function SatinAl() {
         }
       }
       
-      return null;
+      // Son çare olarak hardcoded veriyi döndür
+      const fallbackPackages = {
+        economic: {
+          title: 'Ekonomik',
+          description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
+          price: '₺299',
+          sections: {
+            personalCare: 'Kişisel Bakım Ürünleri',
+            comfort: 'Konfor',
+            technology: 'Teknoloji',
+            health: 'Sağlık / İlk Yardım',
+            additions: 'Ekonomik Paket Eklemeleri'
+          },
+          items: {
+            personalCare: [
+              'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+              'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+            ],
+            comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
+            technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
+            health: [
+              'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+              'Burun Spreyi', 'Maske', 'Sineksavar'
+            ],
+            additions: [
+              'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+              'QR Kart, müzik listesi', 'Lavanta kesesi'
+            ]
+          }
+        },
+        comfort: {
+          title: 'Konforlu',
+          description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı.',
+          price: '₺499',
+          sections: {
+            personalCare: 'Kişisel Bakım Ürünleri',
+            comfort: 'Konfor',
+            technology: 'Teknoloji',
+            health: 'Sağlık / İlk Yardım',
+            additions: 'Konforlu Paket Eklemeleri'
+          },
+          items: {
+            personalCare: [
+              'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+              'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+            ],
+            comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği'],
+            technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo', 'Bluetooth Kulaklık'],
+            health: [
+              'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+              'Burun Spreyi', 'Maske', 'Sineksavar'
+            ],
+            additions: [
+              'Bavul İçi Düzenleyici', 'QR Kart, müzik listesi', 'Lavanta kesesi', 'Seyahat Yastığı'
+            ]
+          }
+        },
+        lux: {
+          title: 'Lux',
+          description: 'En lüks seyahat deneyimi için özel olarak seçilmiş premium malzemeler.',
+          price: '₺799',
+          sections: {
+            personalCare: 'Kişisel Bakım Ürünleri',
+            comfort: 'Konfor',
+            technology: 'Teknoloji',
+            health: 'Sağlık / İlk Yardım',
+            additions: 'Lux Paket Eklemeleri'
+          },
+          items: {
+            personalCare: [
+              'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+              'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+            ],
+            comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği', 'Premium Seyahat Yastığı'],
+            technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo', 'Bluetooth Kulaklık', 'Seyahat Adaptörü'],
+            health: [
+              'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+              'Burun Spreyi', 'Maske', 'Sineksavar'
+            ],
+            additions: [
+              'Bavul İçi Düzenleyici', 'QR Kart, müzik listesi', 'Lavanta kesesi', 'Premium Seyahat Yastığı', 'VIP Çanta'
+            ]
+          }
+        }
+      };
+      
+      return fallbackPackages[packageType] || null;
     }
   }
 
@@ -129,7 +222,7 @@ function SatinAl() {
       `Merhaba! TravelKit'ten ${packageTitle} paketini satın almak istiyorum.\n\n` +
       `📦 Paket: ${packageTitle}\n` +
       `💰 Fiyat: ${packagePriceString}\n` +
-      `📋 Açıklama: ${savedPackageData?.description || t(`packages.${packageType}.description`)}\n\n` +
+      `📋 Açıklama: ${packageData?.description || t(`packages.${packageType}.description`)}\n\n` +
       `Lütfen bana detaylı bilgi verin ve sipariş sürecini başlatalım.`
     )
     // WhatsApp'a yönlendir (Türkiye numarası formatı)
@@ -193,7 +286,7 @@ function SatinAl() {
               <h2 className="satin-al__package-title">{packageTitle} Paket</h2>
               <div className="satin-al__package-price">{packagePriceString}</div>
               <p className="satin-al__package-desc">
-                {savedPackageData?.description || t(`packages.${packageType}.description`)}
+                {packageData?.description || t(`packages.${packageType}.description`)}
               </p>
             </div>
 
