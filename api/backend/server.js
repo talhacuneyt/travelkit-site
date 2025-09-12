@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
+import emailjs from '@emailjs/nodejs';
 
 dotenv.config();
 
@@ -625,35 +626,90 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
-    // Send email using nodemailer
-    const emailResult = await sendEmail(
-      'cuneytosmanlioglu@gmail.com', // Admin email
-      `TravelKit İletişim Formu - ${name}`,
-      `
-        <h2>Yeni İletişim Formu Mesajı</h2>
-        <p><strong>İsim:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Mesaj:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
-        <hr>
-        <p><em>Bu mesaj TravelKit web sitesinden gönderilmiştir.</em></p>
-      `
-    );
+    // 1. Supabase'e kaydet
+    try {
+      const { data: contactData, error: dbError } = await supabase
+        .from('contact_messages')
+        .insert([
+          {
+            name: name,
+            email: email,
+            message: message,
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select();
 
-    if (emailResult.success) {
-      console.log(`✅ İletişim formu emaili gönderildi: ${name} - ${email}`);
+      if (dbError) {
+        console.error('Supabase kayıt hatası:', dbError);
+        // Veritabanı hatası olsa bile email göndermeye devam et
+      } else {
+        console.log('✅ Mesaj Supabase\'e kaydedildi:', contactData);
+      }
+    } catch (dbError) {
+      console.error('Supabase bağlantı hatası:', dbError);
+      // Veritabanı hatası olsa bile email göndermeye devam et
+    }
+
+    // 2. EmailJS ile email gönder
+    try {
+      const emailjsResult = await emailjs.send(
+        'service_gkqoexj', // Service ID
+        'template_97boikk', // Template ID
+        {
+          from_name: name,
+          from_email: email,
+          message: message,
+          to_name: 'TravelKit',
+          reply_to: email
+        },
+        {
+          publicKey: 'YHkV0_Y_204JXzOSm' // Public Key
+        }
+      );
+
+      console.log('✅ EmailJS ile email gönderildi:', emailjsResult);
       
       res.json({
         success: true,
-        message: 'Mesajınız başarıyla gönderildi!'
+        message: 'Mesaj kaydedildi ve mail gönderildi'
       });
-    } else {
-      console.error('Email gönderim hatası:', emailResult.error);
+
+    } catch (emailjsError) {
+      console.error('EmailJS hatası:', emailjsError);
       
-      res.status(500).json({
-        success: false,
-        message: 'Email gönderilemedi. Lütfen tekrar deneyin.'
-      });
+      // EmailJS başarısız olursa nodemailer ile dene
+      try {
+        const emailResult = await sendEmail(
+          'cuneytosmanlioglu@gmail.com', // Admin email
+          `TravelKit İletişim Formu - ${name}`,
+          `
+            <h2>Yeni İletişim Formu Mesajı</h2>
+            <p><strong>İsim:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Mesaj:</strong></p>
+            <p>${message.replace(/\n/g, '<br>')}</p>
+            <hr>
+            <p><em>Bu mesaj TravelKit web sitesinden gönderilmiştir.</em></p>
+          `
+        );
+
+        if (emailResult.success) {
+          console.log('✅ Nodemailer ile email gönderildi');
+          res.json({
+            success: true,
+            message: 'Mesaj kaydedildi ve mail gönderildi'
+          });
+        } else {
+          throw new Error('Nodemailer da başarısız oldu');
+        }
+      } catch (nodemailerError) {
+        console.error('Nodemailer hatası:', nodemailerError);
+        res.status(500).json({
+          success: false,
+          message: 'Email gönderilemedi. Lütfen tekrar deneyin.'
+        });
+      }
     }
 
   } catch (error) {

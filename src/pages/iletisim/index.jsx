@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import emailjs from '@emailjs/browser'
 import './index.css'
 import { useTranslation } from '../../hooks/useTranslation'
-import { supabase, CONTACT_EMAILJS_CONFIG } from '../../lib/supabase'
 import Toast from '../../components/toast'
 
 function Iletisim() {
@@ -16,178 +14,27 @@ function Iletisim() {
     const email = form.email?.value || ''
     const message = form.message?.value || ''
 
-    // Veritabanına kaydet (eğer Supabase yapılandırılmışsa)
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('contact_messages')
-          .insert([
-            {
-              name: name,
-              email: email,
-              message: message,
-              created_at: new Date().toISOString()
-            }
-          ])
-        
-        if (error) {
-          console.error('Veritabanı hatası:', error)
-        } else {
-          console.log('Mesaj veritabanına kaydedildi:', data)
-        }
-      } catch (dbError) {
-        console.error('Veritabanı bağlantı hatası:', dbError)
-      }
-    } else {
-      console.log('Supabase yapılandırılmamış. Sadece mail gönderimi yapılıyor.')
-    }
+    try {
+      // Backend API'sine POST isteği gönder
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, message })
+      })
 
-    const serviceId = (
-      import.meta.env.VITE_EMAILJS_SERVICE_ID ||
-      window.localStorage.getItem('EMAILJS_SERVICE_ID') ||
-      ''
-    ).trim()
-    const templateId = (
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID ||
-      window.localStorage.getItem('EMAILJS_TEMPLATE_ID') ||
-      ''
-    ).trim()
-    const publicKey = (
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY ||
-      window.localStorage.getItem('EMAILJS_PUBLIC_KEY') ||
-      ''
-    ).trim()
+      const result = await response.json()
 
-    const web3formsKey = (
-      import.meta.env.VITE_W3F_ACCESS_KEY ||
-      window.localStorage.getItem('W3F_ACCESS_KEY') ||
-      'a1b2c3d4-e5f6-7890-abcd-ef1234567890' // Geçici test key - gerçek key ile değiştirin
-    ).trim()
-
-    async function sendWithSimpleAPI() {
-      try {
-        // EmailJS'i direkt kullan (hardcoded keys)
-        const serviceId = CONTACT_EMAILJS_CONFIG.serviceId
-        const templateId = CONTACT_EMAILJS_CONFIG.templateId
-        const publicKey = CONTACT_EMAILJS_CONFIG.publicKey
-        
-        const templateParams = {
-          from_name: name,
-          from_email: email,
-          message: message,
-          to_name: 'TravelKit',
-          reply_to: email
-        }
-
-        console.log('EmailJS gönderim deneniyor...', { serviceId, templateId, publicKey, templateParams })
-
-        const result = await emailjs.send(serviceId, templateId, templateParams, publicKey)
-        
-        console.log('EmailJS sonucu:', result)
-        
-        if (result.status === 200) {
-          setToast({ message: 'Mesajınız başarıyla gönderildi!', type: 'success' })
-          form.reset()
-        } else {
-          throw new Error(`EmailJS gönderim hatası: ${result.status}`)
-        }
-      } catch (error) {
-        console.error('EmailJS error:', error)
-        
-        // EmailJS başarısız olursa Web3Forms'u dene
-        if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
-          console.log('EmailJS başarısız, Web3Forms deneniyor...')
-          await sendWithWeb3Forms()
-        } else {
-          // Son çare: hata mesajı göster
-          setToast({ 
-            message: 'Mail gönderimi başarısız. Lütfen tekrar deneyin veya WhatsApp üzerinden iletişime geçin.', 
-            type: 'error' 
-          })
-        }
-      }
-    }
-
-    async function sendWithWeb3Forms() {
-      if (!web3formsKey || web3formsKey === 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
-        // Web3Forms key yoksa, basit bir API endpoint kullan
-        await sendWithSimpleAPI()
-        return
-      }
-      try {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: web3formsKey,
-            subject: 'TravelKit iletişim formu',
-            from_name: name,
-            email,
-            message,
-          })
-        })
-        const result = await response.json()
-        if (result?.success) {
-          setToast({ message: t('contact.success'), type: 'success' })
-          form.reset()
-        } else {
-          console.error('Web3Forms hata:', result)
-          setToast({ message: `Gönderim hatası: ${result?.message || 'Web3Forms başarısız'}`, type: 'error' })
-        }
-      } catch (webErr) {
-        console.error('Web3Forms gönderimi sırasında hata:', webErr)
-        setToast({ message: t('contact.error'), type: 'error' })
-      }
-    }
-
-    // EmailJS ile direkt gönderim (Backend API deploy edilene kadar)
-    if (serviceId && templateId && publicKey) {
-      try {
-        console.log('EmailJS ile gönderim deneniyor...')
-        await emailjs.send(
-          serviceId,
-          templateId,
-          {
-            from_name: name,
-            from_email: email,
-            message: message,
-            to_name: 'TravelKit',
-            reply_to: email
-          },
-          { publicKey }
-        )
-        setToast({ message: 'Mesajınız başarıyla gönderildi!', type: 'success' })
+      if (result.success) {
+        setToast({ message: '✅ Mesajınız gönderildi!', type: 'success' })
         form.reset()
-        console.log('EmailJS ile gönderim başarılı!')
-        return
-      } catch (err) {
-        console.error('EmailJS hatası:', err)
-        
-        // EmailJS başarısız olursa Web3Forms'u dene
-        if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
-          console.log('EmailJS başarısız, Web3Forms deneniyor...')
-          await sendWithWeb3Forms()
-        } else {
-          setToast({ 
-            message: 'Mail gönderimi başarısız. Lütfen WhatsApp üzerinden iletişime geçin.', 
-            type: 'error' 
-          })
-        }
-      }
-    } else {
-      // EmailJS yapılandırılmamışsa Web3Forms'u dene
-      if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
-        console.log('EmailJS yapılandırılmamış, Web3Forms deneniyor...')
-        await sendWithWeb3Forms()
       } else {
-        setToast({ 
-          message: 'Mail gönderimi başarısız. Lütfen WhatsApp üzerinden iletişime geçin.', 
-          type: 'error' 
-        })
+        setToast({ message: '❌ Gönderim başarısız', type: 'error' })
       }
+    } catch (error) {
+      console.error('Form gönderim hatası:', error)
+      setToast({ message: '❌ Gönderim başarısız', type: 'error' })
     }
   }
 
