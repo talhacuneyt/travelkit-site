@@ -1,7 +1,7 @@
 {
   "admin": {
     "username": "admin",
-    "email": "cuneytosmanlioglu@gmail.com",
+    "email": "info@travelkit.com.tr",
     "passwordHash": "$2a$10$sDClTtjI9.HLl5.c1DIz/OAMH9o47tTPlCFbJx8Msgp5v8VxCFCOu",
     "isActive": true,
     "role": "admin"

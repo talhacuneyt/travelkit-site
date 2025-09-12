@@ -43,7 +43,7 @@ function loadUsers() {
       users = {
         'admin': {
           username: 'admin',
-          email: 'cuneytosmanlioglu@gmail.com',
+          email: 'info@travelkit.com.tr',
           passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe',
           isActive: true,
           role: 'admin'
@@ -58,7 +58,7 @@ function loadUsers() {
     users = {
       'admin': {
         username: 'admin',
-        email: 'cuneytosmanlioglu@gmail.com',
+        email: 'info@travelkit.com.tr',
         passwordHash: '$2a$12$mxOtN6NUWviwfeNi6eN2te2hPcH5Q8/sy7.Y6l2R6A3UCMTLUOmqe',
         isActive: true,
         role: 'admin'
@@ -695,7 +695,7 @@ app.post('/api/contact', async (req, res) => {
       console.log('📧 Nodemailer ile email gönderilmeye çalışılıyor...');
       try {
         const emailResult = await sendEmail(
-          'cuneytosmanlioglu@gmail.com', // Admin email
+          'info@travelkit.com.tr', // Admin email
           `TravelKit İletişim Formu - ${name}`,
           `
             <h2>Yeni İletişim Formu Mesajı</h2>

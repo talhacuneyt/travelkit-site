@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     const users = {
       'admin': {
         username: 'admin',
-        email: 'cuneytosmanlioglu@gmail.com',
+        email: 'info@travelkit.com.tr',
         passwordHash: '$2a$10$qvfNmGtdCToH6sxPiQl70On1lYVxbJdww9ZC/0/psThHPQynh2.5q',
         isActive: true,
         role: 'admin'

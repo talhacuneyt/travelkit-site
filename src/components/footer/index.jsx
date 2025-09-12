@@ -37,7 +37,7 @@ function Footer() {
         <div className="footer__section">
           <h4 className="footer__section-title">İletişim</h4>
           <div className="footer__contact">
-            <a href="mailto:cuneytosmanlioglu@gmail.com" className="footer__contact-link">cuneytosmanlioglu@gmail.com</a>
+            <a href="mailto:info@travelkit.com.tr" className="footer__contact-link">info@travelkit.com.tr</a>
             <a href="tel:+905529278937" className="footer__contact-link">0552 927 8937</a>
           </div>
         </div>
