@@ -8,11 +8,18 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Supabase configuration
+const supabaseUrl = process.env.SUPABASE_URL || 'https://kegdhelzdksivfekktkx.supabase.co';
+const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2RoZWx6ZGtzaXZmZWtrdGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTA1NDgsImV4cCI6MjA3MjgyNjU0OH0.9srURxR_AsLu5lqwodeFuV-zsmkkr82PRh9RSToqQUU';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // __dirname için ES6 modül uyumluluğu
 const __filename = fileURLToPath(import.meta.url);
@@ -456,32 +463,126 @@ app.post('/api/payments/verify', paymentLimiter, async (req, res) => {
 });
 
 // Package information endpoint
-app.get('/api/packages', (req, res) => {
-  const packages = [
-    {
-      id: 'ekonomik',
-      name: 'Ekonomik Paket',
-      price: 299,
-      features: ['Temel seyahat malzemeleri', '1 kişilik', 'Çanta dahil']
-    },
-    {
-      id: 'konforlu',
-      name: 'Konforlu Paket',
-      price: 499,
-      features: ['Gelişmiş seyahat malzemeleri', '2 kişilik', 'Premium çanta dahil']
-    },
-    {
-      id: 'lux',
-      name: 'Lux Paket',
-      price: 799,
-      features: ['Lüks seyahat malzemeleri', '4 kişilik', 'VIP çanta dahil']
-    }
-  ];
+app.get('/api/packages', async (req, res) => {
+  try {
+    // Supabase'den paketleri çek
+    const { data: packages, error } = await supabase
+      .from('packages')
+      .select('*')
+      .order('id');
 
-  res.json({
-    success: true,
-    data: packages
-  });
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Paketler yüklenirken hata oluştu'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: packages
+    });
+  } catch (error) {
+    console.error('Package fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Sunucu hatası'
+    });
+  }
+});
+
+// Get single package endpoint
+app.get('/api/packages/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data: package, error } = await supabase
+      .from('packages')
+      .select('*')
+      .eq('package_type', id)
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(404).json({
+        success: false,
+        message: 'Paket bulunamadı'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: package
+    });
+  } catch (error) {
+    console.error('Package fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Sunucu hatası'
+    });
+  }
+});
+
+// Update package endpoint
+app.put('/api/packages/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, price, sections, items } = req.body;
+
+    // Validation
+    if (!title || !description || !price) {
+      return res.status(400).json({
+        success: false,
+        message: 'Başlık, açıklama ve fiyat gerekli'
+      });
+    }
+
+    if (isNaN(price) || price <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Geçerli bir fiyat girin'
+      });
+    }
+
+    // Supabase'de paketi güncelle
+    const { data: updatedPackage, error } = await supabase
+      .from('packages')
+      .update({
+        title,
+        description,
+        price: parseFloat(price),
+        sections: sections || {},
+        items: items || {},
+        updated_at: new Date().toISOString()
+      })
+      .eq('package_type', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Paket güncellenirken hata oluştu'
+      });
+    }
+
+    console.log(`✅ Paket güncellendi: ${id} - Fiyat: ${price}`);
+
+    res.json({
+      success: true,
+      message: 'Paket başarıyla güncellendi',
+      data: updatedPackage
+    });
+
+  } catch (error) {
+    console.error('Package update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Sunucu hatası'
+    });
+  }
 });
 
 // Error handling middleware

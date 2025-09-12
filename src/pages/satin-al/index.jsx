@@ -13,22 +13,69 @@ function SatinAl() {
   const searchParams = new URLSearchParams(location.search)
   const packageType = searchParams.get('package') || 'economic'
 
-  // localStorage'dan paket verilerini oku
-  const getPackageData = (packageType) => {
-    const savedPackage = localStorage.getItem(`package_${packageType}`)
-    if (savedPackage) {
-      try {
-        return JSON.parse(savedPackage)
-      } catch (error) {
-        console.error('Error parsing saved package data:', error)
+  // Paket verilerini state'de tut
+  const [packageData, setPackageData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  // API'den paket verilerini çek
+  const getPackageData = async (packageType) => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        console.error('VITE_API_URL environment variable is not defined!');
+        throw new Error('API URL is not configured.');
       }
+
+      const response = await fetch(`${API_URL}/api/packages/${packageType}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        return {
+          title: data.data.title,
+          description: data.data.description,
+          price: `₺${data.data.price}`,
+          sections: data.data.sections,
+          items: data.data.items
+        };
+      } else {
+        throw new Error(data.message || 'Paket verisi alınamadı');
+      }
+    } catch (error) {
+      console.error('API error, falling back to localStorage:', error);
+      
+      // API hatası durumunda localStorage'dan kaydedilmiş veriyi kontrol et
+      const savedPackage = localStorage.getItem(`package_${packageType}`)
+      if (savedPackage) {
+        try {
+          return JSON.parse(savedPackage)
+        } catch (parseError) {
+          console.error('Error parsing saved package data:', parseError)
+        }
+      }
+      
+      return null;
     }
-    return null
   }
 
-  const savedPackageData = getPackageData(packageType)
-  const packageTitle = savedPackageData?.title || t(`packages.${packageType}.title`)
-  const packagePriceString = savedPackageData?.price || t(`packages.${packageType}.price`)
+  // Paket verilerini yükle
+  useEffect(() => {
+    const loadPackageData = async () => {
+      setLoading(true)
+      try {
+        const data = await getPackageData(packageType)
+        setPackageData(data)
+      } catch (error) {
+        console.error('Paket verisi yüklenirken hata:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadPackageData()
+  }, [packageType])
+
+  const packageTitle = packageData?.title || t(`packages.${packageType}.title`)
+  const packagePriceString = packageData?.price || t(`packages.${packageType}.price`)
   // Price string'den sayıya çevir (₺299 -> 299)
   const packagePrice = parseFloat(packagePriceString.replace(/[^\d.]/g, ''))
 
@@ -108,6 +155,25 @@ function SatinAl() {
             </div>
             <div className="satin-al-success__countdown">
               {countdown} saniye sonra {packageTitle} paket sayfasına yönlendirileceksiniz...
+            </div>
+          </div>
+        </main>
+      </>
+    )
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <>
+        <DocumentTitle title="Yükleniyor - TravelKit" />
+        <main className="satin-al">
+          <div className="satin-al__container">
+            <div className="satin-al__content">
+              <div className="satin-al__package-info">
+                <h2 className="satin-al__package-title">Yükleniyor...</h2>
+                <p className="satin-al__package-desc">Paket bilgileri getiriliyor...</p>
+              </div>
             </div>
           </div>
         </main>
@@ -215,3 +281,4 @@ function SatinAl() {
 }
 
 export default SatinAl
+

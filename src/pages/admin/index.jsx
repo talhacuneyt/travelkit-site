@@ -1310,23 +1310,62 @@ function Admin() {
     }))
   }
 
-  const savePackage = () => {
+  const savePackage = async () => {
     // Validation
     if (!packageData.title || !packageData.description || !packageData.price) {
       setPackageError('Lütfen tüm temel alanları doldurun!')
       return
     }
 
-    // Paket verilerini localStorage'a kaydet
-    const packageKey = editingPackage || 'new_package'
-    localStorage.setItem(`package_${packageKey}`, JSON.stringify(packageData))
-
-    setPackageSuccess('✅ Paket başarıyla kaydedildi!')
-
-    // 3 saniye sonra başarı mesajını temizle
-    setTimeout(() => {
+    try {
+      setPackageError('')
       setPackageSuccess('')
-    }, 3000)
+
+      // API URL kontrolü
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        console.error('VITE_API_URL environment variable is not defined!');
+        throw new Error('API URL is not configured. Please set VITE_API_URL environment variable.');
+      }
+
+      // Fiyat string'den sayıya çevir (₺299 -> 299)
+      const numericPrice = parseFloat(packageData.price.replace(/[^\d.]/g, ''));
+
+      // Backend'e paket güncelleme isteği gönder
+      const response = await fetch(`${API_URL}/api/packages/${editingPackage}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: packageData.title,
+          description: packageData.description,
+          price: numericPrice,
+          sections: packageData.sections,
+          items: packageData.items
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPackageSuccess('✅ Paket başarıyla güncellendi!')
+
+        // localStorage'ı da güncelle (fallback için)
+        const packageKey = editingPackage || 'new_package'
+        localStorage.setItem(`package_${packageKey}`, JSON.stringify(packageData))
+
+        // 3 saniye sonra başarı mesajını temizle
+        setTimeout(() => {
+          setPackageSuccess('')
+        }, 3000)
+      } else {
+        setPackageError(data.message || 'Paket güncellenemedi!')
+      }
+    } catch (error) {
+      console.error('Paket güncelleme hatası:', error)
+      setPackageError('Sunucu hatası. Lütfen tekrar deneyin.')
+    }
   }
 
   // Export fonksiyonu
@@ -1923,11 +1962,6 @@ function Admin() {
           </div>
         </div>
       )}
-
-
-
-
-
     </div>
   )
 }
