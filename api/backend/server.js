@@ -498,7 +498,7 @@ app.get('/api/packages/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data: package, error } = await supabase
+    const { data: packageData, error } = await supabase
       .from('packages')
       .select('*')
       .eq('package_type', id)
@@ -514,7 +514,7 @@ app.get('/api/packages/:id', async (req, res) => {
 
     res.json({
       success: true,
-      data: package
+      data: packageData
     });
   } catch (error) {
     console.error('Package fetch error:', error);
@@ -588,11 +588,20 @@ app.put('/api/packages/:id', async (req, res) => {
 
 // Contact form endpoint
 app.post('/api/contact', async (req, res) => {
+  console.log('🚀 Contact endpoint çağrıldı (Backend):', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body
+  });
+
   try {
+    console.log('📝 Request body:', req.body);
     const { name, email, message } = req.body;
 
     // Validate required fields
     if (!name || !email || !message) {
+      console.log('❌ Validation error - missing fields:', { name: !!name, email: !!email, message: !!message });
       return res.status(400).json({
         success: false,
         message: 'İsim, email ve mesaj gerekli'
@@ -602,13 +611,18 @@ app.post('/api/contact', async (req, res) => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      console.log('❌ Email validation error:', email);
       return res.status(400).json({
         success: false,
         message: 'Geçerli bir email adresi girin'
       });
     }
 
+    console.log('✅ Validation passed:', { name, email, message: message.substring(0, 50) + '...' });
+
     // 1. Supabase'e kaydet
+    console.log('💾 Supabase\'e kaydetmeye başlanıyor...');
+    let supabaseSuccess = false;
     try {
       const { data: contactData, error: dbError } = await supabase
         .from('contact_messages')
@@ -623,17 +637,29 @@ app.post('/api/contact', async (req, res) => {
         .select();
 
       if (dbError) {
-        console.error('Supabase kayıt hatası:', dbError);
-        // Veritabanı hatası olsa bile email göndermeye devam et
+        console.error('❌ Supabase kayıt hatası:', {
+          error: dbError,
+          message: dbError.message,
+          details: dbError.details,
+          hint: dbError.hint
+        });
+        supabaseSuccess = false;
       } else {
         console.log('✅ Mesaj Supabase\'e kaydedildi:', contactData);
+        supabaseSuccess = true;
       }
     } catch (dbError) {
-      console.error('Supabase bağlantı hatası:', dbError);
-      // Veritabanı hatası olsa bile email göndermeye devam et
+      console.error('❌ Supabase bağlantı hatası:', {
+        error: dbError,
+        message: dbError.message,
+        stack: dbError.stack
+      });
+      supabaseSuccess = false;
     }
 
     // 2. EmailJS ile email gönder
+    console.log('📧 EmailJS ile email gönderilmeye başlanıyor...');
+    let emailSuccess = false;
     try {
       const emailjsResult = await emailjs.send(
         'service_gkqoexj', // Service ID
@@ -650,17 +676,23 @@ app.post('/api/contact', async (req, res) => {
         }
       );
 
-      console.log('✅ EmailJS ile email gönderildi:', emailjsResult);
-      
-      res.json({
-        success: true,
-        message: 'Mesaj kaydedildi ve mail gönderildi'
+      console.log('✅ EmailJS ile email gönderildi:', {
+        status: emailjsResult.status,
+        text: emailjsResult.text
       });
+      emailSuccess = true;
 
     } catch (emailjsError) {
-      console.error('EmailJS hatası:', emailjsError);
-      
+      console.error('❌ EmailJS hatası:', {
+        error: emailjsError,
+        message: emailjsError.message,
+        status: emailjsError.status,
+        text: emailjsError.text
+      });
+      emailSuccess = false;
+
       // EmailJS başarısız olursa nodemailer ile dene
+      console.log('📧 Nodemailer ile email gönderilmeye çalışılıyor...');
       try {
         const emailResult = await sendEmail(
           'cuneytosmanlioglu@gmail.com', // Admin email
@@ -678,27 +710,58 @@ app.post('/api/contact', async (req, res) => {
 
         if (emailResult.success) {
           console.log('✅ Nodemailer ile email gönderildi');
-          res.json({
-            success: true,
-            message: 'Mesaj kaydedildi ve mail gönderildi'
-          });
+          emailSuccess = true;
         } else {
-          throw new Error('Nodemailer da başarısız oldu');
+          console.error('❌ Nodemailer hatası:', emailResult.error);
+          emailSuccess = false;
         }
       } catch (nodemailerError) {
-        console.error('Nodemailer hatası:', nodemailerError);
-        res.status(500).json({
-          success: false,
-          message: 'Email gönderilemedi. Lütfen tekrar deneyin.'
+        console.error('❌ Nodemailer exception:', {
+          error: nodemailerError,
+          message: nodemailerError.message,
+          stack: nodemailerError.stack
         });
+        emailSuccess = false;
       }
     }
 
+    // Response döndür
+    if (supabaseSuccess && emailSuccess) {
+      console.log('🎉 Hem Supabase hem Email gönderimi başarılı');
+      return res.status(200).json({
+        success: true,
+        message: 'Mesaj kaydedildi ve mail gönderildi'
+      });
+    } else if (supabaseSuccess && !emailSuccess) {
+      console.log('⚠️ Supabase başarılı, Email başarısız');
+      return res.status(200).json({
+        success: true,
+        message: 'Mesaj kaydedildi (email gönderilemedi)'
+      });
+    } else if (!supabaseSuccess && emailSuccess) {
+      console.log('⚠️ Supabase başarısız, Email başarılı');
+      return res.status(200).json({
+        success: true,
+        message: 'Email gönderildi (veritabanına kaydedilemedi)'
+      });
+    } else {
+      console.log('❌ Hem Supabase hem Email başarısız');
+      return res.status(500).json({
+        success: false,
+        message: 'Mesaj kaydedilemedi ve email gönderilemedi'
+      });
+    }
+
   } catch (error) {
-    console.error('Contact form error:', error);
-    res.status(500).json({
+    console.error('💥 Contact form genel hatası:', {
+      error: error,
+      message: error.message,
+      stack: error.stack
+    });
+    return res.status(500).json({
       success: false,
-      message: 'Sunucu hatası. Lütfen tekrar deneyin.'
+      message: 'Sunucu hatası. Lütfen tekrar deneyin.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
