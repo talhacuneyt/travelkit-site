@@ -89,20 +89,20 @@ function Admin() {
     try {
       // Basit JWT token doğrulama (sadece varlık kontrolü)
       if (!token) return null
-      
+
       // Token'ı decode et (basit kontrol)
       const parts = token.split('.')
       if (parts.length !== 3) return null
-      
+
       // Payload'ı decode et
       const payload = JSON.parse(atob(parts[1]))
-      
+
       // Süre kontrolü
       const now = Math.floor(Date.now() / 1000)
       if (payload.exp && payload.exp < now) {
         return null
       }
-      
+
       return payload
     } catch (error) {
       console.error('Token verification error:', error)
@@ -259,13 +259,16 @@ function Admin() {
 
     // Login attempts kontrolü - Hesap kilidini sıfırla
     localStorage.removeItem('admin_login_attempts')
-    
+
     // Backend'deki failed attempts'ı da sıfırla
     const resetBackendAttempts = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL ||
-          (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3001');
-        
+        const API_URL = import.meta.env.VITE_API_URL;
+        if (!API_URL) {
+          console.error('VITE_API_URL environment variable is not defined!');
+          throw new Error('API URL is not configured. Please set VITE_API_URL environment variable.');
+        }
+
         await fetch(`${API_URL}/api/auth/reset-attempts`, {
           method: 'POST',
           headers: {
@@ -277,7 +280,7 @@ function Admin() {
         console.log('Failed to reset backend attempts:', error)
       }
     }
-    
+
     resetBackendAttempts()
 
     // Beni hatırla özelliği güvenlik nedeniyle kaldırıldı
@@ -483,11 +486,14 @@ function Admin() {
 
     try {
       setLoginError('')
-      
+
       // Backend API'sine login isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3001');
-      
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        console.error('VITE_API_URL environment variable is not defined!');
+        throw new Error('API URL is not configured. Please set VITE_API_URL environment variable.');
+      }
+
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -505,14 +511,14 @@ function Admin() {
         // Başarılı giriş - backend'den gelen token'ı kullan
         const token = data.token
         localStorage.setItem('admin_token', token)
-        
-        
+
+
         // Backend'den gelen token ile doğrudan giriş yap
         setIsAuthenticated(true)
         setLoginError('')
         setUsername('')
         setPassword('')
-        
+
         // Navbar'ı güncellemek için custom event gönder
         window.dispatchEvent(new CustomEvent('adminLogin', {
           detail: { isAuthenticated: true }
@@ -521,7 +527,7 @@ function Admin() {
         if (supabase) {
           fetchMessages()
         }
-        
+
         console.log('✅ Admin girişi başarılı!')
       } else {
         // Hatalı giriş
@@ -1003,11 +1009,14 @@ function Admin() {
 
     try {
       // Backend'e şifre değiştirme isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3001');
-      
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        console.error('VITE_API_URL environment variable is not defined!');
+        throw new Error('API URL is not configured. Please set VITE_API_URL environment variable.');
+      }
+
       const token = localStorage.getItem('admin_token')
-      
+
       const response = await fetch(`${API_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: {
@@ -1024,12 +1033,12 @@ function Admin() {
 
       if (data.success) {
         setPasswordSuccess('Şifre başarıyla değiştirildi!')
-        
+
         // Form'u temizle
         setCurrentPassword('')
         setNewPassword('')
         setConfirmPassword('')
-        
+
         // 3 saniye sonra success mesajını temizle
         setTimeout(() => {
           setPasswordSuccess('')

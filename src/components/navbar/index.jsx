@@ -247,8 +247,11 @@ function Navbar() {
 
     try {
       // Backend'e şifre değiştirme isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3001');
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        console.error('VITE_API_URL environment variable is not defined!');
+        throw new Error('API URL is not configured. Please set VITE_API_URL environment variable.');
+      }
       
       const token = localStorage.getItem('admin_token')
       

@@ -2,8 +2,36 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/backend/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.travelkit.com.tr"
+        }
+      ],
+      "destination": "https://travelkit.com.tr/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "travelkit-site.vercel.app"
+        }
+      ],
+      "destination": "https://travelkit.com.tr/$1",
+      "permanent": true
     }
   ]
 }
