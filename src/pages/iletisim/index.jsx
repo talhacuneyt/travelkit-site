@@ -143,74 +143,32 @@ function Iletisim() {
       }
     }
 
-    // Backend API ile gönderim dene
-    try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      if (!API_URL) {
-        throw new Error('API URL is not configured.');
-      }
-
-      console.log('Backend API ile gönderim deneniyor...')
-      
-      const response = await fetch(`${API_URL}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          message
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setToast({ message: data.message, type: 'success' })
+    // EmailJS ile direkt gönderim (Backend API deploy edilene kadar)
+    if (serviceId && templateId && publicKey) {
+      try {
+        console.log('EmailJS ile gönderim deneniyor...')
+        await emailjs.send(
+          serviceId,
+          templateId,
+          {
+            from_name: name,
+            from_email: email,
+            message: message,
+            to_name: 'TravelKit',
+            reply_to: email
+          },
+          { publicKey }
+        )
+        setToast({ message: 'Mesajınız başarıyla gönderildi!', type: 'success' })
         form.reset()
-        console.log('Backend API ile gönderim başarılı!')
+        console.log('EmailJS ile gönderim başarılı!')
         return
-      } else {
-        throw new Error(data.message || 'Backend API hatası')
-      }
-    } catch (apiError) {
-      console.error('Backend API hatası, fallback deneniyor:', apiError)
-      
-      // Backend API başarısız olursa EmailJS'i dene
-      if (serviceId && templateId && publicKey) {
-        try {
-          console.log('EmailJS ile gönderim deneniyor...')
-          await emailjs.send(
-            serviceId,
-            templateId,
-            {
-              from_name: name,
-              reply_to: email,
-              message,
-              to_email: 'cuneytosmanlioglu@gmail.com',
-            },
-            { publicKey }
-          )
-          setToast({ message: t('contact.success'), type: 'success' })
-          form.reset()
-          console.log('EmailJS ile gönderim başarılı!')
-        } catch (err) {
-          console.error('EmailJS hatası:', err)
-          
-          // EmailJS de başarısız olursa Web3Forms'u dene
-          if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
-            await sendWithWeb3Forms()
-          } else {
-            setToast({ 
-              message: 'Mail gönderimi başarısız. Lütfen WhatsApp üzerinden iletişime geçin.', 
-              type: 'error' 
-            })
-          }
-        }
-      } else {
-        // EmailJS yapılandırılmamışsa Web3Forms'u dene
+      } catch (err) {
+        console.error('EmailJS hatası:', err)
+        
+        // EmailJS başarısız olursa Web3Forms'u dene
         if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
+          console.log('EmailJS başarısız, Web3Forms deneniyor...')
           await sendWithWeb3Forms()
         } else {
           setToast({ 
@@ -218,6 +176,17 @@ function Iletisim() {
             type: 'error' 
           })
         }
+      }
+    } else {
+      // EmailJS yapılandırılmamışsa Web3Forms'u dene
+      if (web3formsKey && web3formsKey !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890') {
+        console.log('EmailJS yapılandırılmamış, Web3Forms deneniyor...')
+        await sendWithWeb3Forms()
+      } else {
+        setToast({ 
+          message: 'Mail gönderimi başarısız. Lütfen WhatsApp üzerinden iletişime geçin.', 
+          type: 'error' 
+        })
       }
     }
   }
