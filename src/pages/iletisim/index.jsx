@@ -24,17 +24,34 @@ function Iletisim() {
         body: JSON.stringify({ name, email, message })
       })
 
-      const result = await response.json()
+      // Response kontrolü
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      // JSON parse etmeden önce response'un boş olmadığını kontrol et
+      const text = await response.text()
+      if (!text) {
+        throw new Error('Boş response alındı')
+      }
+
+      let result
+      try {
+        result = JSON.parse(text)
+      } catch (parseError) {
+        console.error('JSON parse hatası:', parseError)
+        throw new Error('Geçersiz response formatı')
+      }
 
       if (result.success) {
         setToast({ message: '✅ Mesajınız gönderildi!', type: 'success' })
         form.reset()
       } else {
-        setToast({ message: '❌ Gönderim başarısız', type: 'error' })
+        setToast({ message: `❌ Gönderim başarısız: ${result.message || 'Bilinmeyen hata'}`, type: 'error' })
       }
     } catch (error) {
       console.error('Form gönderim hatası:', error)
-      setToast({ message: '❌ Gönderim başarısız', type: 'error' })
+      setToast({ message: `❌ Gönderim başarısız: ${error.message}`, type: 'error' })
     }
   }
 
