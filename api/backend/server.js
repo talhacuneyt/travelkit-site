@@ -603,6 +603,68 @@ app.use('*', (req, res) => {
   });
 });
 
+// Contact form endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'İsim, email ve mesaj gerekli'
+      });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Geçerli bir email adresi girin'
+      });
+    }
+
+    // Send email using nodemailer
+    const emailResult = await sendEmail(
+      'cuneytosmanlioglu@gmail.com', // Admin email
+      `TravelKit İletişim Formu - ${name}`,
+      `
+        <h2>Yeni İletişim Formu Mesajı</h2>
+        <p><strong>İsim:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Mesaj:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+        <hr>
+        <p><em>Bu mesaj TravelKit web sitesinden gönderilmiştir.</em></p>
+      `
+    );
+
+    if (emailResult.success) {
+      console.log(`✅ İletişim formu emaili gönderildi: ${name} - ${email}`);
+      
+      res.json({
+        success: true,
+        message: 'Mesajınız başarıyla gönderildi!'
+      });
+    } else {
+      console.error('Email gönderim hatası:', emailResult.error);
+      
+      res.status(500).json({
+        success: false,
+        message: 'Email gönderilemedi. Lütfen tekrar deneyin.'
+      });
+    }
+
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Sunucu hatası. Lütfen tekrar deneyin.'
+    });
+  }
+});
+
 // SMS endpoint
 app.post('/api/send-sms', smsLimiter, async (req, res) => {
   try {
