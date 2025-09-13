@@ -7,7 +7,7 @@ import './index.css'
 
 function Admin() {
   const location = useLocation()
-  // console.log('Admin component loaded, location:', location.pathname) // Production'da devre dışı
+  // Admin component loaded - production için log kaldırıldı
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -211,10 +211,8 @@ function Admin() {
           if (decodedToken) {
             // Geçerli token - giriş yap
             setIsAuthenticated(true)
-            console.log('✅ Geçerli JWT token bulundu, admin paneline yönlendiriliyor')
           } else {
             // Geçersiz token - tüm verileri temizle
-            console.log('❌ Geçersiz JWT token, login sayfasına yönlendiriliyor')
             localStorage.removeItem('admin_token')
             localStorage.removeItem('admin_session')
             localStorage.removeItem('admin_session_timestamp')
@@ -224,7 +222,6 @@ function Admin() {
           }
         } catch (error) {
           // Token doğrulama hatası - tüm verileri temizle
-          console.log('❌ JWT token doğrulama hatası, login sayfasına yönlendiriliyor:', error)
           localStorage.removeItem('admin_token')
           localStorage.removeItem('admin_session')
           localStorage.removeItem('admin_session_timestamp')
@@ -235,7 +232,6 @@ function Admin() {
       } else {
         // Token yok - login sayfası göster
         setIsAuthenticated(false)
-        console.log('❌ JWT token bulunamadı, login sayfası gösteriliyor')
       }
 
       // Loading'i son olarak false yap
@@ -277,7 +273,7 @@ function Admin() {
           body: JSON.stringify({ username: 'admin' })
         })
       } catch (error) {
-        console.log('Failed to reset backend attempts:', error)
+        // Backend attempts reset failed - production için log kaldırıldı
       }
     }
 
@@ -292,7 +288,7 @@ function Admin() {
   // fetchMessages fonksiyonunu buraya taşıdık
   const fetchMessages = useCallback(async () => {
     if (!supabase) {
-      console.warn('Supabase yapılandırılmamış')
+      // Supabase yapılandırılmamış - production için log kaldırıldı
       setLoading(false)
       return
     }
@@ -414,10 +410,9 @@ function Admin() {
   // }, [isAuthenticated, location.pathname])
 
   // showPackageModal state değişikliklerini yakala (sadece development'ta)
+  // showPackageModal state değişikliklerini takip et - production için log kaldırıldı
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Admin sayfasında showPackageModal state değişti:', showPackageModal)
-    }
+    // State değişimi takibi - log kaldırıldı
   }, [showPackageModal])
 
   // Settings modal body scroll prevention
@@ -528,7 +523,7 @@ function Admin() {
           fetchMessages()
         }
 
-        console.log('✅ Admin girişi başarılı!')
+        // Admin girişi başarılı - production için log kaldırıldı
       } else {
         // Hatalı giriş
         setLoginError(data.message)
@@ -542,7 +537,7 @@ function Admin() {
 
 
   function handleLogout() {
-    // console.log('🚪 Admin çıkış yapılıyor...')
+    // Admin çıkış yapılıyor - production için log kaldırıldı
 
     // State'leri temizle
     setIsAuthenticated(false)
@@ -581,7 +576,7 @@ function Admin() {
 
   async function deleteMessage(id) {
     if (!supabase) {
-      console.warn('Supabase yapılandırılmamış')
+      // Supabase yapılandırılmamış - production için log kaldırıldı
       return
     }
 
@@ -1197,12 +1192,12 @@ function Admin() {
   }
 
   const openPackageModal = (packageType = null) => {
-    console.log('🚀 openPackageModal çağrıldı:', packageType)
+    // openPackageModal çağrıldı - production için log kaldırıldı
 
     if (packageType) {
       // Mevcut paket verilerini yükle
       const packageInfo = getPackageData(packageType)
-      console.log('📦 Paket verisi yüklendi:', packageInfo)
+      // Paket verisi yüklendi - production için log kaldırıldı
       setPackageData(packageInfo)
       setEditingPackage(packageType)
     } else {

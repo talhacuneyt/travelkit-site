@@ -17,7 +17,9 @@ function Iletisim() {
 
     try {
       // 1. EmailJS ile email gönder (frontend'de)
-      console.log('📧 EmailJS ile email gönderilmeye başlanıyor...')
+      if (import.meta.env.DEV) {
+        console.log('📧 EmailJS ile email gönderilmeye başlanıyor...')
+      }
       let emailSuccess = false
       try {
         const emailjsResult = await emailjs.send(
@@ -40,7 +42,9 @@ function Iletisim() {
           import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YHkV0_Y_204JXzOSm'
         )
 
-        console.log('✅ EmailJS ile email gönderildi:', emailjsResult)
+        if (import.meta.env.DEV) {
+          console.log('✅ EmailJS ile email gönderildi:', emailjsResult)
+        }
         emailSuccess = true
       } catch (emailjsError) {
         console.error('❌ EmailJS hatası:', emailjsError)
@@ -48,14 +52,18 @@ function Iletisim() {
       }
 
       // 2. Backend API'sine POST isteği gönder (Supabase kaydı için)
-      console.log('💾 Backend API\'sine kayıt için istek gönderiliyor...')
+      if (import.meta.env.DEV) {
+        console.log('💾 Backend API\'sine kayıt için istek gönderiliyor...')
+      }
       
       // API URL'ini belirle - ortam değişkeni öncelikli
       const API_URL = import.meta.env.VITE_API_URL ||
         (import.meta.env.PROD ? 'https://travelkit.com.tr' : 'http://localhost:3001');
       
-      console.log('🔗 API URL:', API_URL);
-      console.log('📤 Gönderilen veri:', { name, email, message: message.substring(0, 50) + '...' });
+      if (import.meta.env.DEV) {
+        console.log('🔗 API URL:', API_URL);
+        console.log('📤 Gönderilen veri:', { name, email, message: message.substring(0, 50) + '...' });
+      }
 
       const response = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
@@ -65,8 +73,10 @@ function Iletisim() {
         body: JSON.stringify({ name, email, message })
       })
 
-      console.log('📥 Response status:', response.status);
-      console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+      if (import.meta.env.DEV) {
+        console.log('📥 Response status:', response.status);
+        console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+      }
 
       // Response kontrolü
       if (!response.ok) {
@@ -88,7 +98,9 @@ function Iletisim() {
       let result
       try {
         result = JSON.parse(text)
-        console.log('✅ Response parsed:', result);
+        if (import.meta.env.DEV) {
+          console.log('✅ Response parsed:', result);
+        }
       } catch (parseError) {
         console.error('❌ JSON parse hatası:', parseError);
         console.error('❌ Raw response:', text);

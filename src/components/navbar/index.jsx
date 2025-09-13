@@ -58,11 +58,9 @@ function Navbar() {
   const [packageSuccess, setPackageSuccess] = useState('')
 
 
-  // showPackageModal state değişikliklerini yakala (sadece development'ta)
+  // showPackageModal state değişikliklerini yakala - production için log kaldırıldı
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Navbar sayfasında showPackageModal state değişti:', showPackageModal)
-    }
+    // State değişimi takibi - log kaldırıldı
   }, [showPackageModal])
 
   // Admin login/logout event'lerini dinle
@@ -404,12 +402,12 @@ function Navbar() {
   }
 
   const openPackageModal = (packageType = null) => {
-    console.log('🚀 openPackageModal çağrıldı:', packageType)
+    // openPackageModal çağrıldı - production için log kaldırıldı
 
     if (packageType) {
       // Mevcut paket verilerini yükle
       const packageInfo = getPackageData(packageType)
-      console.log('📦 Paket verisi yüklendi:', packageInfo)
+      // Paket verisi yüklendi - production için log kaldırıldı
       setPackageData(packageInfo)
       setEditingPackage(packageType)
     } else {
@@ -436,7 +434,7 @@ function Navbar() {
       setEditingPackage(null)
     }
 
-    console.log('✅ showPackageModal true yapılıyor')
+    // showPackageModal true yapılıyor - production için log kaldırıldı
     setShowPackageModal(true)
     setPackageError('')
     setPackageSuccess('')
@@ -916,7 +914,7 @@ function Navbar() {
       </div>
 
       {/* Package Modal */}
-      {console.log('🔍 showPackageModal state:', showPackageModal)}
+      {/* showPackageModal state - production için log kaldırıldı */}
       {showPackageModal && (
         <div className="modal-overlay">
           <div className="package-modal">

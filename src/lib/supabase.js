@@ -17,15 +17,6 @@ export const CONTACT_EMAILJS_CONFIG = {
   templateId: import.meta.env.VITE_CONTACT_TEMPLATE_ID || 'template_contact_form'
 }
 
-// Configuration kontrolü
-console.log('Supabase URL:', supabaseUrl)
-console.log('Supabase Key:', supabaseKey ? 'Mevcut' : 'Yok')
-console.log('EmailJS Public Key:', EMAILJS_CONFIG.publicKey)
-console.log('EmailJS Service ID:', EMAILJS_CONFIG.serviceId)
-console.log('EmailJS Template ID:', EMAILJS_CONFIG.templateId)
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase environment variables bulunamadı. Veritabanı özellikleri devre dışı.')
-}
-console.log('✅ EmailJS yapılandırması tamamlandı!')
+// Configuration kontrolü - production için loglar kaldırıldı
 
 export const supabase = createClient(supabaseUrl, supabaseKey)

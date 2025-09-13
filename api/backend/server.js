@@ -112,6 +112,7 @@ async function sendEmail(to, subject, html) {
   }
 }
 
+
 // Middleware
 app.use(cors({
   origin: [
@@ -786,20 +787,26 @@ app.put('/api/packages/:id', async (req, res) => {
 
 // Contact form endpoint
 app.post('/api/contact', async (req, res) => {
-  console.log('🚀 Contact endpoint çağrıldı (Backend):', {
-    method: req.method,
-    url: req.url,
-    headers: req.headers,
-    body: req.body
-  });
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🚀 Contact endpoint çağrıldı (Backend):', {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: req.body
+    });
+  }
 
   try {
-    console.log('📝 Request body:', req.body);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📝 Request body:', req.body);
+    }
     const { name, email, message } = req.body;
 
     // Validate required fields
     if (!name || !email || !message) {
-      console.log('❌ Validation error - missing fields:', { name: !!name, email: !!email, message: !!message });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ Validation error - missing fields:', { name: !!name, email: !!email, message: !!message });
+      }
       return res.status(400).json({
         success: false,
         message: 'İsim, email ve mesaj gerekli'
@@ -809,17 +816,23 @@ app.post('/api/contact', async (req, res) => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      console.log('❌ Email validation error:', email);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ Email validation error:', email);
+      }
       return res.status(400).json({
         success: false,
         message: 'Geçerli bir email adresi girin'
       });
     }
 
-    console.log('✅ Validation passed:', { name, email, message: message.substring(0, 50) + '...' });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Validation passed:', { name, email, message: message.substring(0, 50) + '...' });
+    }
 
     // 1. Supabase'e kaydet
-    console.log('💾 Supabase\'e kaydetmeye başlanıyor...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('💾 Supabase\'e kaydetmeye başlanıyor...');
+    }
     let supabaseSuccess = false;
     try {
       const { data: contactData, error: dbError } = await supabase
@@ -843,7 +856,9 @@ app.post('/api/contact', async (req, res) => {
         });
         supabaseSuccess = false;
       } else {
-        console.log('✅ Mesaj Supabase\'e kaydedildi:', contactData);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Mesaj Supabase\'e kaydedildi:', contactData);
+        }
         supabaseSuccess = true;
       }
     } catch (dbError) {
@@ -857,13 +872,17 @@ app.post('/api/contact', async (req, res) => {
 
     // Response döndür - Sadece Supabase kaydı
     if (supabaseSuccess) {
-      console.log('✅ Mesaj Supabase\'e kaydedildi');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Mesaj Supabase\'e kaydedildi');
+      }
       return res.status(200).json({
         success: true,
         message: 'Mesaj başarıyla kaydedildi'
       });
     } else {
-      console.log('❌ Supabase kayıt başarısız');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ Supabase kayıt başarısız');
+      }
       return res.status(500).json({
         success: false,
         message: 'Mesaj kaydedilemedi'
