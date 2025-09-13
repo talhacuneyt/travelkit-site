@@ -16,11 +16,42 @@ function Iletisim() {
     const message = form.message?.value || ''
 
     try {
-      // API URL'ini belirle - production'da Vercel API route kullan
+      // 1. EmailJS ile email gönder (frontend'de)
+      console.log('📧 EmailJS ile email gönderilmeye başlanıyor...')
+      let emailSuccess = false
+      try {
+        const emailjsResult = await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_gkqoexj',
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_97boikk',
+          {
+            from_name: name,
+            from_email: email,
+            message: message,
+            to_name: 'TravelKit',
+            reply_to: email,
+            user_name: name,
+            user_email: email,
+            user_message: message,
+            company_name: 'TravelKit',
+            subject: `İletişim Formu - ${name}`,
+            date: new Date().toLocaleDateString('tr-TR'),
+            time: new Date().toLocaleTimeString('tr-TR')
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YHkV0_Y_204JXzOSm'
+        )
+
+        console.log('✅ EmailJS ile email gönderildi:', emailjsResult)
+        emailSuccess = true
+      } catch (emailjsError) {
+        console.error('❌ EmailJS hatası:', emailjsError)
+        emailSuccess = false
+      }
+
+      // 2. Backend API'sine POST isteği gönder (Supabase kaydı için)
+      console.log('💾 Backend API\'sine kayıt için istek gönderiliyor...')
       const API_URL = import.meta.env.VITE_API_URL ||
         (import.meta.env.PROD ? 'https://travelkit.com.tr' : 'http://localhost:3001');
 
-      // Backend API'sine POST isteği gönder
       const response = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
         headers: {
@@ -34,7 +65,6 @@ function Iletisim() {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      // JSON parse etmeden önce response'un boş olmadığını kontrol et
       const text = await response.text()
       if (!text) {
         throw new Error('Boş response alındı')
@@ -48,39 +78,20 @@ function Iletisim() {
         throw new Error('Geçersiz response formatı')
       }
 
-      if (result.success) {
-        // EmailJS ile email gönder (template'li)
-        try {
-          const emailjsResult = await emailjs.send(
-            import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_gkqoexj',
-            import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_97boikk',
-            {
-              from_name: name,
-              from_email: email,
-              message: message,
-              to_name: 'TravelKit',
-              reply_to: email,
-              user_name: name,
-              user_email: email,
-              user_message: message,
-              company_name: 'TravelKit',
-              subject: `İletişim Formu - ${name}`,
-              date: new Date().toLocaleDateString('tr-TR'),
-              time: new Date().toLocaleTimeString('tr-TR')
-            },
-            import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YHkV0_Y_204JXzOSm'
-          )
-
-          console.log('✅ EmailJS ile email gönderildi:', emailjsResult)
-          setToast({ message: '✅ Mesaj kaydedildi ve email gönderildi!', type: 'success' })
-        } catch (emailjsError) {
-          console.error('❌ EmailJS hatası:', emailjsError)
-          setToast({ message: '✅ Mesaj kaydedildi ancak email gönderilemedi.', type: 'warning' })
-        }
+      // 3. Sonuçları değerlendir ve kullanıcıya bildirim göster
+      if (result.success && emailSuccess) {
+        setToast({ message: '✅ Mesajınız başarıyla gönderildi!', type: 'success' })
+        form.reset()
+      } else if (result.success && !emailSuccess) {
+        setToast({ message: '✅ Mesaj kaydedildi ancak email gönderilemedi.', type: 'warning' })
+        form.reset()
+      } else if (!result.success && emailSuccess) {
+        setToast({ message: '⚠️ Email gönderildi ancak mesaj kaydedilemedi.', type: 'warning' })
         form.reset()
       } else {
-        setToast({ message: `❌ Gönderim başarısız: ${result.message || 'Bilinmeyen hata'}`, type: 'error' })
+        setToast({ message: '❌ Gönderim başarısız. Lütfen tekrar deneyin.', type: 'error' })
       }
+
     } catch (error) {
       console.error('Form gönderim hatası:', error)
       setToast({ message: `❌ Gönderim başarısız: ${error.message}`, type: 'error' })

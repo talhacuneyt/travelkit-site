@@ -9,7 +9,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
-import emailjs from '@emailjs/nodejs';
 
 dotenv.config();
 
@@ -856,72 +855,18 @@ app.post('/api/contact', async (req, res) => {
       supabaseSuccess = false;
     }
 
-    // 2. EmailJS ile email gönder (template'li)
-    console.log('📧 EmailJS ile email gönderilmeye başlanıyor...');
-    let emailSuccess = false;
-    try {
-      const emailjsResult = await emailjs.send(
-        'service_gkqoexj', // Service ID
-        'template_97boikk', // Template ID
-        {
-          from_name: name,
-          from_email: email,
-          message: message,
-          to_name: 'TravelKit',
-          reply_to: email,
-          user_name: name,
-          user_email: email,
-          user_message: message,
-          company_name: 'TravelKit',
-          subject: `İletişim Formu - ${name}`,
-          date: new Date().toLocaleDateString('tr-TR'),
-          time: new Date().toLocaleTimeString('tr-TR')
-        },
-        {
-          publicKey: 'YHkV0_Y_204JXzOSm' // Public Key
-        }
-      );
-
-      console.log('✅ EmailJS ile email gönderildi:', {
-        status: emailjsResult.status,
-        text: emailjsResult.text
-      });
-      emailSuccess = true;
-
-    } catch (emailjsError) {
-      console.error('❌ EmailJS hatası:', {
-        error: emailjsError,
-        message: emailjsError.message,
-        status: emailjsError.status,
-        text: emailjsError.text
-      });
-      emailSuccess = false;
-    }
-
-    // Response döndür
-    if (supabaseSuccess && emailSuccess) {
-      console.log('🎉 Hem Supabase hem EmailJS başarılı');
+    // Response döndür - Sadece Supabase kaydı
+    if (supabaseSuccess) {
+      console.log('✅ Mesaj Supabase\'e kaydedildi');
       return res.status(200).json({
         success: true,
-        message: 'Mesaj kaydedildi ve mail gönderildi'
-      });
-    } else if (supabaseSuccess && !emailSuccess) {
-      console.log('⚠️ Supabase başarılı, EmailJS başarısız');
-      return res.status(200).json({
-        success: true,
-        message: 'Mesaj kaydedildi (email gönderilemedi)'
-      });
-    } else if (!supabaseSuccess && emailSuccess) {
-      console.log('⚠️ Supabase başarısız, EmailJS başarılı');
-      return res.status(200).json({
-        success: true,
-        message: 'Email gönderildi (veritabanına kaydedilemedi)'
+        message: 'Mesaj başarıyla kaydedildi'
       });
     } else {
-      console.log('❌ Hem Supabase hem EmailJS başarısız');
+      console.log('❌ Supabase kayıt başarısız');
       return res.status(500).json({
         success: false,
-        message: 'Mesaj kaydedilemedi ve email gönderilemedi'
+        message: 'Mesaj kaydedilemedi'
       });
     }
 
