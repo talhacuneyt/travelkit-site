@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { supabase, EMAILJS_CONFIG } from '../../lib/supabase'
 import emailjs from '@emailjs/browser'
 import { SignJWT, jwtVerify } from 'jose'
+import { getPackagePrice, logPriceChange } from '../../config/prices'
 import './index.css'
 
 function Admin() {
@@ -1099,7 +1100,7 @@ function Admin() {
       economic: {
         title: 'Ekonomik',
         description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-        price: '₺299',
+        price: getPackagePrice('economic'), // Merkezi config'den fiyat al
         sections: {
           personalCare: 'Kişisel Bakım Ürünleri',
           comfort: 'Konfor',
@@ -1127,7 +1128,7 @@ function Admin() {
       comfort: {
         title: 'Konforlu',
         description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
-        price: '₺599',
+        price: getPackagePrice('comfort'), // Merkezi config'den fiyat al
         sections: {
           personalCare: 'Kişisel Bakım Ürünleri',
           comfort: 'Konfor',
@@ -1157,7 +1158,7 @@ function Admin() {
       luxury: {
         title: 'Lüks',
         description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
-        price: '₺999',
+        price: getPackagePrice('luxury'), // Merkezi config'den fiyat al
         sections: {
           personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
           comfort: 'Konfor',

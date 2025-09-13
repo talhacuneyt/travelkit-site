@@ -15,8 +15,16 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: undefined
+          manualChunks: undefined,
+          // Cache busting için dosya isimlerine timestamp ekle
+          entryFileNames: `assets/[name]-[hash].js`,
+          chunkFileNames: `assets/[name]-[hash].js`,
+          assetFileNames: `assets/[name]-[hash].[ext]`
         }
+      },
+      // Cache busting için build ID ekle
+      define: {
+        __BUILD_TIME__: JSON.stringify(new Date().toISOString())
       }
     },
     define: {

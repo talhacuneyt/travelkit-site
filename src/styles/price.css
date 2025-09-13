@@ -1,0 +1,119 @@
+/* Fiyat formatı için CSS sınıfları */
+
+.price {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price--large {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.price--medium {
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.price--small {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.price--currency {
+  font-size: 0.8em;
+  margin-right: 0.1em;
+}
+
+.price--amount {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Responsive fiyat görünümü */
+@media (max-width: 768px) {
+  .price--large {
+    font-size: 1.5rem;
+  }
+  
+  .price--medium {
+    font-size: 1.25rem;
+  }
+  
+  .price--small {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .price--large {
+    font-size: 1.25rem;
+  }
+  
+  .price--medium {
+    font-size: 1.1rem;
+  }
+  
+  .price--small {
+    font-size: 0.85rem;
+  }
+}
+
+/* Fiyat container'ı - kesilmesini önler */
+.price-container {
+  display: inline-block;
+  min-width: fit-content;
+  max-width: 100%;
+}
+
+/* Package card'larda fiyat */
+.package-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .package-price {
+    font-size: 1.25rem;
+  }
+}
+
+/* Admin panelinde fiyat */
+.admin-price {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* Form input'larında fiyat placeholder */
+.price-input {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+/* Fiyat değişikliği animasyonu */
+.price-change {
+  transition: all 0.3s ease-in-out;
+}
+
+.price-change--updated {
+  background-color: #fef3c7;
+  border-radius: 4px;
+  padding: 2px 4px;
+  animation: priceUpdate 0.6s ease-in-out;
+}
+
+@keyframes priceUpdate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}

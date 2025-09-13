@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useDarkMode } from '../../contexts/DarkModeContext'
 import { useTranslation } from '../../hooks/useTranslation'
+import { getPackagePrice, logPriceChange } from '../../config/prices'
 import './index.css'
 
 function Navbar() {
@@ -309,7 +310,7 @@ function Navbar() {
       economic: {
         title: 'Ekonomik',
         description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-        price: '₺299',
+        price: getPackagePrice('economic'), // Merkezi config'den fiyat al
         sections: {
           personalCare: 'Kişisel Bakım Ürünleri',
           comfort: 'Konfor',
@@ -337,7 +338,7 @@ function Navbar() {
       comfort: {
         title: 'Konforlu',
         description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
-        price: '₺599',
+        price: getPackagePrice('comfort'), // Merkezi config'den fiyat al
         sections: {
           personalCare: 'Kişisel Bakım Ürünleri',
           comfort: 'Konfor',
@@ -367,7 +368,7 @@ function Navbar() {
       luxury: {
         title: 'Lüks',
         description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
-        price: '₺999',
+        price: getPackagePrice('luxury'), // Merkezi config'den fiyat al
         sections: {
           personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
           comfort: 'Konfor',
@@ -712,7 +713,7 @@ function Navbar() {
                                 <div key={packageType} className="package-item">
                                   <div className="package-info">
                                     <h5>{packageData?.title || packageNames[packageType]}</h5>
-                                    <p>Fiyat: {packageData?.price || '₺299'}</p>
+                                    <p>Fiyat: {packageData?.price || getPackagePrice('economic')}</p>
                                   </div>
                                   <button
                                     className="edit-package-btn"
@@ -785,7 +786,7 @@ function Navbar() {
                         value={packageData.price}
                         onChange={(e) => handlePackageDataChange('price', e.target.value)}
                         className="form-input"
-                        placeholder="₺299"
+                        placeholder={getPackagePrice('economic')}
                       />
                     </div>
                   </div>
@@ -955,7 +956,7 @@ function Navbar() {
                       value={packageData.price}
                       onChange={(e) => handlePackageDataChange('price', e.target.value)}
                       className="form-input"
-                      placeholder="₺299"
+                      placeholder={getPackagePrice('economic')}
                     />
                   </div>
                 </div>

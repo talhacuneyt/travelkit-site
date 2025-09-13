@@ -4,6 +4,8 @@ import luxImg from '/images/lux.png'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslation } from '../../hooks/useTranslation'
+import { getPackagePrice, logPriceChange } from '../../config/prices'
+import Price from '../Price/Price'
 import './index.css'
 
 function HomeContent() {
@@ -19,7 +21,7 @@ function HomeContent() {
   const packagesHeadingRef = useRef(null)
   const testimonialsRef = useRef(null)
 
-  // Load packages data from localStorage or fallback to translation
+  // Load packages data from localStorage or fallback to config
   const loadPackages = useCallback(() => {
     const packageTypes = ['economic', 'comfort', 'luxury']
     const packageImages = [ekonomikImg, ortaImg, luxImg]
@@ -30,9 +32,16 @@ function HomeContent() {
       if (savedPackage) {
         try {
           const parsedData = JSON.parse(savedPackage)
+          const configPrice = getPackagePrice(type)
+          
+          // Fiyat değişikliğini logla
+          if (parsedData.price !== configPrice) {
+            logPriceChange(type, parsedData.price, configPrice)
+          }
+          
           return {
             name: parsedData.title,
-            price: parsedData.price,
+            price: configPrice, // Merkezi config'den fiyat al
             img: packageImages[index],
             key: type
           }
@@ -41,10 +50,10 @@ function HomeContent() {
         }
       }
 
-      // Fallback to translation data
+      // Fallback to config data
       return {
         name: t(`home.packages.${type}.title`),
-        price: t(`home.packages.${type}.price`),
+        price: getPackagePrice(type), // Merkezi config'den fiyat al
         img: packageImages[index],
         key: type
       }

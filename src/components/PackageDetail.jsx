@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from '../hooks/useTranslation'
+import { getPackagePrice, logPriceChange } from '../config/prices'
 
 // SVG icons as components
 const PersonalCareIcon = () => (
@@ -72,7 +73,7 @@ const PackageDetail = ({ packageType }) => {
     economic: {
       title: 'Ekonomik',
       description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-      price: '₺299',
+      price: getPackagePrice('economic'), // Merkezi config'den fiyat al
       sections: {
         personalCare: 'Kişisel Bakım Ürünleri',
         comfort: 'Konfor',
@@ -100,7 +101,7 @@ const PackageDetail = ({ packageType }) => {
     comfort: {
       title: 'Konforlu',
       description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı.',
-      price: '₺599',
+      price: getPackagePrice('comfort'), // Merkezi config'den fiyat al
       sections: {
         personalCare: 'Kişisel Bakım Ürünleri',
         comfort: 'Konfor',
@@ -130,7 +131,7 @@ const PackageDetail = ({ packageType }) => {
     luxury: {
       title: 'Lüks',
       description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
-      price: '₺999',
+      price: getPackagePrice('luxury'), // Merkezi config'den fiyat al
       sections: {
         personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
         comfort: 'Konfor',

@@ -470,6 +470,12 @@ app.post('/api/payments/verify', paymentLimiter, async (req, res) => {
 
 // Package information endpoint
 app.get('/api/packages', async (req, res) => {
+  // Cache control headers - fiyat değişikliklerini garanti etmek için
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('ETag', `"packages-${Date.now()}"`);
+
   try {
     // Hardcoded paket verileri
     const packages = [

@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useState, useEffect } from 'react'
 import DocumentTitle from '../../components/DocumentTitle'
+import { getPackagePrice, logPriceChange } from '../../config/prices'
 import './index.css'
 
 function SatinAl() {
@@ -65,7 +66,7 @@ function SatinAl() {
         economic: {
           title: 'Ekonomik',
           description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-          price: '₺299',
+          price: getPackagePrice('economic'), // Merkezi config'den fiyat al
           sections: {
             personalCare: 'Kişisel Bakım Ürünleri',
             comfort: 'Konfor',
@@ -93,7 +94,7 @@ function SatinAl() {
         comfort: {
           title: 'Konforlu',
           description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı.',
-          price: '₺499',
+          price: getPackagePrice('comfort'), // Merkezi config'den fiyat al
           sections: {
             personalCare: 'Kişisel Bakım Ürünleri',
             comfort: 'Konfor',
@@ -120,7 +121,7 @@ function SatinAl() {
         lux: {
           title: 'Lux',
           description: 'En lüks seyahat deneyimi için özel olarak seçilmiş premium malzemeler.',
-          price: '₺799',
+          price: getPackagePrice('luxury'), // Merkezi config'den fiyat al
           sections: {
             personalCare: 'Kişisel Bakım Ürünleri',
             comfort: 'Konfor',

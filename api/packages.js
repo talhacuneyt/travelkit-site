@@ -5,6 +5,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
+  // Cache control headers - fiyat değişikliklerini garanti etmek için
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('ETag', `"packages-${Date.now()}"`);
+
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -20,25 +26,33 @@ export default async function handler(req, res) {
         id: 'ekonomik',
         name: 'Ekonomik Paket',
         price: 299,
-        features: ['Temel seyahat malzemeleri', '1 kişilik', 'Çanta dahil']
+        formattedPrice: '₺299,00',
+        features: ['Temel seyahat malzemeleri', '1 kişilik', 'Çanta dahil'],
+        lastUpdated: new Date().toISOString()
       },
       {
         id: 'konforlu',
         name: 'Konforlu Paket',
-        price: 499,
-        features: ['Gelişmiş seyahat malzemeleri', '2 kişilik', 'Premium çanta dahil']
+        price: 599,
+        formattedPrice: '₺599,00',
+        features: ['Gelişmiş seyahat malzemeleri', '2 kişilik', 'Premium çanta dahil'],
+        lastUpdated: new Date().toISOString()
       },
       {
         id: 'lux',
         name: 'Lux Paket',
-        price: 799,
-        features: ['Lüks seyahat malzemeleri', '4 kişilik', 'VIP çanta dahil']
+        price: 999,
+        formattedPrice: '₺999,00',
+        features: ['Lüks seyahat malzemeleri', '4 kişilik', 'VIP çanta dahil'],
+        lastUpdated: new Date().toISOString()
       }
     ];
 
     res.status(200).json({
       success: true,
-      data: packages
+      data: packages,
+      version: '1.0.0',
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {

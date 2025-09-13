@@ -33,17 +33,17 @@ export const tr = {
       subtitle: 'Her bütçe ve ihtiyaca uygun hazır seyahat setleri',
       economic: {
         title: 'Ekonomik',
-        price: '₺299',
+        price: '₺299,00',
         features: ['Diş fırçası & macun', 'Şampuan & sabun', 'Havlu', 'Çorap']
       },
       comfort: {
         title: 'Konforlu',
-        price: '₺599',
+        price: '₺599,00',
         features: ['Ekonomik paket içeriği', 'Yüz bakım seti', 'Nemlendirici', 'Güneş kremi']
       },
       luxury: {
         title: 'Lüks',
-        price: '₺999',
+        price: '₺999,00',
         features: ['Konforlu paket içeriği', 'Premium bakım ürünleri', 'Organik ürünler', 'Özel çanta']
       }
     },
