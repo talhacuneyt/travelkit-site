@@ -80,12 +80,17 @@ function saveUsers() {
 loadUsers();
 
 
-// Email transporter oluştur
+// Email transporter oluştur - SMTP konfigürasyonu
 const emailTransporter = nodemailer.createTransport({
-  service: 'gmail', // Gmail kullanıyoruz
+  host: process.env.MAIL_HOST || 'mail.kurumsaleposta.com',
+  port: parseInt(process.env.MAIL_PORT) || 465,
+  secure: true, // 465 portu için true
   auth: {
-    user: process.env.EMAIL_USER || 'travelkit.admin@gmail.com',
-    pass: process.env.EMAIL_PASS || 'your-app-password'
+    user: process.env.MAIL_USER || 'info@travelkit.com.tr',
+    pass: process.env.MAIL_PASSWORD || 'mail-sifrem'
+  },
+  tls: {
+    rejectUnauthorized: false // SSL sertifika doğrulamasını atla
   }
 });
 
@@ -93,7 +98,7 @@ const emailTransporter = nodemailer.createTransport({
 async function sendEmail(to, subject, html) {
   try {
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'your-email@gmail.com',
+      from: process.env.MAIL_USER || 'info@travelkit.com.tr',
       to: to,
       subject: subject,
       html: html
@@ -466,19 +471,112 @@ app.post('/api/payments/verify', paymentLimiter, async (req, res) => {
 // Package information endpoint
 app.get('/api/packages', async (req, res) => {
   try {
-    // Supabase'den paketleri çek
-    const { data: packages, error } = await supabase
-      .from('packages')
-      .select('*')
-      .order('id');
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Paketler yüklenirken hata oluştu'
-      });
-    }
+    // Hardcoded paket verileri
+    const packages = [
+      {
+        id: 1,
+        package_type: 'economic',
+        title: 'Ekonomik',
+        description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
+        price: 299,
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Ekonomik Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+          ],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
+          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+            'QR Kart, müzik listesi', 'Lavanta kesesi'
+          ]
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        package_type: 'comfort',
+        title: 'Konforlu',
+        description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
+        price: 599,
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'KONFOR PAKET EKLEMELERİ'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+            'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
+            'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
+          technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
+          ]
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 3,
+        package_type: 'luxury',
+        title: 'Lüks',
+        description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
+        price: 999,
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Lüks Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
+            'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+            'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
+            'El Dezenfektanı', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
+          technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici',
+            'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı',
+            'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
+          ]
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
 
     res.json({
       success: true,
@@ -498,14 +596,115 @@ app.get('/api/packages/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data: packageData, error } = await supabase
-      .from('packages')
-      .select('*')
-      .eq('package_type', id)
-      .single();
+    // Hardcoded paket verileri
+    const packages = {
+      'economic': {
+        id: 1,
+        package_type: 'economic',
+        title: 'Ekonomik',
+        description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
+        price: 299,
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Ekonomik Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+          ],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
+          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+            'QR Kart, müzik listesi', 'Lavanta kesesi'
+          ]
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      'comfort': {
+        id: 2,
+        package_type: 'comfort',
+        title: 'Konforlu',
+        description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
+        price: 599,
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'KONFOR PAKET EKLEMELERİ'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+            'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
+            'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
+          technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
+          ]
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      'luxury': {
+        id: 3,
+        package_type: 'luxury',
+        title: 'Lüks',
+        description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
+        price: 999,
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Lüks Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
+            'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+            'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
+            'El Dezenfektanı', 'Tarak'
+          ],
+          comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
+          technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+            'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi',
+            'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici',
+            'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı',
+            'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
+          ]
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    };
 
-    if (error) {
-      console.error('Supabase error:', error);
+    const packageData = packages[id];
+    if (!packageData) {
       return res.status(404).json({
         success: false,
         message: 'Paket bulunamadı'
@@ -657,7 +856,7 @@ app.post('/api/contact', async (req, res) => {
       supabaseSuccess = false;
     }
 
-    // 2. EmailJS ile email gönder
+    // 2. EmailJS ile email gönder (template'li)
     console.log('📧 EmailJS ile email gönderilmeye başlanıyor...');
     let emailSuccess = false;
     try {
@@ -669,7 +868,14 @@ app.post('/api/contact', async (req, res) => {
           from_email: email,
           message: message,
           to_name: 'TravelKit',
-          reply_to: email
+          reply_to: email,
+          user_name: name,
+          user_email: email,
+          user_message: message,
+          company_name: 'TravelKit',
+          subject: `İletişim Formu - ${name}`,
+          date: new Date().toLocaleDateString('tr-TR'),
+          time: new Date().toLocaleTimeString('tr-TR')
         },
         {
           publicKey: 'YHkV0_Y_204JXzOSm' // Public Key
@@ -690,62 +896,29 @@ app.post('/api/contact', async (req, res) => {
         text: emailjsError.text
       });
       emailSuccess = false;
-
-      // EmailJS başarısız olursa nodemailer ile dene
-      console.log('📧 Nodemailer ile email gönderilmeye çalışılıyor...');
-      try {
-        const emailResult = await sendEmail(
-          'info@travelkit.com.tr', // Admin email
-          `TravelKit İletişim Formu - ${name}`,
-          `
-            <h2>Yeni İletişim Formu Mesajı</h2>
-            <p><strong>İsim:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Mesaj:</strong></p>
-            <p>${message.replace(/\n/g, '<br>')}</p>
-            <hr>
-            <p><em>Bu mesaj TravelKit web sitesinden gönderilmiştir.</em></p>
-          `
-        );
-
-        if (emailResult.success) {
-          console.log('✅ Nodemailer ile email gönderildi');
-          emailSuccess = true;
-        } else {
-          console.error('❌ Nodemailer hatası:', emailResult.error);
-          emailSuccess = false;
-        }
-      } catch (nodemailerError) {
-        console.error('❌ Nodemailer exception:', {
-          error: nodemailerError,
-          message: nodemailerError.message,
-          stack: nodemailerError.stack
-        });
-        emailSuccess = false;
-      }
     }
 
     // Response döndür
     if (supabaseSuccess && emailSuccess) {
-      console.log('🎉 Hem Supabase hem Email gönderimi başarılı');
+      console.log('🎉 Hem Supabase hem EmailJS başarılı');
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi ve mail gönderildi'
       });
     } else if (supabaseSuccess && !emailSuccess) {
-      console.log('⚠️ Supabase başarılı, Email başarısız');
+      console.log('⚠️ Supabase başarılı, EmailJS başarısız');
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi (email gönderilemedi)'
       });
     } else if (!supabaseSuccess && emailSuccess) {
-      console.log('⚠️ Supabase başarısız, Email başarılı');
+      console.log('⚠️ Supabase başarısız, EmailJS başarılı');
       return res.status(200).json({
         success: true,
         message: 'Email gönderildi (veritabanına kaydedilemedi)'
       });
     } else {
-      console.log('❌ Hem Supabase hem Email başarısız');
+      console.log('❌ Hem Supabase hem EmailJS başarısız');
       return res.status(500).json({
         success: false,
         message: 'Mesaj kaydedilemedi ve email gönderilemedi'

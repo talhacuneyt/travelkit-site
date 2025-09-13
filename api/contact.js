@@ -97,7 +97,7 @@ export default async function handler(req, res) {
       supabaseSuccess = false;
     }
 
-    // 2. EmailJS ile email gönder
+    // 2. EmailJS ile email gönder (template'li)
     console.log('📧 EmailJS ile email gönderilmeye başlanıyor...');
     let emailSuccess = false;
     try {
@@ -109,7 +109,14 @@ export default async function handler(req, res) {
           from_email: email,
           message: message,
           to_name: 'TravelKit',
-          reply_to: email
+          reply_to: email,
+          user_name: name,
+          user_email: email,
+          user_message: message,
+          company_name: 'TravelKit',
+          subject: `İletişim Formu - ${name}`,
+          date: new Date().toLocaleDateString('tr-TR'),
+          time: new Date().toLocaleTimeString('tr-TR')
         },
         {
           publicKey: 'YHkV0_Y_204JXzOSm' // Public Key

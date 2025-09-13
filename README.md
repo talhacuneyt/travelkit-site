@@ -45,10 +45,57 @@ npm run dev
 
 ### Backend (Geliştirme)
 ```bash
-cd backend
+cd api/backend
 npm install
 npm run dev
 ```
+
+## 🔐 Ortam Değişkenleri
+
+Backend için gerekli ortam değişkenlerini `api/backend/.env` dosyasında tanımlayın:
+
+```env
+# Supabase Configuration
+SUPABASE_URL=https://kegdhelzdksivfekktkx.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# JWT Secret
+JWT_SECRET=your-super-secret-jwt-key-here
+
+# Mail Configuration (EmailJS - Template'li email gönderimi)
+VITE_EMAILJS_SERVICE_ID=service_gkqoexj
+VITE_EMAILJS_TEMPLATE_ID=template_97boikk
+VITE_EMAILJS_PUBLIC_KEY=YHkV0_Y_204JXzOSm
+
+# Mail Configuration (SMTP - Alternatif)
+MAIL_HOST=mail.kurumsaleposta.com
+MAIL_PORT=465
+MAIL_USER=info@travelkit.com.tr
+MAIL_PASSWORD=your-mail-password
+
+# Twilio SMS (Optional)
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_PHONE_NUMBER=your-twilio-phone-number
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+```
+
+### Vercel Deployment
+
+Vercel'de deployment için Environment Variables'ı ayarlayın:
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `JWT_SECRET`
+- `VITE_EMAILJS_SERVICE_ID`
+- `VITE_EMAILJS_TEMPLATE_ID`
+- `VITE_EMAILJS_PUBLIC_KEY`
+- `MAIL_HOST` (opsiyonel)
+- `MAIL_PORT` (opsiyonel)
+- `MAIL_USER` (opsiyonel)
+- `MAIL_PASSWORD` (opsiyonel)
 
 ## 📱 Kullanım
 

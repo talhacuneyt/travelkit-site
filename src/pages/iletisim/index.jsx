@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './index.css'
 import { useTranslation } from '../../hooks/useTranslation'
 import Toast from '../../components/toast'
+import emailjs from '@emailjs/browser'
 
 function Iletisim() {
   const { t } = useTranslation()
@@ -48,7 +49,34 @@ function Iletisim() {
       }
 
       if (result.success) {
-        setToast({ message: '✅ Mesajınız gönderildi!', type: 'success' })
+        // EmailJS ile email gönder (template'li)
+        try {
+          const emailjsResult = await emailjs.send(
+            import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_gkqoexj',
+            import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_97boikk',
+            {
+              from_name: name,
+              from_email: email,
+              message: message,
+              to_name: 'TravelKit',
+              reply_to: email,
+              user_name: name,
+              user_email: email,
+              user_message: message,
+              company_name: 'TravelKit',
+              subject: `İletişim Formu - ${name}`,
+              date: new Date().toLocaleDateString('tr-TR'),
+              time: new Date().toLocaleTimeString('tr-TR')
+            },
+            import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YHkV0_Y_204JXzOSm'
+          )
+
+          console.log('✅ EmailJS ile email gönderildi:', emailjsResult)
+          setToast({ message: '✅ Mesaj kaydedildi ve email gönderildi!', type: 'success' })
+        } catch (emailjsError) {
+          console.error('❌ EmailJS hatası:', emailjsError)
+          setToast({ message: '✅ Mesaj kaydedildi ancak email gönderilemedi.', type: 'warning' })
+        }
         form.reset()
       } else {
         setToast({ message: `❌ Gönderim başarısız: ${result.message || 'Bilinmeyen hata'}`, type: 'error' })
