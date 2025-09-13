@@ -49,8 +49,13 @@ function Iletisim() {
 
       // 2. Backend API'sine POST isteği gönder (Supabase kaydı için)
       console.log('💾 Backend API\'sine kayıt için istek gönderiliyor...')
+      
+      // API URL'ini belirle - ortam değişkeni öncelikli
       const API_URL = import.meta.env.VITE_API_URL ||
         (import.meta.env.PROD ? 'https://travelkit.com.tr' : 'http://localhost:3001');
+      
+      console.log('🔗 API URL:', API_URL);
+      console.log('📤 Gönderilen veri:', { name, email, message: message.substring(0, 50) + '...' });
 
       const response = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
@@ -60,21 +65,33 @@ function Iletisim() {
         body: JSON.stringify({ name, email, message })
       })
 
+      console.log('📥 Response status:', response.status);
+      console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+
       // Response kontrolü
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text();
+        console.error('❌ HTTP Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`)
       }
 
       const text = await response.text()
       if (!text) {
+        console.error('❌ Boş response alındı');
         throw new Error('Boş response alındı')
       }
 
       let result
       try {
         result = JSON.parse(text)
+        console.log('✅ Response parsed:', result);
       } catch (parseError) {
-        console.error('JSON parse hatası:', parseError)
+        console.error('❌ JSON parse hatası:', parseError);
+        console.error('❌ Raw response:', text);
         throw new Error('Geçersiz response formatı')
       }
 
@@ -93,7 +110,11 @@ function Iletisim() {
       }
 
     } catch (error) {
-      console.error('Form gönderim hatası:', error)
+      console.error('❌ Form gönderim hatası:', {
+        error: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       setToast({ message: `❌ Gönderim başarısız: ${error.message}`, type: 'error' })
     }
   }
