@@ -26,7 +26,7 @@ function SatinAl() {
         throw new Error('API URL is not configured.');
       }
 
-      const response = await fetch(`${API_URL}/api/packages/${packageType}`);
+      const response = await fetch(`${API_URL}/api/packages`);
       
       // Response'un JSON olup olmadığını kontrol et
       const contentType = response.headers.get('content-type');
@@ -37,12 +37,18 @@ function SatinAl() {
       const data = await response.json();
 
       if (data.success && data.data) {
+        // Tüm paketlerden istenen paketi bul
+        const packageData = data.data.find(pkg => pkg.id === packageType);
+        
+        if (!packageData) {
+          throw new Error('Paket bulunamadı');
+        }
+
         return {
-          title: data.data.title,
-          description: data.data.description,
-          price: `₺${data.data.price}`,
-          sections: data.data.sections,
-          items: data.data.items
+          title: packageData.name,
+          description: packageData.description || 'Seyahat paketi',
+          price: `₺${packageData.price}`,
+          features: packageData.features
         };
       } else {
         throw new Error(data.message || 'Paket verisi alınamadı');
