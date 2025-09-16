@@ -263,7 +263,7 @@ function Admin() {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-        await fetch(`${API_URL}/api/auth/reset-attempts`, {
+        await fetch(`${API_URL}/api/backend/auth/reset-attempts`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -289,7 +289,7 @@ function Admin() {
       // Mesajlar çekiliyor
 
       // Backend API'den mesajları çek
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/messages`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/backend/messages`)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -517,7 +517,7 @@ function Admin() {
       // Backend API'sine login isteği gönder
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/backend/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1036,7 +1036,7 @@ function Admin() {
 
       const token = localStorage.getItem('admin_token')
 
-      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+      const response = await fetch(`${API_URL}/api/backend/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1347,7 +1347,7 @@ function Admin() {
       const numericPrice = parseFloat(packageData.price.replace(/[^\d.]/g, ''));
 
       // Backend'e paket güncelleme isteği gönder
-      const response = await fetch(`${API_URL}/api/packages/${editingPackage}`, {
+      const response = await fetch(`${API_URL}/api/backend/packages/${editingPackage}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
