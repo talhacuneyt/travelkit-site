@@ -261,8 +261,11 @@ function Admin() {
     // Backend'deki failed attempts'ı da sıfırla
     const resetBackendAttempts = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        console.log('API_URL:', API_URL, 'VITE_API_URL:', import.meta.env.VITE_API_URL);
+        const API_URL = import.meta.env.VITE_API_URL;
+        if (!API_URL) {
+          throw new Error('VITE_API_URL environment variable is not defined');
+        }
+        // API URL loaded
 
         await fetch(`${API_URL}/api/auth/reset-attempts`, {
           method: 'POST',
@@ -290,7 +293,11 @@ function Admin() {
       // Mesajlar çekiliyor
 
       // Backend API'den mesajları çek
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/messages`)
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        throw new Error('VITE_API_URL environment variable is not defined');
+      }
+      const response = await fetch(`${API_URL}/api/messages`)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -516,7 +523,10 @@ function Admin() {
       setLoginError('')
 
       // Backend API'sine login isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        throw new Error('VITE_API_URL environment variable is not defined');
+      }
 
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
@@ -1033,7 +1043,10 @@ function Admin() {
 
     try {
       // Backend'e şifre değiştirme isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        throw new Error('VITE_API_URL environment variable is not defined');
+      }
 
       const token = localStorage.getItem('admin_token')
 
@@ -1342,7 +1355,10 @@ function Admin() {
       setPackageSuccess('')
 
       // API URL kontrolü
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        throw new Error('VITE_API_URL environment variable is not defined');
+      }
 
       // Fiyat string'den sayıya çevir (₺299 -> 299)
       const numericPrice = parseFloat(packageData.price.replace(/[^\d.]/g, ''));
