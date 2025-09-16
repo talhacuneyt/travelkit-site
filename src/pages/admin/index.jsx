@@ -262,6 +262,7 @@ function Admin() {
     const resetBackendAttempts = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        console.log('API_URL:', API_URL, 'VITE_API_URL:', import.meta.env.VITE_API_URL);
 
         await fetch(`${API_URL}/api/auth/reset-attempts`, {
           method: 'POST',
