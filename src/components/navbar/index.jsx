@@ -239,16 +239,10 @@ function Navbar() {
     }
 
     try {
-      // Backend'e şifre değiştirme isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL;
-      if (!API_URL) {
-        console.error('VITE_API_URL environment variable is not defined!');
-        throw new Error('API URL is not configured. Please set VITE_API_URL environment variable.');
-      }
-
+      // Backend'e şifre değiştirme isteği gönder (proxy üzerinden)
       const token = localStorage.getItem('admin_token')
 
-      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+      const response = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -608,12 +602,7 @@ function Navbar() {
                       🔐 Şifre Değiştir
                     </button>
 
-                    <button
-                      className={`admin-tab ${settingsActiveTab === 'packages' ? 'active' : ''}`}
-                      onClick={() => setSettingsActiveTab('packages')}
-                    >
-                      📦 Paket Güncelle
-                    </button>
+
                   </div>
                   <div className="admin-tab-content">
                     {settingsActiveTab === 'password' && (
@@ -689,48 +678,6 @@ function Navbar() {
                       </div>
                     )}
 
-
-                    {settingsActiveTab === 'packages' && (
-                      <div className="tab-panel">
-                        <h4>Paket Yönetimi</h4>
-                        <div className="package-management">
-                          <div className="package-list">
-                            {['economic', 'comfort', 'luxury'].map((packageType) => {
-                              const packageData = getPackageData(packageType)
-                              const packageNames = {
-                                economic: 'Ekonomik Paket',
-                                comfort: 'Konforlu Paket',
-                                luxury: 'Lüks Paket'
-                              }
-
-                              return (
-                                <div key={packageType} className="package-item">
-                                  <div className="package-info">
-                                    <h5>{packageData?.title || packageNames[packageType]}</h5>
-                                    <p>Fiyat: {packageData?.price || '₺299'}</p>
-                                  </div>
-                                  <button
-                                    className="edit-package-btn"
-                                    onClick={() => {
-                                      console.log(`🔘 ${packageNames[packageType]} butonuna tıklandı`)
-                                      openPackageModal(packageType)
-                                    }}
-                                  >
-                                    ✏️ Düzenle
-                                  </button>
-                                </div>
-                              )
-                            })}
-                          </div>
-                          <button
-                            className="add-package-btn"
-                            onClick={() => openPackageModal()}
-                          >
-                            ➕ Yeni Paket Ekle
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

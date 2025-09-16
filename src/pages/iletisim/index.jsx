@@ -15,12 +15,8 @@ function Iletisim() {
     const message = form.message?.value || ''
 
     try {
-      // API URL'ini belirle - production'da Vercel API route kullan
-      const API_URL = import.meta.env.VITE_API_URL ||
-        (import.meta.env.PROD ? 'https://travelkit.com.tr' : 'http://localhost:3001');
-
-      // Backend API'sine POST isteği gönder
-      const response = await fetch(`${API_URL}/api/contact`, {
+      // Backend API'sine POST isteği gönder (proxy üzerinden)
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

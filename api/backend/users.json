@@ -1,0 +1,9 @@
+{
+  "admin": {
+    "username": "admin",
+    "email": "info@travelkit.com.tr",
+    "passwordHash": "$2a$10$Pb1Gxv1LDHvbBZBxy2cSFOoqkZYXDS88eIWOqFmzbRkYX66szaTGe",
+    "isActive": true,
+    "role": "admin"
+  }
+}

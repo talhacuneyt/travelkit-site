@@ -43,33 +43,6 @@ function Admin() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [settingsActiveTab, setSettingsActiveTab] = useState('password')
 
-  // Package Management States
-  const [showPackageModal, setShowPackageModal] = useState(false)
-  const [editingPackage, setEditingPackage] = useState(null)
-  const [packageData, setPackageData] = useState({
-    title: '',
-    description: '',
-    price: '',
-    sections: {
-      personalCare: '',
-      comfort: '',
-      technology: '',
-      health: '',
-      additions: ''
-    },
-    items: {
-      personalCare: [],
-      comfort: [],
-      technology: [],
-      health: [],
-      additions: []
-    }
-  })
-  const [packageError, setPackageError] = useState('')
-  const [packageSuccess, setPackageSuccess] = useState('')
-
-
-
 
   // JWT Secret (production'da environment variable kullanılmalı)
   const JWT_SECRET = new TextEncoder().encode(import.meta.env.VITE_JWT_SECRET || 'fallback-secret-key')
@@ -109,12 +82,6 @@ function Admin() {
       return null
     }
   }
-
-
-
-
-
-
 
   const completeLogin = async () => {
     // JWT token oluştur
@@ -261,13 +228,7 @@ function Admin() {
     // Backend'deki failed attempts'ı da sıfırla
     const resetBackendAttempts = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        if (!API_URL) {
-          throw new Error('VITE_API_URL environment variable is not defined');
-        }
-        // API URL loaded
-
-        await fetch(`${API_URL}/api/auth/reset-attempts`, {
+        await fetch('/api/auth/reset-attempts', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -292,12 +253,8 @@ function Admin() {
     try {
       // Mesajlar çekiliyor
 
-      // Backend API'den mesajları çek
-      const API_URL = import.meta.env.VITE_API_URL;
-      if (!API_URL) {
-        throw new Error('VITE_API_URL environment variable is not defined');
-      }
-      const response = await fetch(`${API_URL}/api/messages`)
+      // Backend API'den mesajları çek (proxy üzerinden)
+      const response = await fetch('/api/messages')
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -436,24 +393,6 @@ function Admin() {
     }
   }, [isAuthenticated])
 
-  // URL'ye göre paket modal'ını aç - Artık kullanılmıyor, onClick handler'lar kullanılıyor
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     const path = location.pathname
-  //     if (path === '/admin/paket/ekonomik') {
-  //       openPackageModal('economic')
-  //     } else if (path === '/admin/paket/konforlu') {
-  //       openPackageModal('comfort')
-  //     } else if (path === '/admin/paket/lux') {
-  //       openPackageModal('luxury')
-  //     }
-  //   }
-  // }, [isAuthenticated, location.pathname])
-
-  // showPackageModal state değişikliklerini yakala (sadece development'ta)
-  useEffect(() => {
-    // Debug log removed
-  }, [showPackageModal])
 
   // Settings modal body scroll prevention
   useEffect(() => {
@@ -522,13 +461,8 @@ function Admin() {
     try {
       setLoginError('')
 
-      // Backend API'sine login isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL;
-      if (!API_URL) {
-        throw new Error('VITE_API_URL environment variable is not defined');
-      }
-
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      // Backend API'sine login isteği gönder (proxy üzerinden)
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -573,8 +507,6 @@ function Admin() {
     }
   }
 
-
-
   function handleLogout() {
     // console.log('🚪 Admin çıkış yapılıyor...')
 
@@ -608,10 +540,6 @@ function Admin() {
     // Sayfayı yenile ve login sayfasına yönlendir
     window.location.reload()
   }
-
-
-
-
 
   async function deleteMessage(id) {
     if (!supabase) {
@@ -1042,15 +970,10 @@ function Admin() {
     }
 
     try {
-      // Backend'e şifre değiştirme isteği gönder
-      const API_URL = import.meta.env.VITE_API_URL;
-      if (!API_URL) {
-        throw new Error('VITE_API_URL environment variable is not defined');
-      }
-
+      // Backend'e şifre değiştirme isteği gönder (proxy üzerinden)
       const token = localStorage.getItem('admin_token')
 
-      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+      const response = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1119,286 +1042,6 @@ function Admin() {
     )
   }
 
-  // Package Management Functions
-  const getPackageData = (packageType) => {
-    // Önce localStorage'dan kaydedilmiş veriyi kontrol et
-    const savedPackage = localStorage.getItem(`package_${packageType}`)
-    if (savedPackage) {
-      try {
-        const parsedData = JSON.parse(savedPackage)
-        return parsedData
-      } catch (error) {
-        console.error('Error parsing saved package data:', error)
-      }
-    }
-
-    // localStorage'da veri yoksa hardcoded veriyi kullan
-    const packages = {
-      economic: {
-        title: 'Ekonomik',
-        description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-        price: '₺299',
-        sections: {
-          personalCare: 'Kişisel Bakım Ürünleri',
-          comfort: 'Konfor',
-          technology: 'Teknoloji',
-          health: 'Sağlık / İlk Yardım',
-          additions: 'Ekonomik Paket Eklemeleri'
-        },
-        items: {
-          personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
-            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
-          ],
-          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
-          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
-          health: [
-            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
-            'Burun Spreyi', 'Maske', 'Sineksavar'
-          ],
-          additions: [
-            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
-            'QR Kart, müzik listesi', 'Lavanta kesesi'
-          ]
-        }
-      },
-      comfort: {
-        title: 'Konforlu',
-        description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
-        price: '₺599',
-        sections: {
-          personalCare: 'Kişisel Bakım Ürünleri',
-          comfort: 'Konfor',
-          technology: 'Teknoloji',
-          health: 'Sağlık / İlk Yardım',
-          additions: 'KONFOR PAKET EKLEMELERİ'
-        },
-        items: {
-          personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
-            'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
-            'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
-          ],
-          comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
-          technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
-          health: [
-            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
-            'Burun Spreyi', 'Maske', 'Sineksavar'
-          ],
-          additions: [
-            'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
-            'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi',
-            'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
-          ]
-        }
-      },
-      luxury: {
-        title: 'Lüks',
-        description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
-        price: '₺999',
-        sections: {
-          personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
-          comfort: 'Konfor',
-          technology: 'Teknoloji',
-          health: 'Sağlık / İlk Yardım',
-          additions: 'Lüks Paket Eklemeleri'
-        },
-        items: {
-          personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
-            'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
-            'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
-            'El Dezenfektanı', 'Tarak'
-          ],
-          comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
-          technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
-          health: [
-            'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
-            'Burun Spreyi', 'Maske', 'Sineksavar'
-          ],
-          additions: [
-            'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
-            'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi',
-            'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici',
-            'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı',
-            'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
-          ]
-        }
-      }
-    }
-    return packages[packageType] || null
-  }
-
-  const openPackageModal = (packageType = null) => {
-    console.log('🚀 openPackageModal çağrıldı:', packageType)
-
-    if (packageType) {
-      // Mevcut paket verilerini yükle
-      const packageInfo = getPackageData(packageType)
-      console.log('📦 Paket verisi yüklendi:', packageInfo)
-      setPackageData(packageInfo)
-      setEditingPackage(packageType)
-    } else {
-      // Yeni paket oluştur
-      setPackageData({
-        title: '',
-        description: '',
-        price: '',
-        sections: {
-          personalCare: '',
-          comfort: '',
-          technology: '',
-          health: '',
-          additions: ''
-        },
-        items: {
-          personalCare: [],
-          comfort: [],
-          technology: [],
-          health: [],
-          additions: []
-        }
-      })
-      setEditingPackage(null)
-    }
-
-    setShowPackageModal(true)
-    setPackageError('')
-    setPackageSuccess('')
-  }
-
-  const closePackageModal = () => {
-    setShowPackageModal(false)
-    setEditingPackage(null)
-    setPackageData({
-      title: '',
-      description: '',
-      price: '',
-      sections: {
-        personalCare: '',
-        comfort: '',
-        technology: '',
-        health: '',
-        additions: ''
-      },
-      items: {
-        personalCare: [],
-        comfort: [],
-        technology: [],
-        health: [],
-        additions: []
-      }
-    })
-    setPackageError('')
-    setPackageSuccess('')
-  }
-
-  const handlePackageDataChange = (field, value) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.')
-      setPackageData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }))
-    } else {
-      setPackageData(prev => ({
-        ...prev,
-        [field]: value
-      }))
-    }
-  }
-
-  const handleItemChange = (section, index, value) => {
-    setPackageData(prev => ({
-      ...prev,
-      items: {
-        ...prev.items,
-        [section]: prev.items[section].map((item, i) =>
-          i === index ? value : item
-        )
-      }
-    }))
-  }
-
-  const addItem = (section) => {
-    setPackageData(prev => ({
-      ...prev,
-      items: {
-        ...prev.items,
-        [section]: [...prev.items[section], '']
-      }
-    }))
-  }
-
-  const removeItem = (section, index) => {
-    setPackageData(prev => ({
-      ...prev,
-      items: {
-        ...prev.items,
-        [section]: prev.items[section].filter((_, i) => i !== index)
-      }
-    }))
-  }
-
-  const savePackage = async () => {
-    // Validation
-    if (!packageData.title || !packageData.description || !packageData.price) {
-      setPackageError('Lütfen tüm temel alanları doldurun!')
-      return
-    }
-
-    try {
-      setPackageError('')
-      setPackageSuccess('')
-
-      // API URL kontrolü
-      const API_URL = import.meta.env.VITE_API_URL;
-      if (!API_URL) {
-        throw new Error('VITE_API_URL environment variable is not defined');
-      }
-
-      // Fiyat string'den sayıya çevir (₺299 -> 299)
-      const numericPrice = parseFloat(packageData.price.replace(/[^\d.]/g, ''));
-
-      // Backend'e paket güncelleme isteği gönder
-      const response = await fetch(`${API_URL}/api/packages/${editingPackage}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: packageData.title,
-          description: packageData.description,
-          price: numericPrice,
-          sections: packageData.sections,
-          items: packageData.items
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setPackageSuccess('✅ Paket başarıyla güncellendi!')
-
-        // localStorage'ı da güncelle (fallback için)
-        const packageKey = editingPackage || 'new_package'
-        localStorage.setItem(`package_${packageKey}`, JSON.stringify(packageData))
-
-        // 3 saniye sonra başarı mesajını temizle
-        setTimeout(() => {
-          setPackageSuccess('')
-        }, 3000)
-      } else {
-        setPackageError(data.message || 'Paket güncellenemedi!')
-      }
-    } catch (error) {
-      console.error('Paket güncelleme hatası:', error)
-      setPackageError('Sunucu hatası. Lütfen tekrar deneyin.')
-    }
-  }
 
   // Export fonksiyonu
   function exportToExcel() {
