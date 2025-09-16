@@ -2,6 +2,7 @@
 CREATE TABLE packages (
   id SERIAL PRIMARY KEY,
   package_type VARCHAR(50) UNIQUE NOT NULL, -- 'economic', 'comfort', 'lux'
+  slug VARCHAR(50) UNIQUE NOT NULL, -- 'economic', 'comfort', 'lux'
   title VARCHAR(100) NOT NULL,
   description TEXT NOT NULL,
   price DECIMAL(10,2) NOT NULL,
@@ -12,16 +13,16 @@ CREATE TABLE packages (
 );
 
 -- Insert default packages
-INSERT INTO packages (package_type, title, description, price, sections, items) VALUES
-('economic', 'Ekonomik', 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.', 299.00, 
+INSERT INTO packages (package_type, slug, title, description, price, sections, items) VALUES
+('economic', 'economic', 'Ekonomik', 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.', 299.00, 
  '{"personalCare": "Kişisel Bakım Ürünleri", "comfort": "Konfor", "technology": "Teknoloji", "health": "Sağlık / İlk Yardım", "additions": "Ekonomik Paket Eklemeleri"}',
  '{"personalCare": ["Diş Fırçası & Macun", "Şampuan & Duş Jeli", "Deodorant", "Güneş Kremi", "El Kremi", "Islak Mendil", "Mikrofiber Havlu", "Çamaşır Torbası", "Dezenfektan"], "comfort": ["Kulak Tıkacı", "Göz Bandı", "Seyahat Defteri & Kalem"], "technology": ["Powerbank", "Çoklu Fonksiyonlu Kablo"], "health": ["Ağrı Kesici", "Basit Alerji İlacı", "Yara Bandı", "Antiseptik Krem", "Burun Spreyi", "Maske", "Sineksavar"], "additions": ["Bavul İçi Düzenleyici", "Boyun Yastığı", "Seyahat Terliği", "QR Kart, müzik listesi", "Lavanta kesesi"]}'),
 
-('comfort', 'Konforlu', 'Seyahatinizi daha konforlu hale getiren gelişmiş malzemelerle donatılmış paket.', 499.00,
+('comfort', 'comfort', 'Konforlu', 'Seyahatinizi daha konforlu hale getiren gelişmiş malzemelerle donatılmış paket.', 499.00,
  '{"personalCare": "Kişisel Bakım Ürünleri", "comfort": "Konfor", "technology": "Teknoloji", "health": "Sağlık / İlk Yardım", "additions": "Konforlu Paket Eklemeleri"}',
  '{"personalCare": ["Diş Fırçası & Macun", "Şampuan & Duş Jeli", "Deodorant", "Güneş Kremi", "El Kremi", "Islak Mendil", "Mikrofiber Havlu", "Çamaşır Torbası", "Dezenfektan"], "comfort": ["Kulak Tıkacı", "Göz Bandı", "Seyahat Defteri & Kalem", "Boyun Yastığı", "Seyahat Terliği"], "technology": ["Powerbank", "Çoklu Fonksiyonlu Kablo", "Bluetooth Kulaklık"], "health": ["Ağrı Kesici", "Basit Alerji İlacı", "Yara Bandı", "Antiseptik Krem", "Burun Spreyi", "Maske", "Sineksavar"], "additions": ["Bavul İçi Düzenleyici", "QR Kart, müzik listesi", "Lavanta kesesi", "Seyahat Yastığı"]}'),
 
-('lux', 'Lux', 'En lüks seyahat deneyimi için özel olarak seçilmiş premium malzemeler.', 799.00,
+('lux', 'lux', 'Lux', 'En lüks seyahat deneyimi için özel olarak seçilmiş premium malzemeler.', 799.00,
  '{"personalCare": "Kişisel Bakım Ürünleri", "comfort": "Konfor", "technology": "Teknoloji", "health": "Sağlık / İlk Yardım", "additions": "Lux Paket Eklemeleri"}',
  '{"personalCare": ["Diş Fırçası & Macun", "Şampuan & Duş Jeli", "Deodorant", "Güneş Kremi", "El Kremi", "Islak Mendil", "Mikrofiber Havlu", "Çamaşır Torbası", "Dezenfektan"], "comfort": ["Kulak Tıkacı", "Göz Bandı", "Seyahat Defteri & Kalem", "Boyun Yastığı", "Seyahat Terliği", "Premium Seyahat Yastığı"], "technology": ["Powerbank", "Çoklu Fonksiyonlu Kablo", "Bluetooth Kulaklık", "Seyahat Adaptörü"], "health": ["Ağrı Kesici", "Basit Alerji İlacı", "Yara Bandı", "Antiseptik Krem", "Burun Spreyi", "Maske", "Sineksavar"], "additions": ["Bavul İçi Düzenleyici", "QR Kart, müzik listesi", "Lavanta kesesi", "Premium Seyahat Yastığı", "VIP Çanta"]}');
 

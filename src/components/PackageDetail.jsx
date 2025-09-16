@@ -54,9 +54,11 @@ const FeatureSection = ({ icon: Icon, sectionTitle, items, isEven = false }) => 
       <div className="paket-feature__body">
         <h3 className="paket__group-title">{sectionTitle}</h3>
         <div className="paket__chips">
-          {items.map((item, index) => (
+          {items && items.length > 0 ? items.map((item, index) => (
             <span key={index} className="paket__chip">{item}</span>
-          ))}
+          )) : (
+            <span className="paket__chip">İçerik bulunamadı</span>
+          )}
         </div>
       </div>
     </article>
@@ -66,6 +68,7 @@ const FeatureSection = ({ icon: Icon, sectionTitle, items, isEven = false }) => 
 // Main package detail component
 const PackageDetail = ({ packageType }) => {
   const { t } = useTranslation()
+
 
   // Hardcoded package data
   const hardcodedData = {
@@ -162,20 +165,8 @@ const PackageDetail = ({ packageType }) => {
     }
   }
 
-  // Get package data - try localStorage first, then fallback to hardcoded
-  const getPackageData = () => {
-    const savedPackage = localStorage.getItem(`package_${packageType}`)
-    if (savedPackage) {
-      try {
-        return JSON.parse(savedPackage)
-      } catch (error) {
-        console.error('Error parsing saved package data:', error)
-      }
-    }
-    return hardcodedData[packageType] || hardcodedData.economic
-  }
-
-  const packageData = getPackageData()
+  // Doğrudan hardcoded data kullan - basit çözüm
+  const packageData = hardcodedData[packageType] || hardcodedData.economic
 
   // Animation useEffect - must be before conditional returns
   useEffect(() => {
@@ -220,30 +211,30 @@ const PackageDetail = ({ packageType }) => {
   }
 
 
-  // Feature sections configuration
+  // Feature sections configuration - güvenli erişim
   const featureSections = [
     {
       icon: PersonalCareIcon,
-      sectionTitle: packageData.sections.personalCare,
-      items: packageData.items.personalCare,
+      sectionTitle: packageData?.sections?.personalCare || 'Kişisel Bakım',
+      items: packageData?.items?.personalCare || [],
       isEven: false
     },
     {
       icon: ComfortIcon,
-      sectionTitle: packageData.sections.comfort,
-      items: packageData.items.comfort,
+      sectionTitle: packageData?.sections?.comfort || 'Konfor',
+      items: packageData?.items?.comfort || [],
       isEven: true
     },
     {
       icon: TechnologyIcon,
-      sectionTitle: packageData.sections.technology,
-      items: packageData.items.technology,
+      sectionTitle: packageData?.sections?.technology || 'Teknoloji',
+      items: packageData?.items?.technology || [],
       isEven: false
     },
     {
       icon: HealthIcon,
-      sectionTitle: packageData.sections.health,
-      items: packageData.items.health,
+      sectionTitle: packageData?.sections?.health || 'Sağlık',
+      items: packageData?.items?.health || [],
       isEven: true
     }
   ]
@@ -253,8 +244,8 @@ const PackageDetail = ({ packageType }) => {
       <section className="paket-hero">
         <FloatingParticles />
         <div className="paket-hero__inner">
-          <h1 className="paket__title">{packageData.title}</h1>
-          <p className="paket__description">{packageData.description}</p>
+          <h1 className="paket__title">{packageData?.title || 'Paket'}</h1>
+          <p className="paket__description">{packageData?.description || 'Paket açıklaması'}</p>
         </div>
       </section>
 
@@ -275,9 +266,9 @@ const PackageDetail = ({ packageType }) => {
           </section>
 
           <section className="paket__section">
-            <h2 className="paket__section-title">{packageData.sections.additions}</h2>
+            <h2 className="paket__section-title">{packageData?.sections?.additions || 'Ek Paketler'}</h2>
             <div className="paket__chips">
-              {packageData.items.additions.map((item, index) => (
+              {(packageData?.items?.additions || []).map((item, index) => (
                 <span key={index} className="paket__chip">{item}</span>
               ))}
             </div>

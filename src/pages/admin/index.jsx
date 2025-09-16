@@ -211,7 +211,6 @@ function Admin() {
           if (decodedToken) {
             // Geçerli token - giriş yap
             setIsAuthenticated(true)
-            console.log('✅ Geçerli JWT token bulundu, admin paneline yönlendiriliyor')
           } else {
             // Geçersiz token - tüm verileri temizle
             console.log('❌ Geçersiz JWT token, login sayfasına yönlendiriliyor')
@@ -235,7 +234,6 @@ function Admin() {
       } else {
         // Token yok - login sayfası göster
         setIsAuthenticated(false)
-        console.log('❌ JWT token bulunamadı, login sayfası gösteriliyor')
       }
 
       // Loading'i son olarak false yap
@@ -291,44 +289,79 @@ function Admin() {
 
   // fetchMessages fonksiyonunu buraya taşıdık
   const fetchMessages = useCallback(async () => {
-    if (!supabase) {
-      console.warn('Supabase yapılandırılmamış')
-      setLoading(false)
-      return
-    }
-
     try {
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false })
+      // Mesajlar çekiliyor
 
-      if (error) {
-        console.error('Mesajlar yüklenirken hata:', error)
-      } else {
+      // Backend API'den mesajları çek
+      const response = await fetch('http://localhost:3001/api/messages')
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      // Backend artık direkt array döndürüyor, success wrapper yok
+      if (Array.isArray(data)) {
         // localStorage'dan okunmuş mesajları al
         const readMessages = JSON.parse(localStorage.getItem('read_messages') || '[]')
 
         // Her mesaj için okunmuş durumunu kontrol et
-        // Önce veritabanındaki değeri, sonra localStorage'ı kontrol et
-        const messagesWithReadStatus = (data || []).map(msg => ({
+        const messagesWithReadStatus = data.map(msg => ({
           ...msg,
           is_read: msg.is_read || readMessages.includes(msg.id) || false
         }))
 
-        // console.log('Yüklenen mesajlar:', messagesWithReadStatus)
+        // Mesajlar yüklendi
         setMessages(messagesWithReadStatus)
+      } else {
+        console.error('❌ Mesaj yükleme hatası: Beklenmeyen veri formatı')
+        console.error('❌ Gelen veri:', data)
+        setMessages([])
       }
-    } catch (err) {
-      console.error('Veritabanı bağlantı hatası:', err)
+    } catch (error) {
+      console.error('❌ Mesaj yükleme hatası:', error)
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+
+      // Fallback olarak mock data kullan
+      const mockMessages = [
+        {
+          id: 1,
+          name: 'Test Kullanıcı',
+          email: 'test@example.com',
+          message: 'Bu bir test mesajıdır.',
+          is_read: false,
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          name: 'Demo Kullanıcı',
+          email: 'demo@example.com',
+          message: 'Demo mesajı - Backend bağlantısı yok.',
+          is_read: true,
+          created_at: new Date(Date.now() - 86400000).toISOString()
+        }
+      ]
+
+      const readMessages = JSON.parse(localStorage.getItem('read_messages') || '[]')
+      const messagesWithReadStatus = mockMessages.map(msg => ({
+        ...msg,
+        is_read: msg.is_read || readMessages.includes(msg.id) || false
+      }))
+
+      setMessages(messagesWithReadStatus)
     } finally {
       setLoading(false)
     }
-  }, []) // supabase dependency'sini kaldırdık
+  }, [])
 
   // Ayrı bir useEffect ile fetchMessages'ı çağır
   useEffect(() => {
-    if (isAuthenticated && supabase) {
+    if (isAuthenticated) {
       fetchMessages()
     }
   }, [isAuthenticated, fetchMessages])
@@ -415,9 +448,7 @@ function Admin() {
 
   // showPackageModal state değişikliklerini yakala (sadece development'ta)
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Admin sayfasında showPackageModal state değişti:', showPackageModal)
-    }
+    // Debug log removed
   }, [showPackageModal])
 
   // Settings modal body scroll prevention
@@ -528,7 +559,7 @@ function Admin() {
           fetchMessages()
         }
 
-        console.log('✅ Admin girişi başarılı!')
+        // Admin girişi başarılı
       } else {
         // Hatalı giriş
         setLoginError(data.message)
@@ -1477,17 +1508,18 @@ function Admin() {
     )
   }
 
-  if (!supabase) {
-    return (
-      <div className="admin-container">
-        <div className="no-messages">
-          <h2>Supabase Yapılandırılmamış</h2>
-          <p>Veritabanı özelliklerini kullanmak için Supabase ayarlarını yapılandırın.</p>
-          <p>Detaylar için <code>SUPABASE_SETUP.md</code> dosyasını inceleyin.</p>
-        </div>
-      </div>
-    )
-  }
+  // Geçici olarak Supabase kontrolünü devre dışı bırak
+  // if (!supabase) {
+  //   return (
+  //     <div className="admin-container">
+  //       <div className="no-messages">
+  //         <h2>Supabase Yapılandırılmamış</h2>
+  //         <p>Veritabanı özelliklerini kullanmak için Supabase ayarlarını yapılandırın.</p>
+  //         <p>Detaylar için <code>SUPABASE_SETUP.md</code> dosyasını inceleyin.</p>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="admin-container">

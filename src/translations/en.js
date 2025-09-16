@@ -34,17 +34,23 @@ export const en = {
       economic: {
         title: 'Economic',
         price: '$29',
-        features: ['Toothbrush & paste', 'Shampoo & soap', 'Towel', 'Socks']
+        features: ['Toothbrush & paste', 'Shampoo & soap', 'Towel', 'Socks'],
+        purchase: 'Buy Now',
+        cta: 'Contact Us'
       },
       comfort: {
         title: 'Comfort',
         price: '$59',
-        features: ['Economic package content', 'Face care set', 'Moisturizer', 'Sunscreen']
+        features: ['Economic package content', 'Face care set', 'Moisturizer', 'Sunscreen'],
+        purchase: 'Buy Now',
+        cta: 'Contact Us'
       },
       luxury: {
         title: 'Luxury',
         price: '$99',
-        features: ['Comfort package content', 'Premium care products', 'Organic products', 'Special bag']
+        features: ['Comfort package content', 'Premium care products', 'Organic products', 'Special bag'],
+        purchase: 'Buy Now',
+        cta: 'Contact Us'
       }
     },
     cta: {
@@ -149,7 +155,7 @@ export const en = {
       email: 'Email',
       phone: 'Phone',
       response: 'Response Time',
-      emailValue: 'info@travelkit.com',
+      emailValue: 'info@travelkit.com.tr',
       phoneValue: '+90 552 927 89 37',
       responseValue: 'Within 24 hours'
     },

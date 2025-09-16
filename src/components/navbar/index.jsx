@@ -60,9 +60,7 @@ function Navbar() {
 
   // showPackageModal state değişikliklerini yakala (sadece development'ta)
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Navbar sayfasında showPackageModal state değişti:', showPackageModal)
-    }
+    // Debug log removed
   }, [showPackageModal])
 
   // Admin login/logout event'lerini dinle
@@ -211,11 +209,6 @@ function Navbar() {
     setShowCurrentPassword(false)
     setShowNewPassword(false)
     setShowConfirmPassword(false)
-    setTwoFactorError('')
-    setTwoFactorSuccess('')
-    setShowTwoFactorSetup(false)
-    setShowBackupCodes(false)
-    setTwoFactorCode('')
   }
 
   // Şifre değiştirme fonksiyonu
@@ -252,9 +245,9 @@ function Navbar() {
         console.error('VITE_API_URL environment variable is not defined!');
         throw new Error('API URL is not configured. Please set VITE_API_URL environment variable.');
       }
-      
+
       const token = localStorage.getItem('admin_token')
-      
+
       const response = await fetch(`${API_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: {
@@ -271,7 +264,7 @@ function Navbar() {
 
       if (data.success) {
         setPasswordSuccess('Şifre başarıyla değiştirildi!')
-        
+
         // Form'u temizle
         setCurrentPassword('')
         setNewPassword('')
@@ -279,7 +272,7 @@ function Navbar() {
         setShowCurrentPassword(false)
         setShowNewPassword(false)
         setShowConfirmPassword(false)
-        
+
         // 3 saniye sonra success mesajını temizle
         setTimeout(() => {
           setPasswordSuccess('')
@@ -745,7 +738,7 @@ function Navbar() {
           </div>
         )}
 
-       
+
         {/* Package Modal */}
         {showPackageModal && (
           <div className="modal-overlay">
@@ -764,7 +757,7 @@ function Navbar() {
                       <label>Paket Adı:</label>
                       <input
                         type="text"
-                        value={packageData.title}
+                        value={packageData.title || ''}
                         onChange={(e) => handlePackageDataChange('title', e.target.value)}
                         className="form-input"
                         placeholder="Paket adını girin"
@@ -773,7 +766,7 @@ function Navbar() {
                     <div className="form-group">
                       <label>Açıklama:</label>
                       <textarea
-                        value={packageData.description}
+                        value={packageData.description || ''}
                         onChange={(e) => handlePackageDataChange('description', e.target.value)}
                         className="form-textarea"
                         placeholder="Paket açıklamasını girin"
@@ -784,7 +777,7 @@ function Navbar() {
                       <label>Fiyat:</label>
                       <input
                         type="text"
-                        value={packageData.price}
+                        value={packageData.price || ''}
                         onChange={(e) => handlePackageDataChange('price', e.target.value)}
                         className="form-input"
                         placeholder="₺299"
@@ -793,7 +786,7 @@ function Navbar() {
                   </div>
 
                   <div className="form-section">
-                    {Object.entries(packageData.sections).map(([key, value]) => {
+                    {Object.entries(packageData.sections || {}).map(([key, value]) => {
                       const sectionNames = {
                         personalCare: 'Kişisel Bakım Ürünleri',
                         comfort: 'Konfor Ürünleri',
@@ -809,7 +802,7 @@ function Navbar() {
                             <label>Bölüm Başlığı:</label>
                             <input
                               type="text"
-                              value={value}
+                              value={value || ''}
                               onChange={(e) => handlePackageDataChange(`sections.${key}`, e.target.value)}
                               className="form-input"
                               placeholder={`${key} bölüm başlığı`}
@@ -819,11 +812,11 @@ function Navbar() {
                           <div className="items-section">
                             <h5>Ürün Listesi:</h5>
                             <div className="items-list">
-                              {packageData.items[key].map((item, index) => (
+                              {(packageData.items?.[key] || []).map((item, index) => (
                                 <div key={index} className="item-input-group">
                                   <input
                                     type="text"
-                                    value={item}
+                                    value={item || ''}
                                     onChange={(e) => handleItemChange(key, index, e.target.value)}
                                     className="form-input"
                                     placeholder={`${key} ürünü`}
@@ -916,7 +909,6 @@ function Navbar() {
       </div>
 
       {/* Package Modal */}
-      {console.log('🔍 showPackageModal state:', showPackageModal)}
       {showPackageModal && (
         <div className="modal-overlay">
           <div className="package-modal">
@@ -934,7 +926,7 @@ function Navbar() {
                     <label>Paket Adı:</label>
                     <input
                       type="text"
-                      value={packageData.title}
+                      value={packageData.title || ''}
                       onChange={(e) => handlePackageDataChange('title', e.target.value)}
                       className="form-input"
                       placeholder="Paket adını girin"
@@ -943,7 +935,7 @@ function Navbar() {
                   <div className="form-group">
                     <label>Açıklama:</label>
                     <textarea
-                      value={packageData.description}
+                      value={packageData.description || ''}
                       onChange={(e) => handlePackageDataChange('description', e.target.value)}
                       className="form-textarea"
                       placeholder="Paket açıklamasını girin"
@@ -954,7 +946,7 @@ function Navbar() {
                     <label>Fiyat:</label>
                     <input
                       type="text"
-                      value={packageData.price}
+                      value={packageData.price || ''}
                       onChange={(e) => handlePackageDataChange('price', e.target.value)}
                       className="form-input"
                       placeholder="₺299"
@@ -963,7 +955,7 @@ function Navbar() {
                 </div>
 
                 <div className="form-section">
-                  {Object.entries(packageData.sections).map(([key, value]) => {
+                  {Object.entries(packageData.sections || {}).map(([key, value]) => {
                     const sectionNames = {
                       personalCare: 'Kişisel Bakım Ürünleri',
                       comfort: 'Konfor Ürünleri',
@@ -979,7 +971,7 @@ function Navbar() {
                           <label>Bölüm Başlığı:</label>
                           <input
                             type="text"
-                            value={value}
+                            value={value || ''}
                             onChange={(e) => handlePackageDataChange(`sections.${key}`, e.target.value)}
                             className="form-input"
                             placeholder={`${key} bölüm başlığı`}
@@ -989,11 +981,11 @@ function Navbar() {
                         <div className="items-section">
                           <h5>Ürün Listesi:</h5>
                           <div className="items-list">
-                            {packageData.items[key].map((item, index) => (
+                            {(packageData.items?.[key] || []).map((item, index) => (
                               <div key={index} className="item-input-group">
                                 <input
                                   type="text"
-                                  value={item}
+                                  value={item || ''}
                                   onChange={(e) => handleItemChange(key, index, e.target.value)}
                                   className="form-input"
                                   placeholder={`${key} ürünü`}

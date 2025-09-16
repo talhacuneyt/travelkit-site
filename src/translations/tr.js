@@ -6,7 +6,8 @@ export const tr = {
     faq: 'SSS',
     contact: 'İletişim'
   },
-  
+
+  // Ho  
   // Homepage
   home: {
     hero: {
@@ -34,17 +35,23 @@ export const tr = {
       economic: {
         title: 'Ekonomik',
         price: '₺299',
-        features: ['Diş fırçası & macun', 'Şampuan & sabun', 'Havlu', 'Çorap']
+        features: ['Diş fırçası & macun', 'Şampuan & sabun', 'Havlu', 'Çorap'],
+        purchase: 'Satın Al',
+        cta: 'İletişime Geç'
       },
       comfort: {
         title: 'Konforlu',
         price: '₺599',
-        features: ['Ekonomik paket içeriği', 'Yüz bakım seti', 'Nemlendirici', 'Güneş kremi']
+        features: ['Ekonomik paket içeriği', 'Yüz bakım seti', 'Nemlendirici', 'Güneş kremi'],
+        purchase: 'Satın Al',
+        cta: 'İletişime Geç'
       },
       luxury: {
         title: 'Lüks',
         price: '₺999',
-        features: ['Konforlu paket içeriği', 'Premium bakım ürünleri', 'Organik ürünler', 'Özel çanta']
+        features: ['Konforlu paket içeriği', 'Premium bakım ürünleri', 'Organik ürünler', 'Özel çanta'],
+        purchase: 'Satın Al',
+        cta: 'İletişime Geç'
       }
     },
     cta: {
@@ -149,7 +156,7 @@ export const tr = {
       email: 'E-posta',
       phone: 'Telefon',
       response: 'Yanıt Süresi',
-      emailValue: 'info@travelkit.com',
+      emailValue: 'info@travelkit.com.tr',
       phoneValue: '+90 552 927 89 37',
       responseValue: '24 saat içinde'
     },
@@ -172,17 +179,17 @@ export const tr = {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi', 
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
           'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
         ],
         comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
         technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
         health: [
-          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
           'Burun Spreyi', 'Maske', 'Sineksavar'
         ],
         additions: [
-          'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği', 
+          'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
           'QR Kart, müzik listesi', 'Lavanta kesesi'
         ]
       },
@@ -202,19 +209,19 @@ export const tr = {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay', 
-          'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu', 
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+          'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
           'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
         ],
         comfort: ['Uyku Kiti - Uyku Maskesi & Kulak Tıkacı', 'Seyahat Defteri & Kalem'],
         technology: ['Soultech Powerbank', 'Çok Fonksiyonlu Kablo'],
         health: [
-          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
           'Burun Spreyi', 'Maske', 'Sineksavar'
         ],
         additions: [
-          'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü', 
-          'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi', 
+          'Boyun Yastığı', 'Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+          'Bavul içi düzenleyici', 'Lavanta Kesesi', 'Beurer Saç Kurutma Makinesi',
           'Kompakt Dikiş Seti', 'Küçük Hijyen Çantası', 'QR kodlu müzik listesi'
         ]
       },
@@ -234,41 +241,38 @@ export const tr = {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On', 
-          'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası', 
-          'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası', 
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
+          'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+          'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
           'El Dezenfektanı', 'Tarak'
         ],
         comfort: ['Uyku Kiti', 'Silikon Kulak Tıkacı', 'Premium Defter ve Roller Kalem Seti'],
         technology: ['Anker Powerbank', 'Çok Fonksiyonlu Kablo'],
         health: [
-          'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem', 
+          'Ağrı Kesici - Parol', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
           'Burun Spreyi', 'Maske', 'Sineksavar'
         ],
         additions: [
-          'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü', 
-          'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi', 
-          'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici', 
-          'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı', 
-          'Deri Bagaj Etiketi', 'Termos', 'Katlanır Şemsiye'
+          'Boyun Yastığı', 'Katlanabilir Terlik', 'Bitki Çayı & Enerji Bar', 'Priz Dönüştürücü',
+          'Parça Valiz Düzenleyici', 'Lavanta Kesesi', 'Xiaomi Saç Kurutma Makinesi',
+          'Kompakt Dikiş Seti', 'Deri Hijyen Çantası', 'Ütü / Buhar Düzleştirici',
+          'Kapı Alarmı', 'Organik Pamuk Yastık Kılıfı', 'Qr Kodlu Özel Seyahat Playlist Kartı'
         ]
       },
       cta: 'Bu paketi konuşalım',
-      purchase: 'Satın Al'
+      purchase: 'Satın Al',
+      notFound: {
+        title: 'Sayfa Bulunamadı',
+        message: 'Aradığınız sayfa bulunamadı veya taşınmış olabilir.',
+        backToHome: 'Anasayfaya Dön'
+      },
+
+      // Common
+      common: {
+        learnMore: 'Daha Fazla Bilgi',
+        getStarted: 'Başlayın',
+        backToTop: 'Yukarı Çık'
+      }
     }
-  },
-
-  // 404 Page
-  notFound: {
-    title: 'Sayfa Bulunamadı',
-    description: 'Aradığınız sayfa mevcut değil veya taşınmış olabilir.',
-    backToHome: 'Anasayfaya Dön'
-  },
-
-  // Common
-  common: {
-    learnMore: 'Daha Fazla Bilgi',
-    getStarted: 'Başlayın',
-    backToTop: 'Yukarı Çık'
   }
 }

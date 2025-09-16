@@ -10,6 +10,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import emailjs from '@emailjs/nodejs';
+import pkg from 'pg';
+const { Pool } = pkg;
 
 dotenv.config();
 
@@ -21,6 +23,14 @@ const supabaseUrl = process.env.SUPABASE_URL || 'https://kegdhelzdksivfekktkx.su
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2RoZWx6ZGtzaXZmZWtrdGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTA1NDgsImV4cCI6MjA3MjgyNjU0OH0.9srURxR_AsLu5lqwodeFuV-zsmkkr82PRh9RSToqQUU';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Postgres pool configuration
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:YOUR_PASSWORD@ep-rough-king-a5q8q8q8.us-east-2.aws.neon.tech/neondb?sslmode=require',
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 // __dirname için ES6 modül uyumluluğu
 const __filename = fileURLToPath(import.meta.url);
@@ -81,29 +91,56 @@ loadUsers();
 
 
 // Email transporter oluştur
+const emailUser = process.env.EMAIL_USER || 'info@travelkit.com.tr';
+const emailPass = process.env.EMAIL_PASS || '54e6e2B2935D0';
+
+console.log('📧 Email konfigürasyonu:', {
+  user: emailUser,
+  passSet: emailPass !== 'your-app-password' ? '✅ Ayarlandı' : '❌ Varsayılan değer'
+});
+
 const emailTransporter = nodemailer.createTransport({
-  service: 'gmail', // Gmail kullanıyoruz
+  host: 'mail.kurumsaleposta.com', // Natro SMTP sunucusu
+  port: 587,
+  secure: false, // TLS kullan
   auth: {
-    user: process.env.EMAIL_USER || 'travelkit.admin@gmail.com',
-    pass: process.env.EMAIL_PASS || 'your-app-password'
+    user: emailUser,
+    pass: emailPass
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
 // Email gönderim fonksiyonu
 async function sendEmail(to, subject, html) {
   try {
+    // Gmail uygulama şifresi kontrolü
+    if (emailPass === 'your-app-password') {
+      console.error('❌ Gmail uygulama şifresi ayarlanmamış!');
+      return {
+        success: false,
+        error: 'Gmail uygulama şifresi ayarlanmamış. Lütfen EMAIL_PASS environment değişkenini ayarlayın.'
+      };
+    }
+
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'your-email@gmail.com',
+      from: emailUser,
       to: to,
       subject: subject,
       html: html
     };
 
+    console.log('📧 Email gönderiliyor:', { to, subject });
     const result = await emailTransporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
+    console.log('✅ Email başarıyla gönderildi:', result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Email sending failed:', error);
+    console.error('❌ Email gönderim hatası:', {
+      message: error.message,
+      code: error.code,
+      response: error.response
+    });
     return { success: false, error: error.message };
   }
 }
@@ -466,61 +503,110 @@ app.post('/api/payments/verify', paymentLimiter, async (req, res) => {
 // Package information endpoint
 app.get('/api/packages', async (req, res) => {
   try {
-    // Supabase'den paketleri çek
-    const { data: packages, error } = await supabase
-      .from('packages')
-      .select('*')
-      .order('id');
+    // NeonDB'den paketleri çek
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM packages ORDER BY id'
+      );
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Paketler yüklenirken hata oluştu'
+      res.json({
+        success: true,
+        data: result.rows
       });
+    } finally {
+      client.release();
     }
-
-    res.json({
-      success: true,
-      data: packages
-    });
   } catch (error) {
     console.error('Package fetch error:', error);
     res.status(500).json({
       success: false,
-      message: 'Sunucu hatası'
+      message: 'Database error'
     });
   }
 });
 
-// Get single package endpoint
-app.get('/api/packages/:id', async (req, res) => {
+// Get single package by slug endpoint
+app.get('/api/packages/:slug', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { slug } = req.params;
 
-    const { data: packageData, error } = await supabase
-      .from('packages')
-      .select('*')
-      .eq('package_type', id)
-      .single();
+    // Slug mapping - frontend'den gelen paket tiplerini veritabanı slug'larına çevir
+    const slugMapping = {
+      'luxury': 'lux',
+      'economic': 'economic',
+      'comfort': 'comfort'
+    };
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(404).json({
-        success: false,
-        message: 'Paket bulunamadı'
+    const actualSlug = slugMapping[slug] || slug;
+
+    // NeonDB'den paketi slug'a göre çek
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM packages WHERE slug = $1',
+        [actualSlug]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paket bulunamadı'
+        });
+      }
+
+      const packageData = result.rows[0];
+
+      res.json({
+        success: true,
+        data: packageData
       });
+    } finally {
+      client.release();
     }
-
-    res.json({
-      success: true,
-      data: packageData
-    });
   } catch (error) {
     console.error('Package fetch error:', error);
     res.status(500).json({
       success: false,
-      message: 'Sunucu hatası'
+      message: 'Database error'
+    });
+  }
+});
+
+// Get single package by id endpoint (for admin panel)
+app.get('/api/packages/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // NeonDB'den paketi id'ye göre çek
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM packages WHERE id = $1',
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paket bulunamadı'
+        });
+      }
+
+      const packageData = result.rows[0];
+
+      res.json({
+        success: true,
+        data: packageData
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Package fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Database error'
     });
   }
 });
@@ -546,42 +632,37 @@ app.put('/api/packages/:id', async (req, res) => {
       });
     }
 
-    // Supabase'de paketi güncelle
-    const { data: updatedPackage, error } = await supabase
-      .from('packages')
-      .update({
-        title,
-        description,
-        price: parseFloat(price),
-        sections: sections || {},
-        items: items || {},
-        updated_at: new Date().toISOString()
-      })
-      .eq('package_type', id)
-      .select()
-      .single();
+    // NeonDB'de paketi güncelle
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'UPDATE packages SET title = $1, description = $2, price = $3, sections = $4, items = $5, updated_at = NOW() WHERE id = $6 RETURNING *',
+        [title, description, parseFloat(price), sections || {}, items || {}, id]
+      );
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Paket güncellenirken hata oluştu'
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paket bulunamadı'
+        });
+      }
+
+      console.log(`✅ Paket güncellendi: ${id} - Fiyat: ${price}`);
+
+      res.json({
+        success: true,
+        message: 'Paket başarıyla güncellendi',
+        data: result.rows[0]
       });
+    } finally {
+      client.release();
     }
-
-    console.log(`✅ Paket güncellendi: ${id} - Fiyat: ${price}`);
-
-    res.json({
-      success: true,
-      message: 'Paket başarıyla güncellendi',
-      data: updatedPackage
-    });
 
   } catch (error) {
     console.error('Package update error:', error);
     res.status(500).json({
       success: false,
-      message: 'Sunucu hatası'
+      message: 'Database error'
     });
   }
 });
@@ -620,45 +701,32 @@ app.post('/api/contact', async (req, res) => {
 
     console.log('✅ Validation passed:', { name, email, message: message.substring(0, 50) + '...' });
 
-    // 1. Supabase'e kaydet
-    console.log('💾 Supabase\'e kaydetmeye başlanıyor...');
-    let supabaseSuccess = false;
+    // 1. Postgres'e kaydet
+    console.log('💾 Postgres\'e kaydetmeye başlanıyor...');
+    let dbSuccess = false;
     try {
-      const { data: contactData, error: dbError } = await supabase
-        .from('contact_messages')
-        .insert([
-          {
-            name: name,
-            email: email,
-            message: message,
-            created_at: new Date().toISOString()
-          }
-        ])
-        .select();
+      const client = await pool.connect();
+      try {
+        const result = await client.query(
+          'INSERT INTO contact_messages (name, email, message, is_read, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+          [name, email, message, false, new Date().toISOString()]
+        );
 
-      if (dbError) {
-        console.error('❌ Supabase kayıt hatası:', {
-          error: dbError,
-          message: dbError.message,
-          details: dbError.details,
-          hint: dbError.hint
-        });
-        supabaseSuccess = false;
-      } else {
-        console.log('✅ Mesaj Supabase\'e kaydedildi:', contactData);
-        supabaseSuccess = true;
+        console.log('✅ Yeni mesaj kaydedildi:', result.rows[0]);
+        dbSuccess = true;
+      } finally {
+        client.release();
       }
     } catch (dbError) {
-      console.error('❌ Supabase bağlantı hatası:', {
+      console.error('❌ Mesaj hatası:', {
         error: dbError,
         message: dbError.message,
         stack: dbError.stack
       });
-      supabaseSuccess = false;
+      dbSuccess = false;
     }
 
     // 2. EmailJS ile email gönder
-    console.log('📧 EmailJS ile email gönderilmeye başlanıyor...');
     let emailSuccess = false;
     try {
       const emailjsResult = await emailjs.send(
@@ -676,10 +744,7 @@ app.post('/api/contact', async (req, res) => {
         }
       );
 
-      console.log('✅ EmailJS ile email gönderildi:', {
-        status: emailjsResult.status,
-        text: emailjsResult.text
-      });
+      // EmailJS başarılı
       emailSuccess = true;
 
     } catch (emailjsError) {
@@ -698,13 +763,119 @@ app.post('/api/contact', async (req, res) => {
           'info@travelkit.com.tr', // Admin email
           `TravelKit İletişim Formu - ${name}`,
           `
-            <h2>Yeni İletişim Formu Mesajı</h2>
-            <p><strong>İsim:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Mesaj:</strong></p>
-            <p>${message.replace(/\n/g, '<br>')}</p>
-            <hr>
-            <p><em>Bu mesaj TravelKit web sitesinden gönderilmiştir.</em></p>
+            <!DOCTYPE html>
+            <html lang="tr">
+            <head>
+              <meta charset="UTF-8">
+              <style>
+                body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  background: #f4f4f9;
+                  margin: 0;
+                  padding: 30px;
+                }
+                .container {
+                  max-width: 650px;
+                  margin: auto;
+                  background: #ffffff;
+                  border-radius: 10px;
+                  border: 1px solid #e0e0e0;
+                  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+                  overflow: hidden;
+                }
+                .header {
+                  color: #fff;
+                  text-align: center;
+                  padding: 20px;
+                }
+                .header img {
+                  max-width: 120px;
+                  margin-bottom: 10px;
+                }
+                .header h1 {
+                  margin: 0;
+                  font-size: 22px;
+                  font-weight: bold;
+                }
+                .content {
+                  background: linear-gradient(135deg, #ff6600, #ff914d);
+                  padding: 25px;
+                  color: #333;
+                }
+                .field {
+                  margin-bottom: 20px;
+                }
+                .label {
+                  font-weight: bold;
+                  font-size: 14px;
+                  margin-bottom: 5px;
+                  display: block;
+                  color: #fff;
+                  font-weight: bold;
+                }
+                .value {
+                  font-size: 15px;
+                  color: #111;
+                }
+                .message-box {
+                  background: #f9f9f9;
+                  padding: 15px;
+                  border-radius: 6px;
+                  border: 1px solid #ddd;
+                  font-size: 14px;
+                  line-height: 1.5;
+                  white-space: pre-line;
+                }
+                .footer {
+                  background: linear-gradient(135deg, #ff6600, #ff914d);
+                  text-align: center;
+                  padding: 15px;
+                  font-size: 12px;
+                  color: #fff;
+                  font-weight: bold;
+                  border-top: 1px solid #eee;
+                }
+                .footer a {
+                  color: #ff6600;
+                  text-decoration: none;
+                  font-weight: bold;
+                }
+                .logo {
+                  color: white !important;
+                  background-color: white
+                }
+                .title {
+                  color: #ff6600;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                    <img class="logo" src="https://travelkit.com.tr/images/logo.png" alt="TravelKit Logo">
+                    <h1 class="title">Yeni İletişim Mesajı</h1>
+                </div>
+                <div class="content">
+                  <div class="field">
+                    <span class="label">Gönderen:</span>
+                    <div class="value">${name}</div>
+                  </div>
+                  <div class="field">
+                    <span class="label">E-posta:</span>
+                    <div class="value">${email}</div>
+                  </div>
+                  <div class="field">
+                    <span class="label">Mesaj:</span>
+                    <div class="message-box">${message.replace(/\n/g, '\n')}</div>
+                  </div>
+                </div>
+                <div class="footer">
+                  Bu mesaj <strong>travelkit.com.tr</strong> web sitesi üzerinden gönderildi.<br>
+                  Cevaplamak için: <a href="mailto:${email}">${email}</a>
+                </div>
+              </div>
+            </body>
+            </html>
           `
         );
 
@@ -726,26 +897,26 @@ app.post('/api/contact', async (req, res) => {
     }
 
     // Response döndür
-    if (supabaseSuccess && emailSuccess) {
-      console.log('🎉 Hem Supabase hem Email gönderimi başarılı');
+    if (dbSuccess && emailSuccess) {
+      console.log('🎉 Hem Postgres hem Email gönderimi başarılı');
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi ve mail gönderildi'
       });
-    } else if (supabaseSuccess && !emailSuccess) {
-      console.log('⚠️ Supabase başarılı, Email başarısız');
+    } else if (dbSuccess && !emailSuccess) {
+      console.log('⚠️ Postgres başarılı, Email başarısız');
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi (email gönderilemedi)'
       });
-    } else if (!supabaseSuccess && emailSuccess) {
-      console.log('⚠️ Supabase başarısız, Email başarılı');
+    } else if (!dbSuccess && emailSuccess) {
+      console.log('⚠️ Postgres başarısız, Email başarılı');
       return res.status(200).json({
         success: true,
         message: 'Email gönderildi (veritabanına kaydedilemedi)'
       });
     } else {
-      console.log('❌ Hem Supabase hem Email başarısız');
+      console.log('❌ Hem Postgres hem Email başarısız');
       return res.status(500).json({
         success: false,
         message: 'Mesaj kaydedilemedi ve email gönderilemedi'
@@ -773,14 +944,6 @@ app.use((err, req, res, next) => {
     success: false,
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
-  });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Endpoint not found'
   });
 });
 
@@ -844,7 +1007,45 @@ app.post('/api/send-sms', smsLimiter, async (req, res) => {
   }
 });
 
+// Messages endpoint - Postgres'den mesajları çek
+app.get('/api/messages', async (req, res) => {
+  try {
+    console.log('📨 Fetching messages...');
 
+    // Postgres'den mesajları çek
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM contact_messages ORDER BY created_at DESC'
+      );
+
+      console.log('📩 Mesajlar yüklendi:', result.rows.length);
+
+      res.json(result.rows);
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('❌ DB error:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    res.status(500).json({
+      error: 'Database error',
+      message: error.message
+    });
+  }
+});
+
+// 404 handler - en sona koy
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint not found'
+  });
+});
 
 // Start server
 app.listen(PORT, () => {

@@ -98,7 +98,6 @@ export default async function handler(req, res) {
     }
 
     // 2. EmailJS ile email gönder
-    console.log('📧 EmailJS ile email gönderilmeye başlanıyor...');
     let emailSuccess = false;
     try {
       const emailjsResult = await emailjs.send(
@@ -116,10 +115,7 @@ export default async function handler(req, res) {
         }
       );
 
-      console.log('✅ EmailJS ile email gönderildi:', {
-        status: emailjsResult.status,
-        text: emailjsResult.text
-      });
+      // EmailJS başarılı
       emailSuccess = true;
 
     } catch (emailjsError) {
@@ -134,25 +130,21 @@ export default async function handler(req, res) {
 
     // Response döndür
     if (supabaseSuccess && emailSuccess) {
-      console.log('🎉 Hem Supabase hem EmailJS başarılı');
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi ve mail gönderildi'
       });
     } else if (supabaseSuccess && !emailSuccess) {
-      console.log('⚠️ Supabase başarılı, EmailJS başarısız');
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi (email gönderilemedi)'
       });
     } else if (!supabaseSuccess && emailSuccess) {
-      console.log('⚠️ Supabase başarısız, EmailJS başarılı');
       return res.status(200).json({
         success: true,
         message: 'Email gönderildi (veritabanına kaydedilemedi)'
       });
     } else {
-      console.log('❌ Hem Supabase hem EmailJS başarısız');
       return res.status(500).json({
         success: false,
         message: 'Mesaj kaydedilemedi ve email gönderilemedi'

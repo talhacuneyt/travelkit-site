@@ -13,26 +13,40 @@ function HomeContent() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [previousTestimonial, setPreviousTestimonial] = useState(-1)
   const [packages, setPackages] = useState([])
-  
+
   // Refs for scroll animations
   const packagesRef = useRef(null)
   const packagesHeadingRef = useRef(null)
   const testimonialsRef = useRef(null)
 
-  // Load packages data from localStorage or fallback to translation
+  // Load packages data from translation first, then localStorage as fallback
   const loadPackages = useCallback(() => {
     const packageTypes = ['economic', 'comfort', 'luxury']
     const packageImages = [ekonomikImg, ortaImg, luxImg]
-    
+
     const loadedPackages = packageTypes.map((type, index) => {
-      // Try to load from localStorage first
+      // First try translation data
+      const translatedName = t(`home.packages.${type}.title`)
+      const translatedPrice = t(`home.packages.${type}.price`)
+
+      // If translation exists, use it
+      if (translatedName && translatedName !== `home.packages.${type}.title`) {
+        return {
+          name: translatedName,
+          price: translatedPrice || '₺0',
+          img: packageImages[index],
+          key: type
+        }
+      }
+
+      // Fallback to localStorage
       const savedPackage = localStorage.getItem(`package_${type}`)
       if (savedPackage) {
         try {
           const parsedData = JSON.parse(savedPackage)
           return {
-            name: parsedData.title,
-            price: parsedData.price,
+            name: parsedData.title || `Package ${type}`,
+            price: parsedData.price || '₺0',
             img: packageImages[index],
             key: type
           }
@@ -41,15 +55,16 @@ function HomeContent() {
         }
       }
 
-      // Fallback to translation data
+      // Final fallback
       return {
-        name: t(`home.packages.${type}.title`),
-        price: t(`home.packages.${type}.price`),
+        name: `Package ${type}`,
+        price: '₺0',
         img: packageImages[index],
         key: type
       }
-    })
-    
+    }).filter(item => item && item.name) // Sadece geçerli item'ları al
+
+    // Packages loaded
     setPackages(loadedPackages)
   }, [t])
 
@@ -63,7 +78,7 @@ function HomeContent() {
       desc: t('home.features.ready.desc'),
       icon: (
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M5 12l4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M5 12l4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
     },
@@ -72,9 +87,9 @@ function HomeContent() {
       desc: t('home.features.time.desc'),
       icon: (
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M6 4h12M6 20h12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M8 4v3c0 1.8 1.4 3.2 3.2 4.1-1.8.9-3.2 2.3-3.2 4.1v3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M16 4v3c0 1.8-1.4 3.2-3.2 4.1 1.8.9 3.2 2.3 3.2 4.1v3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M6 4h12M6 20h12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M8 4v3c0 1.8 1.4 3.2 3.2 4.1-1.8.9-3.2 2.3-3.2 4.1v3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M16 4v3c0 1.8-1.4 3.2-3.2 4.1 1.8.9 3.2 2.3 3.2 4.1v3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
     },
@@ -83,7 +98,7 @@ function HomeContent() {
       desc: t('home.features.budget.desc'),
       icon: (
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 10h14a4 4 0 010 8H7a4 4 0 010-8zm4-4h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M3 10h14a4 4 0 010 8H7a4 4 0 010-8zm4-4h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
     }
@@ -172,7 +187,7 @@ function HomeContent() {
         setIsTransitioning(true)
         setPreviousTestimonial(currentTestimonial)
         setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
-        
+
         // Animasyon tamamlandıktan sonra transition durumunu sıfırla
         setTimeout(() => {
           setIsTransitioning(false)
@@ -230,32 +245,39 @@ function HomeContent() {
       <section className="home-packages-section">
         <h2 className="home-grid__heading" ref={packagesHeadingRef} id="paketler">{t('home.packages.title')}</h2>
         <div className="home-grid" aria-label={t('home.ariaLabels.packages')} ref={packagesRef}>
-        {packages.map((item) => {
-          const target = item.key === 'economic' ? '/ekonomik' : item.key === 'comfort' ? '/konforlu' : '/lux'
-          return (
-          <Link
-            key={item.name}
-            to={target}
-            className="home-card"
-            aria-label={`${item.name} package details`}
-          >
-            {item.key === 'comfort' && <span className="home-card__badge">{t('home.badges.bestseller')}</span>}
-            {item.key === 'luxury' && <span className="home-card__badge badge--accent">{t('home.badges.premium')}</span>}
-            <div className="home-card__media">
-              <img src={item.img} alt={`${item.name} package`} loading="lazy" />
-            </div>
-            <div className="home-card__label">
-            </div>
-            <div className="home-card__center" aria-hidden="true">
-              <p className="home-card__center-text">{item.name.toLocaleUpperCase()}</p>
-            </div>
-          </Link>
-          )})}
+          {packages.map((item) => {
+            // Güvenli kontrol - item ve item.name var mı?
+            if (!item || !item.name) {
+              console.warn('Invalid package item:', item)
+              return null
+            }
+
+            const target = item.key === 'economic' ? '/ekonomik' : item.key === 'comfort' ? '/konforlu' : '/lux'
+            return (
+              <Link
+                key={item.name}
+                to={target}
+                className="home-card"
+                aria-label={`${item.name} package details`}
+              >
+                {item.key === 'comfort' && <span className="home-card__badge">{t('home.badges.bestseller')}</span>}
+                {item.key === 'luxury' && <span className="home-card__badge badge--accent">{t('home.badges.premium')}</span>}
+                <div className="home-card__media">
+                  <img src={item.img} alt={`${item.name} package`} loading="lazy" />
+                </div>
+                <div className="home-card__label">
+                </div>
+                <div className="home-card__center" aria-hidden="true">
+                  <p className="home-card__center-text">{item.name.toLocaleUpperCase()}</p>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </section>
 
       <section className="home-testimonials" aria-label={t('home.ariaLabels.testimonials')} ref={testimonialsRef}>
-        <button 
+        <button
           className="testimonial-nav testimonial-nav--prev"
           onClick={() => {
             console.log('Left button clicked, current:', currentTestimonial, 'isTransitioning:', isTransitioning)
@@ -263,31 +285,31 @@ function HomeContent() {
               setIsTransitioning(true)
               setPreviousTestimonial(currentTestimonial)
               setCurrentTestimonial((prev) => prev === 0 ? testimonials.length - 1 : prev - 1)
-                              setTimeout(() => {
-                  setIsTransitioning(false)
-                  setPreviousTestimonial(-1)
-                }, 600)
+              setTimeout(() => {
+                setIsTransitioning(false)
+                setPreviousTestimonial(-1)
+              }, 600)
             }
           }}
           aria-label="Previous review"
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        
+
         <div className="testimonials-container">
           <div className="testimonials-slider">
             {testimonials.map((t, index) => (
-              <div 
-                key={t.name} 
+              <div
+                key={t.name}
                 className={`testimonial ${index === currentTestimonial ? 'active' : ''} ${index === previousTestimonial ? 'prev' : ''}`}
               >
                 <div className="testimonial-content">
                   <div className="testimonial-quote">
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="quote-icon">
-                      <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
-                      <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                      <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
+                      <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
                     </svg>
                   </div>
                   <blockquote className="testimonial__text">{t.text}</blockquote>
@@ -296,8 +318,8 @@ function HomeContent() {
             ))}
           </div>
         </div>
-        
-        <button 
+
+        <button
           className="testimonial-nav testimonial-nav--next"
           onClick={() => {
             console.log('Right button clicked, current:', currentTestimonial, 'isTransitioning:', isTransitioning)
@@ -305,16 +327,16 @@ function HomeContent() {
               setIsTransitioning(true)
               setPreviousTestimonial(currentTestimonial)
               setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
-                              setTimeout(() => {
-                  setIsTransitioning(false)
-                  setPreviousTestimonial(-1)
-                }, 600)
+              setTimeout(() => {
+                setIsTransitioning(false)
+                setPreviousTestimonial(-1)
+              }, 600)
             }
           }}
           aria-label="Next review"
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </section>
