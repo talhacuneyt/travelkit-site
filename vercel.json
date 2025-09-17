@@ -1,22 +1,17 @@
 {
   "version": 2,
+  "functions": {
+    "api/contact.js": {
+      "maxDuration": 10
+    },
+    "api/messages.js": {
+      "maxDuration": 10
+    },
+    "api/packages.js": {
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
-    {
-      "source": "/api/messages/(.*)",
-      "destination": "/api/messages"
-    },
-    {
-      "source": "/api/contact",
-      "destination": "/api/contact"
-    },
-    {
-      "source": "/api/packages",
-      "destination": "/api/packages"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/backend/$1"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

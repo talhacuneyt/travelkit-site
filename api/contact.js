@@ -1,6 +1,5 @@
 import pkg from 'pg';
 const { Pool } = pkg;
-import emailjs from '@emailjs/nodejs';
 
 // Neon Database configuration
 const pool = new Pool({
@@ -88,57 +87,19 @@ export default async function handler(req, res) {
       dbSuccess = false;
     }
 
-    // 2. EmailJS ile email gönder
-    let emailSuccess = false;
-    try {
-      const emailjsResult = await emailjs.send(
-        'service_gkqoexj', // Service ID
-        'template_97boikk', // Template ID
-        {
-          from_name: name,
-          from_email: email,
-          message: message,
-          to_name: 'TravelKit',
-          reply_to: email
-        },
-        {
-          publicKey: 'YHkV0_Y_204JXzOSm' // Public Key
-        }
-      );
-
-      // EmailJS başarılı
-      emailSuccess = true;
-
-    } catch (emailjsError) {
-      console.error('❌ EmailJS hatası:', {
-        error: emailjsError,
-        message: emailjsError.message,
-        status: emailjsError.status,
-        text: emailjsError.text
-      });
-      emailSuccess = false;
-    }
+    // 2. Email gönderme kaldırıldı - sadece database'e kaydet
+    const emailSuccess = true; // Email gönderme olmadığı için her zaman başarılı
 
     // Response döndür
-    if (dbSuccess && emailSuccess) {
+    if (dbSuccess) {
       return res.status(200).json({
         success: true,
-        message: 'Mesaj kaydedildi ve mail gönderildi'
-      });
-    } else if (dbSuccess && !emailSuccess) {
-      return res.status(200).json({
-        success: true,
-        message: 'Mesaj kaydedildi (email gönderilemedi)'
-      });
-    } else if (!dbSuccess && emailSuccess) {
-      return res.status(200).json({
-        success: true,
-        message: 'Email gönderildi (veritabanına kaydedilemedi)'
+        message: 'Mesaj başarıyla kaydedildi'
       });
     } else {
       return res.status(500).json({
         success: false,
-        message: 'Mesaj kaydedilemedi ve email gönderilemedi'
+        message: 'Mesaj kaydedilemedi'
       });
     }
 
