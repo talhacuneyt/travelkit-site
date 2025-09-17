@@ -261,13 +261,13 @@ function Admin() {
 
       const data = await response.json()
 
-      // Backend artık direkt array döndürüyor, success wrapper yok
-      if (Array.isArray(data)) {
+      // Backend yeni format: { success: true, data: [...] }
+      if (data.success && Array.isArray(data.data)) {
         // localStorage'dan okunmuş mesajları al
         const readMessages = JSON.parse(localStorage.getItem('read_messages') || '[]')
 
         // Her mesaj için okunmuş durumunu kontrol et
-        const messagesWithReadStatus = data.map(msg => ({
+        const messagesWithReadStatus = data.data.map(msg => ({
           ...msg,
           is_read: msg.is_read || readMessages.includes(msg.id) || false
         }))
@@ -540,7 +540,7 @@ function Admin() {
 
   async function deleteMessage(id) {
     try {
-      const response = await fetch(`/api/messages/${id}`, {
+      const response = await fetch(`/api/messages?id=${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -575,7 +575,7 @@ function Admin() {
 
     // Veritabanını güncelle
     try {
-      const response = await fetch(`/api/messages/${id}`, {
+      const response = await fetch(`/api/messages?id=${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -756,7 +756,7 @@ function Admin() {
   async function confirmDeleteAll() {
     try {
       // API endpoint'i ile tüm mesajları sil
-      const response = await fetch('/api/messages/delete-all', {
+      const response = await fetch('/api/messages?id=delete-all', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -1134,466 +1134,466 @@ function Admin() {
     <div className="admin-container">
       <div className="admin-content-wrapper">
         {/* Filtre Bilgisi */}
-      {dateFilter !== 'all' && (
-        <div className="date-filter-info">
-          {dateFilter === 'today' && 'Bugünkü mesajlar gösteriliyor'}
-          {dateFilter === 'week' && 'Son 7 günün mesajları gösteriliyor'}
-          {dateFilter === 'month' && 'Son 30 günün mesajları gösteriliyor'}
-          {dateFilter === 'custom' && customStartDate && customEndDate &&
-            `${customStartDate} - ${customEndDate} tarihleri arasındaki mesajlar gösteriliyor`
-          }
-        </div>
-      )}
-
-      {/* İstatistik Kartları */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <div className="stat-number">{stats.daily}</div>
-            <div className="stat-label">Bugün</div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📈</div>
-          <div className="stat-content">
-            <div className="stat-number">{stats.weekly}</div>
-            <div className="stat-label">Bu Hafta</div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📅</div>
-          <div className="stat-content">
-            <div className="stat-number">{stats.monthly}</div>
-            <div className="stat-label">Bu Ay</div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📧</div>
-          <div className="stat-content">
-            <div className="stat-number">{messages.length}</div>
-            <div className="stat-label">Toplam</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Grafikler */}
-      <div className="charts-section">
-        <div className="chart-container">
-          <h3>📈 Son 7 Gün Mesaj Trendi</h3>
-          <div className="bar-chart">
-            {chartData.last7Days.map((day, index) => {
-              const maxCount = Math.max(...chartData.last7Days.map(d => d.count))
-              const height = maxCount > 0 ? (day.count / maxCount) * 100 : 0
-
-              return (
-                <div key={index} className="bar-item">
-                  <div
-                    className="bar"
-                    style={{ height: `${height}%` }}
-                    title={`${day.date}: ${day.count} mesaj`}
-                  ></div>
-                  <div className="bar-label">{day.date}</div>
-                  <div className="bar-count">{day.count}</div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        <div className="chart-container">
-          <h3>🕐 En Çok Mesaj Gelen Saatler</h3>
-          <div className="hourly-chart">
-            {chartData.hourlyData.map((hour, index) => {
-              const maxCount = Math.max(...chartData.hourlyData.map(h => h.count))
-              const height = maxCount > 0 ? (hour.count / maxCount) * 100 : 0
-
-              return (
-                <div key={index} className="hour-item">
-                  <div
-                    className="hour-bar"
-                    style={{ height: `${height}%` }}
-                    title={`${hour.hour}: ${hour.count} mesaj`}
-                  ></div>
-                  <div className="hour-label">{hour.hour}</div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
-      <div className="admin-main-content">
-        {/* Arama ve Filtreleme */}
-        <div className="search-filters-section">
-          <div className="search-container">
-            <div className="search-input-wrapper">
-              <div className="search-icon">⌕</div>
-              <input
-                type="text"
-                placeholder="Ara..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="search-input"
-              />
-            </div>
-            {searchTerm && (
-              <div className="search-results-info">
-                {filteredMessages.length} sonuç
-              </div>
-            )}
-          </div>
-          <div className="filters-row">
-            <select
-              value={dateFilter}
-              onChange={(e) => handleDateFilterChange(e.target.value)}
-              className="date-filter-select"
-            >
-              <option value="all">Tümü</option>
-              <option value="today">Bugün</option>
-              <option value="week">Bu Hafta</option>
-              <option value="month">Bu Ay</option>
-              <option value="custom">Özel Tarih</option>
-            </select>
-            <button
-              className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
-              onClick={() => handleSortChange('date')}
-              title="Tarihe göre sırala"
-            >
-              📅 {getSortIcon('date')}
-            </button>
-            <button
-              className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
-              onClick={() => handleSortChange('name')}
-              title="İsme göre sırala"
-            >
-              👤 {getSortIcon('name')}
-            </button>
-            <button
-              className={`sort-btn ${sortBy === 'email' ? 'active' : ''}`}
-              onClick={() => handleSortChange('email')}
-              title="Email'e göre sırala"
-            >
-              📧 {getSortIcon('email')}
-            </button>
-          </div>
-        </div>
-
-        {/* Özel Tarih Seçici */}
-        {showDatePicker && (
-          <div className="custom-date-picker">
-            <div className="date-inputs">
-              <div className="date-input-group">
-                <label>Başlangıç:</label>
-                <input
-                  type="date"
-                  value={customStartDate}
-                  onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="date-input"
-                />
-              </div>
-              <div className="date-input-group">
-                <label>Bitiş:</label>
-                <input
-                  type="date"
-                  value={customEndDate}
-                  onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="date-input"
-                />
-              </div>
-              <button onClick={clearDateFilter} className="clear-date-btn">
-                Temizle
-              </button>
-            </div>
+        {dateFilter !== 'all' && (
+          <div className="date-filter-info">
+            {dateFilter === 'today' && 'Bugünkü mesajlar gösteriliyor'}
+            {dateFilter === 'week' && 'Son 7 günün mesajları gösteriliyor'}
+            {dateFilter === 'month' && 'Son 30 günün mesajları gösteriliyor'}
+            {dateFilter === 'custom' && customStartDate && customEndDate &&
+              `${customStartDate} - ${customEndDate} tarihleri arasındaki mesajlar gösteriliyor`
+            }
           </div>
         )}
-        <div className="tabs">
-          <div className="tabs-container">
-            <button
-              className={`tab ${activeTab === 'unread' ? 'tab--active' : ''}`}
-              onClick={() => handleTabChange('unread')}
-            >
-              Okunmamış ({unreadCount})
-            </button>
-            <button
-              className={`tab ${activeTab === 'read' ? 'tab--active' : ''}`}
-              onClick={() => handleTabChange('read')}
-            >
-              Okunmuş ({readCount})
-            </button>
-            <button
-              className={`tab ${activeTab === 'all' ? 'tab--active' : ''}`}
-              onClick={() => handleTabChange('all')}
-            >
-              Tümü ({messages.length})
-            </button>
+
+        {/* İstatistik Kartları */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon">📊</div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.daily}</div>
+              <div className="stat-label">Bugün</div>
+            </div>
           </div>
-          <div className="tabs-actions">
-            {activeTab === 'unread' && unreadCount > 0 && (
-              <button
-                className="mark-all-read-btn"
-                onClick={markAllAsRead}
-              >
-                Hepsini Okundu Say
-              </button>
-            )}
-            {activeTab === 'all' && messages.length > 0 && (
-              <button
-                className="delete-all-btn"
-                onClick={openDeleteConfirmModal}
-              >
-                Hepsini Sil
-              </button>
-            )}
-            <button onClick={exportToExcel} className="export-btn export-excel">
-              Excel İndir
-            </button>
+          <div className="stat-card">
+            <div className="stat-icon">📈</div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.weekly}</div>
+              <div className="stat-label">Bu Hafta</div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">📅</div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.monthly}</div>
+              <div className="stat-label">Bu Ay</div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">📧</div>
+            <div className="stat-content">
+              <div className="stat-number">{messages.length}</div>
+              <div className="stat-label">Toplam</div>
+            </div>
           </div>
         </div>
 
-        <div className={`messages-list ${isTransitioning ? 'messages-list--transitioning' : ''}`}>
-          {filteredMessages.length === 0 ? (
-            <div className="no-messages">
-              {activeTab === 'unread' ? 'Okunmamış mesaj yok' :
-                activeTab === 'read' ? 'Okunmuş mesaj yok' :
-                  'Henüz mesaj yok'}
+        {/* Grafikler */}
+        <div className="charts-section">
+          <div className="chart-container">
+            <h3>📈 Son 7 Gün Mesaj Trendi</h3>
+            <div className="bar-chart">
+              {chartData.last7Days.map((day, index) => {
+                const maxCount = Math.max(...chartData.last7Days.map(d => d.count))
+                const height = maxCount > 0 ? (day.count / maxCount) * 100 : 0
+
+                return (
+                  <div key={index} className="bar-item">
+                    <div
+                      className="bar"
+                      style={{ height: `${height}%` }}
+                      title={`${day.date}: ${day.count} mesaj`}
+                    ></div>
+                    <div className="bar-label">{day.date}</div>
+                    <div className="bar-count">{day.count}</div>
+                  </div>
+                )
+              })}
             </div>
-          ) : (
-            filteredMessages.map((message) => (
-              <div
-                key={message.id}
-                className={`message-card ${!message.is_read ? 'message-card--unread' : ''}`}
-                onClick={() => openModal(message)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="message-header">
-                  <h3>{highlightSearchTerm(message.name, searchTerm)}</h3>
-                  <div className="message-header-right">
-                    <span className="message-date">
-                      {new Date(message.created_at).toLocaleDateString('tr-TR')} - {new Date(message.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+          </div>
+
+          <div className="chart-container">
+            <h3>🕐 En Çok Mesaj Gelen Saatler</h3>
+            <div className="hourly-chart">
+              {chartData.hourlyData.map((hour, index) => {
+                const maxCount = Math.max(...chartData.hourlyData.map(h => h.count))
+                const height = maxCount > 0 ? (hour.count / maxCount) * 100 : 0
+
+                return (
+                  <div key={index} className="hour-item">
+                    <div
+                      className="hour-bar"
+                      style={{ height: `${height}%` }}
+                      title={`${hour.hour}: ${hour.count} mesaj`}
+                    ></div>
+                    <div className="hour-label">{hour.hour}</div>
                   </div>
-                </div>
-                <div className="message-email">{highlightSearchTerm(message.email, searchTerm)}</div>
-                <div className="message-content-wrapper">
-                  <div className="message-content">
-                    {highlightSearchTerm(message.message.split(' ').slice(0, 6).join(' '), searchTerm)}
-                    {message.message.split(' ').length > 6 && '...'}
-                  </div>
-                  <div className="message-actions" onClick={(e) => e.stopPropagation()}>
-                    {!message.is_read && (
-                      <button
-                        className="mark-read-btn"
-                        onClick={() => markAsRead(message.id)}
-                      >
-                        Okundu İşaretle
-                      </button>
-                    )}
-                    <button
-                      className="delete-btn"
-                      onClick={() => deleteMessage(message.id)}
-                    >
-                      Sil
-                    </button>
-                  </div>
-                </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="admin-main-content">
+          {/* Arama ve Filtreleme */}
+          <div className="search-filters-section">
+            <div className="search-container">
+              <div className="search-input-wrapper">
+                <div className="search-icon">⌕</div>
+                <input
+                  type="text"
+                  placeholder="Ara..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="search-input"
+                />
               </div>
-            ))
+              {searchTerm && (
+                <div className="search-results-info">
+                  {filteredMessages.length} sonuç
+                </div>
+              )}
+            </div>
+            <div className="filters-row">
+              <select
+                value={dateFilter}
+                onChange={(e) => handleDateFilterChange(e.target.value)}
+                className="date-filter-select"
+              >
+                <option value="all">Tümü</option>
+                <option value="today">Bugün</option>
+                <option value="week">Bu Hafta</option>
+                <option value="month">Bu Ay</option>
+                <option value="custom">Özel Tarih</option>
+              </select>
+              <button
+                className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
+                onClick={() => handleSortChange('date')}
+                title="Tarihe göre sırala"
+              >
+                📅 {getSortIcon('date')}
+              </button>
+              <button
+                className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
+                onClick={() => handleSortChange('name')}
+                title="İsme göre sırala"
+              >
+                👤 {getSortIcon('name')}
+              </button>
+              <button
+                className={`sort-btn ${sortBy === 'email' ? 'active' : ''}`}
+                onClick={() => handleSortChange('email')}
+                title="Email'e göre sırala"
+              >
+                📧 {getSortIcon('email')}
+              </button>
+            </div>
+          </div>
+
+          {/* Özel Tarih Seçici */}
+          {showDatePicker && (
+            <div className="custom-date-picker">
+              <div className="date-inputs">
+                <div className="date-input-group">
+                  <label>Başlangıç:</label>
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="date-input"
+                  />
+                </div>
+                <div className="date-input-group">
+                  <label>Bitiş:</label>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="date-input"
+                  />
+                </div>
+                <button onClick={clearDateFilter} className="clear-date-btn">
+                  Temizle
+                </button>
+              </div>
+            </div>
           )}
-        </div>
-      </div>
-
-      {/* Modal */}
-      {showModal && selectedMessage && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{selectedMessage.name}{getTurkishSuffix(selectedMessage.name)}</h3>
-              <button className="modal-close" onClick={closeModal}>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+          <div className="tabs">
+            <div className="tabs-container">
+              <button
+                className={`tab ${activeTab === 'unread' ? 'tab--active' : ''}`}
+                onClick={() => handleTabChange('unread')}
+              >
+                Okunmamış ({unreadCount})
+              </button>
+              <button
+                className={`tab ${activeTab === 'read' ? 'tab--active' : ''}`}
+                onClick={() => handleTabChange('read')}
+              >
+                Okunmuş ({readCount})
+              </button>
+              <button
+                className={`tab ${activeTab === 'all' ? 'tab--active' : ''}`}
+                onClick={() => handleTabChange('all')}
+              >
+                Tümü ({messages.length})
               </button>
             </div>
-            <div className="modal-body">
-              <div className="modal-email-date">
-                <div className="modal-email">{highlightSearchTerm(selectedMessage.email, searchTerm)}</div>
-                <div className="modal-date">
-                  {new Date(selectedMessage.created_at).toLocaleDateString('tr-TR')} - {new Date(selectedMessage.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+            <div className="tabs-actions">
+              {activeTab === 'unread' && unreadCount > 0 && (
+                <button
+                  className="mark-all-read-btn"
+                  onClick={markAllAsRead}
+                >
+                  Hepsini Okundu Say
+                </button>
+              )}
+              {activeTab === 'all' && messages.length > 0 && (
+                <button
+                  className="delete-all-btn"
+                  onClick={openDeleteConfirmModal}
+                >
+                  Hepsini Sil
+                </button>
+              )}
+              <button onClick={exportToExcel} className="export-btn export-excel">
+                Excel İndir
+              </button>
+            </div>
+          </div>
+
+          <div className={`messages-list ${isTransitioning ? 'messages-list--transitioning' : ''}`}>
+            {filteredMessages.length === 0 ? (
+              <div className="no-messages">
+                {activeTab === 'unread' ? 'Okunmamış mesaj yok' :
+                  activeTab === 'read' ? 'Okunmuş mesaj yok' :
+                    'Henüz mesaj yok'}
+              </div>
+            ) : (
+              filteredMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`message-card ${!message.is_read ? 'message-card--unread' : ''}`}
+                  onClick={() => openModal(message)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="message-header">
+                    <h3>{highlightSearchTerm(message.name, searchTerm)}</h3>
+                    <div className="message-header-right">
+                      <span className="message-date">
+                        {new Date(message.created_at).toLocaleDateString('tr-TR')} - {new Date(message.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="message-email">{highlightSearchTerm(message.email, searchTerm)}</div>
+                  <div className="message-content-wrapper">
+                    <div className="message-content">
+                      {highlightSearchTerm(message.message.split(' ').slice(0, 6).join(' '), searchTerm)}
+                      {message.message.split(' ').length > 6 && '...'}
+                    </div>
+                    <div className="message-actions" onClick={(e) => e.stopPropagation()}>
+                      {!message.is_read && (
+                        <button
+                          className="mark-read-btn"
+                          onClick={() => markAsRead(message.id)}
+                        >
+                          Okundu İşaretle
+                        </button>
+                      )}
+                      <button
+                        className="delete-btn"
+                        onClick={() => deleteMessage(message.id)}
+                      >
+                        Sil
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Modal */}
+        {showModal && selectedMessage && (
+          <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>{selectedMessage.name}{getTurkishSuffix(selectedMessage.name)}</h3>
+                <button className="modal-close" onClick={closeModal}>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="modal-email-date">
+                  <div className="modal-email">{highlightSearchTerm(selectedMessage.email, searchTerm)}</div>
+                  <div className="modal-date">
+                    {new Date(selectedMessage.created_at).toLocaleDateString('tr-TR')} - {new Date(selectedMessage.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+                <div className="modal-message">
+                  {highlightSearchTerm(selectedMessage.message, searchTerm)}
                 </div>
               </div>
-              <div className="modal-message">
-                {highlightSearchTerm(selectedMessage.message, searchTerm)}
-              </div>
-            </div>
-            <div className="modal-actions">
-              {!selectedMessage.is_read && (
+              <div className="modal-actions">
+                {!selectedMessage.is_read && (
+                  <button
+                    className="mark-read-btn"
+                    onClick={() => {
+                      markAsRead(selectedMessage.id)
+                      closeModal()
+                    }}
+                  >
+                    Okundu İşaretle
+                  </button>
+                )}
                 <button
-                  className="mark-read-btn"
+                  className="delete-btn"
                   onClick={() => {
-                    markAsRead(selectedMessage.id)
+                    deleteMessage(selectedMessage.id)
                     closeModal()
                   }}
                 >
-                  Okundu İşaretle
+                  Sil
                 </button>
-              )}
-              <button
-                className="delete-btn"
-                onClick={() => {
-                  deleteMessage(selectedMessage.id)
-                  closeModal()
-                }}
-              >
-                Sil
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirmModal && (
-        <div className="modal-overlay" onClick={cancelDeleteAll}>
-          <div className="modal-content delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>⚠️ Tüm Mesajları Sil</h3>
-              <button className="modal-close" onClick={cancelDeleteAll}>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="delete-warning">
-                <p><strong>Tüm mesajları silmek istediğinizden emin misiniz?</strong></p>
-                <p>Bu işlem geri alınamaz ve <strong>{messages.length} mesaj</strong> kalıcı olarak silinecektir.</p>
               </div>
             </div>
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={cancelDeleteAll}
-              >
-                İptal
-              </button>
-              <button
-                className="confirm-delete-btn"
-                onClick={confirmDeleteAll}
-              >
-                Evet, Hepsini Sil
-              </button>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirmModal && (
+          <div className="modal-overlay" onClick={cancelDeleteAll}>
+            <div className="modal-content delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>⚠️ Tüm Mesajları Sil</h3>
+                <button className="modal-close" onClick={cancelDeleteAll}>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="delete-warning">
+                  <p><strong>Tüm mesajları silmek istediğinizden emin misiniz?</strong></p>
+                  <p>Bu işlem geri alınamaz ve <strong>{messages.length} mesaj</strong> kalıcı olarak silinecektir.</p>
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button
+                  className="cancel-btn"
+                  onClick={cancelDeleteAll}
+                >
+                  İptal
+                </button>
+                <button
+                  className="confirm-delete-btn"
+                  onClick={confirmDeleteAll}
+                >
+                  Evet, Hepsini Sil
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Admin Settings Modal */}
-      {showSettingsModal && (
-        <div className="modal-overlay" onClick={closeSettingsModal}>
-          <div className="admin-settings-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h3>⚙️ Admin Ayarları</h3>
-              <button className="admin-modal-close" onClick={closeSettingsModal}>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ width: '30px', height: '30px' }}>
-                  <path d="M18 6L6 18M6 6l12 12" stroke="#111111" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-            <div className="admin-modal-content">
-              <div className="admin-settings-layout">
-                <div className="admin-tabs-sidebar">
-                  <button
-                    className={`admin-tab ${settingsActiveTab === 'password' ? 'active' : ''}`}
-                    onClick={() => setSettingsActiveTab('password')}
-                  >
-                    🔐 Şifre Değiştir
-                  </button>
-                </div>
-                <div className="admin-tab-content">
-                  {settingsActiveTab === 'password' && (
-                    <div className="tab-panel">
-                      <h4>Şifre Değiştir</h4>
-                      <form onSubmit={handlePasswordChange} className="password-form">
-                        <div className="form-group">
-                          <label>Mevcut Şifre:</label>
-                          <div className="password-input-wrapper">
-                            <input
-                              type={showCurrentPassword ? "text" : "password"}
-                              value={currentPassword}
-                              onChange={(e) => setCurrentPassword(e.target.value)}
-                              className="form-input"
-                              placeholder="Mevcut şifrenizi girin"
-                              tabIndex={1}
-                            />
-                            <button
-                              type="button"
-                              className="password-toggle-btn"
-                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                              tabIndex={-1}
-                            >
-                              {showCurrentPassword ? "🙈" : "👁️"}
-                            </button>
+        {/* Admin Settings Modal */}
+        {showSettingsModal && (
+          <div className="modal-overlay" onClick={closeSettingsModal}>
+            <div className="admin-settings-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h3>⚙️ Admin Ayarları</h3>
+                <button className="admin-modal-close" onClick={closeSettingsModal}>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ width: '30px', height: '30px' }}>
+                    <path d="M18 6L6 18M6 6l12 12" stroke="#111111" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <div className="admin-modal-content">
+                <div className="admin-settings-layout">
+                  <div className="admin-tabs-sidebar">
+                    <button
+                      className={`admin-tab ${settingsActiveTab === 'password' ? 'active' : ''}`}
+                      onClick={() => setSettingsActiveTab('password')}
+                    >
+                      🔐 Şifre Değiştir
+                    </button>
+                  </div>
+                  <div className="admin-tab-content">
+                    {settingsActiveTab === 'password' && (
+                      <div className="tab-panel">
+                        <h4>Şifre Değiştir</h4>
+                        <form onSubmit={handlePasswordChange} className="password-form">
+                          <div className="form-group">
+                            <label>Mevcut Şifre:</label>
+                            <div className="password-input-wrapper">
+                              <input
+                                type={showCurrentPassword ? "text" : "password"}
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                className="form-input"
+                                placeholder="Mevcut şifrenizi girin"
+                                tabIndex={1}
+                              />
+                              <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                tabIndex={-1}
+                              >
+                                {showCurrentPassword ? "🙈" : "👁️"}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="form-group">
-                          <label>Yeni Şifre:</label>
-                          <div className="password-input-wrapper">
-                            <input
-                              type={showNewPassword ? "text" : "password"}
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              className="form-input"
-                              placeholder="Yeni şifrenizi girin (min 6 karakter)"
-                              tabIndex={2}
-                            />
-                            <button
-                              type="button"
-                              className="password-toggle-btn"
-                              onClick={() => setShowNewPassword(!showNewPassword)}
-                              tabIndex={-1}
-                            >
-                              {showNewPassword ? "🙈" : "👁️"}
-                            </button>
+                          <div className="form-group">
+                            <label>Yeni Şifre:</label>
+                            <div className="password-input-wrapper">
+                              <input
+                                type={showNewPassword ? "text" : "password"}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="form-input"
+                                placeholder="Yeni şifrenizi girin (min 6 karakter)"
+                                tabIndex={2}
+                              />
+                              <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                tabIndex={-1}
+                              >
+                                {showNewPassword ? "🙈" : "👁️"}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="form-group">
-                          <label>Yeni Şifre Tekrar:</label>
-                          <div className="password-input-wrapper">
-                            <input
-                              type={showConfirmPassword ? "text" : "password"}
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              className="form-input"
-                              placeholder="Yeni şifrenizi tekrar girin"
-                              tabIndex={3}
-                            />
-                            <button
-                              type="button"
-                              className="password-toggle-btn"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              tabIndex={-1}
-                            >
-                              {showConfirmPassword ? "🙈" : "👁️"}
-                            </button>
+                          <div className="form-group">
+                            <label>Yeni Şifre Tekrar:</label>
+                            <div className="password-input-wrapper">
+                              <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="form-input"
+                                placeholder="Yeni şifrenizi tekrar girin"
+                                tabIndex={3}
+                              />
+                              <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                tabIndex={-1}
+                              >
+                                {showConfirmPassword ? "🙈" : "👁️"}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        {passwordError && <div className="error-message">{passwordError}</div>}
-                        {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
-                        <button type="submit" className="change-password-btn" tabIndex={4}>
-                          Şifre Değiştir
-                        </button>
-                      </form>
-                    </div>
-                  )}
+                          {passwordError && <div className="error-message">{passwordError}</div>}
+                          {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+                          <button type="submit" className="change-password-btn" tabIndex={4}>
+                            Şifre Değiştir
+                          </button>
+                        </form>
+                      </div>
+                    )}
 
 
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
 
       {/* Footer */}

@@ -1,132 +1,124 @@
 import pkg from 'pg';
+
 const { Pool } = pkg;
 
-// Neon Database configuration
+// Database connection pool
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_kacwW2tmv8dh@ep-hidden-rain-agg3uf7b-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
-    ssl: {
-        rejectUnauthorized: false
-    }
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 export default async function handler(req, res) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
-    }
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-    try {
-        if (req.method === 'GET') {
-            // GET /api/messages - Tüm mesajları listele
-            console.log('📨 Fetching messages from Neon...');
+  let client;
+  try {
+    // Connect to database
+    client = await pool.connect();
 
-            const client = await pool.connect();
-            try {
-                const result = await client.query(`
-          SELECT id, name, email, message, is_read, created_at 
-          FROM contact_messages 
-          ORDER BY created_at DESC
-      `);
+    if (req.method === 'GET') {
+      // Get all messages
+      const result = await client.query(
+        'SELECT id, name, email, message, created_at FROM messages ORDER BY created_at DESC'
+      );
 
-                console.log('📩 Mesajlar yüklendi:', result.rows.length);
-                res.json(result.rows);
-            } finally {
-                client.release();
-            }
-        }
-        else if (req.method === 'DELETE') {
-            // DELETE /api/messages/:id - Mesaj sil veya DELETE /api/messages/delete-all - Tüm mesajları sil
-            const { id } = req.query;
+      return res.status(200).json({
+        success: true,
+        data: result.rows,
+        count: result.rows.length
+      });
 
-            if (id === 'delete-all') {
-                // Tüm mesajları sil
-                console.log('🗑️ Deleting all messages...');
-                const client = await pool.connect();
-                try {
-                    const result = await client.query('DELETE FROM contact_messages RETURNING *');
-                    console.log('✅ Tüm mesajlar silindi:', result.rows.length);
-                    res.json({
-                        success: true,
-                        message: 'Tüm mesajlar başarıyla silindi',
-                        deletedCount: result.rows.length
-                    });
-                } finally {
-                    client.release();
-                }
-            } else {
-                // Tek mesaj sil
-                console.log('🗑️ Deleting message:', id);
-                const client = await pool.connect();
-                try {
-                    const result = await client.query(
-                        'DELETE FROM contact_messages WHERE id = $1 RETURNING *',
-                        [id]
-                    );
-                    if (result.rows.length === 0) {
-                        return res.status(404).json({
-                            success: false,
-                            message: 'Mesaj bulunamadı'
-                        });
-                    }
+    } else if (req.method === 'POST') {
+      // Create new message (if needed for admin panel)
+      const { name, email, message } = req.body;
 
-                    console.log('✅ Mesaj silindi:', result.rows[0]);
-                    res.json({
-                        success: true,
-                        message: 'Mesaj başarıyla silindi'
-                    });
-                } finally {
-                    client.release();
-                }
-            }
-        }
-        else if (req.method === 'PATCH') {
-            // PATCH /api/messages/:id - Mesaj güncelle (okundu işaretle)
-            const { id } = req.query;
-            const { is_read } = req.body;
-            console.log('📝 Updating message:', id, 'is_read:', is_read);
+      if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Name, email and message are required' });
+      }
 
-            const client = await pool.connect();
-            try {
-                const result = await client.query(
-                    'UPDATE contact_messages SET is_read = $1 WHERE id = $2 RETURNING *',
-                    [is_read, id]
-                );
+      const result = await client.query(
+        'INSERT INTO messages (name, email, message) VALUES ($1, $2, $3) RETURNING *',
+        [name, email, message]
+      );
 
-                if (result.rows.length === 0) {
-                    return res.status(404).json({
-                        success: false,
-                        message: 'Mesaj bulunamadı'
-                    });
-                }
+      return res.status(201).json({
+        success: true,
+        data: result.rows[0]
+      });
 
-                console.log('✅ Mesaj güncellendi:', result.rows[0]);
-                res.json({
-                    success: true,
-                    message: 'Mesaj başarıyla güncellendi',
-                    data: result.rows[0]
-                });
-            } finally {
-                client.release();
-            }
-        }
-        else {
-            res.status(405).json({
-                success: false,
-                message: 'Method not allowed'
-            });
-        }
+    } else if (req.method === 'PATCH') {
+      // Update message (mark as read, etc.)
+      const { id } = req.query;
+      const { is_read } = req.body;
 
-    } catch (error) {
-        console.error('❌ Messages endpoint error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error: ' + error.message
+      if (!id) {
+        return res.status(400).json({ error: 'Message ID is required' });
+      }
+
+      const result = await client.query(
+        'UPDATE messages SET is_read = $1 WHERE id = $2 RETURNING *',
+        [is_read || false, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Message not found' });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: result.rows[0]
+      });
+
+    } else if (req.method === 'DELETE') {
+      // Delete message or delete all
+      const { id } = req.query;
+
+      if (id === 'delete-all') {
+        // Delete all messages
+        const result = await client.query('DELETE FROM messages RETURNING *');
+
+        return res.status(200).json({
+          success: true,
+          message: 'All messages deleted successfully',
+          deletedCount: result.rows.length
         });
+      } else if (id) {
+        // Delete single message
+        const result = await client.query(
+          'DELETE FROM messages WHERE id = $1 RETURNING *',
+          [id]
+        );
+
+        if (result.rows.length === 0) {
+          return res.status(404).json({ error: 'Message not found' });
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: 'Message deleted successfully'
+        });
+      } else {
+        return res.status(400).json({ error: 'Message ID is required' });
+      }
+
+    } else {
+      return res.status(405).json({ error: 'Method not allowed' });
     }
+
+  } catch (error) {
+    console.error('Messages API error:', error.message);
+    return res.status(500).json({ error: error.message });
+  } finally {
+    if (client) {
+      client.release();
+    }
+  }
 }

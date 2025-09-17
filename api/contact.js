@@ -1,22 +1,28 @@
 import pkg from 'pg';
+import nodemailer from 'nodemailer';
+
 const { Pool } = pkg;
 
-// Neon Database configuration
+// Database connection pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_kacwW2tmv8dh@ep-hidden-rain-agg3uf7b-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
-  ssl: {
-    rejectUnauthorized: false
-  }
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-export default async function handler(req, res) {
-  console.log('🚀 Contact endpoint çağrıldı:', {
-    method: req.method,
-    url: req.url,
-    headers: req.headers,
-    body: req.body
+// Email transporter configuration
+const createTransporter = () => {
+  return nodemailer.createTransporter({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_PORT === '465',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
   });
+};
 
+export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -24,95 +30,86 @@ export default async function handler(req, res) {
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('✅ CORS preflight request handled');
     return res.status(200).end();
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
-    console.log('❌ Method not allowed:', req.method);
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    console.log('📝 Request body:', req.body);
     const { name, email, message } = req.body;
 
     // Validate required fields
     if (!name || !email || !message) {
-      console.log('❌ Validation error - missing fields:', { name: !!name, email: !!email, message: !!message });
-      return res.status(400).json({
-        success: false,
-        message: 'İsim, email ve mesaj gerekli'
-      });
+      return res.status(400).json({ error: 'Name, email and message are required' });
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      console.log('❌ Email validation error:', email);
-      return res.status(400).json({
-        success: false,
-        message: 'Geçerli bir email adresi girin'
-      });
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    console.log('✅ Validation passed:', { name, email, message: message.substring(0, 50) + '...' });
+    // Sanitize inputs
+    const sanitizedName = name.trim().substring(0, 100);
+    const sanitizedEmail = email.trim().toLowerCase();
+    const sanitizedMessage = message.trim().substring(0, 1000);
 
-    // 1. Neon'a kaydet
-    console.log('💾 Neon\'a kaydetmeye başlanıyor...');
-    let dbSuccess = false;
+    let client;
     try {
-      const client = await pool.connect();
+      // Connect to database
+      client = await pool.connect();
+      
+      // Insert message into database
+      const dbResult = await client.query(
+        'INSERT INTO messages (name, email, message) VALUES ($1, $2, $3) RETURNING id, created_at',
+        [sanitizedName, sanitizedEmail, sanitizedMessage]
+      );
+
+      console.log('Message saved to database:', dbResult.rows[0].id);
+
+      // Send email notification
       try {
-        const result = await client.query(
-          'INSERT INTO contact_messages (name, email, message, is_read, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-          [name, email, message, false, new Date().toISOString()]
-        );
+        const transporter = createTransporter();
+        
+        const mailOptions = {
+          from: process.env.SMTP_USER,
+          to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
+          subject: `New Contact Message from ${sanitizedName}`,
+          html: `
+            <h2>New Contact Message</h2>
+            <p><strong>Name:</strong> ${sanitizedName}</p>
+            <p><strong>Email:</strong> ${sanitizedEmail}</p>
+            <p><strong>Message:</strong></p>
+            <p>${sanitizedMessage.replace(/\n/g, '<br>')}</p>
+            <hr>
+            <p><small>Received at: ${new Date().toLocaleString()}</small></p>
+          `
+        };
 
-        console.log('✅ Yeni mesaj kaydedildi:', result.rows[0]);
-        dbSuccess = true;
-      } finally {
-        client.release();
+        await transporter.sendMail(mailOptions);
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.error('Email sending failed:', emailError.message);
+        // Don't fail the request if email fails, just log it
       }
-    } catch (dbError) {
-      console.error('❌ Neon error:', {
-        error: dbError,
-        message: dbError.message,
-        stack: dbError.stack
-      });
-      dbSuccess = false;
-    }
 
-    // 2. Email gönderme kaldırıldı - sadece database'e kaydet
-    const emailSuccess = true; // Email gönderme olmadığı için her zaman başarılı
-
-    // Response döndür
-    if (dbSuccess) {
       return res.status(200).json({
         success: true,
-        message: 'Mesaj başarıyla kaydedildi'
+        message: 'Message sent successfully',
+        id: dbResult.rows[0].id
       });
-    } else {
-      return res.status(500).json({
-        success: false,
-        message: 'Mesaj kaydedilemedi'
-      });
+
+    } finally {
+      if (client) {
+        client.release();
+      }
     }
 
   } catch (error) {
-    console.error('💥 Contact form genel hatası:', {
-      error: error,
-      message: error.message,
-      stack: error.stack
-    });
-    return res.status(500).json({
-      success: false,
-      message: 'Sunucu hatası. Lütfen tekrar deneyin.',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    console.error('Contact form error:', error.message);
+    return res.status(500).json({ error: error.message });
   }
 }

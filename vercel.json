@@ -1,16 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "api/contact.js": {
-      "maxDuration": 10
-    },
-    "api/messages.js": {
-      "maxDuration": 10
-    },
-    "api/packages.js": {
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",
