@@ -6,7 +6,7 @@ export const en = {
     faq: 'FAQ',
     contact: 'CONTACT'
   },
-  
+
   // Homepage
   home: {
     hero: {
@@ -33,21 +33,21 @@ export const en = {
       subtitle: 'Ready travel sets suitable for every budget and need',
       economic: {
         title: 'Economic',
-        price: '$29',
+        price: '4.999 TL',
         features: ['Toothbrush & paste', 'Shampoo & soap', 'Towel', 'Socks'],
         purchase: 'Buy Now',
         cta: 'Contact Us'
       },
       comfort: {
         title: 'Comfort',
-        price: '$59',
+        price: '9.999 TL',
         features: ['Economic package content', 'Face care set', 'Moisturizer', 'Sunscreen'],
         purchase: 'Buy Now',
         cta: 'Contact Us'
       },
       luxury: {
         title: 'Luxury',
-        price: '$99',
+        price: '14.999 TL',
         features: ['Comfort package content', 'Premium care products', 'Organic products', 'Special bag'],
         purchase: 'Buy Now',
         cta: 'Contact Us'
@@ -168,7 +168,7 @@ export const en = {
     economic: {
       title: 'Economic',
       description: 'A smart and elegant solution for those who want to start their journey effortlessly and completely.',
-      price: '₺299',
+      price: '4.999 TL',
       sections: {
         personalCare: 'Personal Care Products',
         comfort: 'Comfort',
@@ -178,17 +178,17 @@ export const en = {
       },
       items: {
         personalCare: [
-          'Toothbrush & Paste', 'Shampoo & Shower Gel', 'Deodorant', 'Sunscreen', 
+          'Toothbrush & Paste', 'Shampoo & Shower Gel', 'Deodorant', 'Sunscreen',
           'Hand Cream', 'Wet Wipes', 'Microfiber Towel', 'Laundry Bag', 'Disinfectant'
         ],
         comfort: ['Ear Plugs', 'Eye Mask', 'Travel Notebook & Pen'],
         technology: ['Powerbank', 'Multi-Function Cable'],
         health: [
-          'Pain Reliever', 'Simple Allergy Medicine', 'Band-Aid', 'Antiseptic Cream', 
+          'Pain Reliever', 'Simple Allergy Medicine', 'Band-Aid', 'Antiseptic Cream',
           'Nasal Spray', 'Mask', 'Insect Repellent'
         ],
         additions: [
-          'Suitcase Organizer', 'Neck Pillow', 'Travel Slippers', 
+          'Suitcase Organizer', 'Neck Pillow', 'Travel Slippers',
           'QR Card, music playlist', 'Lavender sachet'
         ]
       },
@@ -198,7 +198,7 @@ export const en = {
     comfort: {
       title: 'Comfort',
       description: 'Carefully prepared for those who value not only functionality but also comfort in their travels. It offers a complete experience beyond standards.',
-      price: '₺599',
+      price: '9.999 TL',
       sections: {
         personalCare: 'Personal Care Products',
         comfort: 'Comfort',
@@ -208,19 +208,19 @@ export const en = {
       },
       items: {
         personalCare: [
-          'Toothbrush & Paste', 'Shampoo & Shower Gel', 'Deodorant', 'La Roche-Posay Sunscreen', 
-          'Hand Cream', 'Nail Clipper', 'Wet/Dry Wipes', 'Microfiber Towel', 
+          'Toothbrush & Paste', 'Shampoo & Shower Gel', 'Deodorant', 'La Roche-Posay Sunscreen',
+          'Hand Cream', 'Nail Clipper', 'Wet/Dry Wipes', 'Microfiber Towel',
           'Mini Laundry Bag', 'Disinfectant', 'Comb'
         ],
         comfort: ['Sleep Kit - Sleep Mask & Ear Plugs', 'Travel Notebook & Pen'],
         technology: ['Soultech Powerbank', 'Multi-Function Cable'],
         health: [
-          'Pain Reliever', 'Simple Allergy Medicine', 'Band-Aid', 'Antiseptic Cream', 
+          'Pain Reliever', 'Simple Allergy Medicine', 'Band-Aid', 'Antiseptic Cream',
           'Nasal Spray', 'Mask', 'Insect Repellent'
         ],
         additions: [
-          'Neck Pillow', 'Slippers', 'Herbal Tea & Energy Bar', 'Power Adapter', 
-          'Suitcase organizer', 'Lavender Sachet', 'Beurer Hair Dryer', 
+          'Neck Pillow', 'Slippers', 'Herbal Tea & Energy Bar', 'Power Adapter',
+          'Suitcase organizer', 'Lavender Sachet', 'Beurer Hair Dryer',
           'Compact Sewing Kit', 'Small Hygiene Bag', 'QR coded music playlist'
         ]
       },
@@ -230,7 +230,7 @@ export const en = {
     luxury: {
       title: 'Luxury',
       description: 'The most exclusive and prestigious form of travel, specially designed for you with every component.',
-      price: '₺999',
+      price: '14.999 TL',
       sections: {
         personalCare: 'Personal Care Products (Premium Quality)',
         comfort: 'Comfort',
@@ -240,22 +240,22 @@ export const en = {
       },
       items: {
         personalCare: [
-          'Toothbrush & Paste', 'Shampoo & Shower Gel', 'L\'occitane Roll-On Deodorant', 
-          'La Roche Posay Sunscreen', 'Hand Cream', 'Nail Clipper', 
-          'Wet/Dry Wipes', 'Microfiber Towel', 'Mini Laundry Bag', 
+          'Toothbrush & Paste', 'Shampoo & Shower Gel', 'L\'occitane Roll-On Deodorant',
+          'La Roche Posay Sunscreen', 'Hand Cream', 'Nail Clipper',
+          'Wet/Dry Wipes', 'Microfiber Towel', 'Mini Laundry Bag',
           'Hand Sanitizer', 'Comb'
         ],
         comfort: ['Sleep Kit', 'Silicone Ear Plugs', 'Premium Notebook and Roller Pen Set'],
         technology: ['Anker Powerbank', 'Multi-Function Cable'],
         health: [
-          'Parol Pain Reliever', 'Simple Allergy Medicine', 'Band-Aid', 'Antiseptic Cream', 
+          'Parol Pain Reliever', 'Simple Allergy Medicine', 'Band-Aid', 'Antiseptic Cream',
           'Nasal Spray', 'Mask', 'Insect Repellent'
         ],
         additions: [
-          'Neck Pillow', 'Foldable Slippers', 'Herbal Tea & Energy Bar', 'Power Adapter', 
-          'Suitcase Organizer', 'Lavender Sachet', 'Xiaomi Hair Dryer', 
-          'Compact Sewing Kit', 'Leather Hygiene Bag', 'Iron / Steam Straightener', 
-          'Door Alarm', 'Organic Cotton Pillowcase', 'QR Coded Special Travel Playlist Card', 
+          'Neck Pillow', 'Foldable Slippers', 'Herbal Tea & Energy Bar', 'Power Adapter',
+          'Suitcase Organizer', 'Lavender Sachet', 'Xiaomi Hair Dryer',
+          'Compact Sewing Kit', 'Leather Hygiene Bag', 'Iron / Steam Straightener',
+          'Door Alarm', 'Organic Cotton Pillowcase', 'QR Coded Special Travel Playlist Card',
           'Leather Luggage Tag', 'Thermos', 'Foldable Umbrella'
         ]
       },

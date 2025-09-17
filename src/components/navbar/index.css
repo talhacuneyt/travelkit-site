@@ -2,6 +2,97 @@
   --navbar-h: 12vh;
 }
 
+/* Top Contact Bar */
+.top-contact-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 2px 250px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-contact-bar__inner {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-contact-bar__email {
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.top-contact-bar__email:hover {
+  color: #f97316;
+}
+
+.top-contact-bar__email svg {
+  stroke-width: 2;
+}
+
+.top-contact-bar__social {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.top-contact-bar__icon {
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-weight: 600;
+}
+
+.top-contact-bar__icon svg {
+  stroke-width: 3;
+  font-weight: 900;
+}
+
+.top-contact-bar__icon:hover {
+  color: #f97316;
+}
+
+/* Dark mode for top contact bar */
+.dark .top-contact-bar {
+  background: #1a1a1a;
+  border-bottom-color: #333333;
+}
+
+.dark .top-contact-bar__email {
+  color: #94a3b8;
+}
+
+.dark .top-contact-bar__email:hover {
+  color: #f97316;
+}
+
+.dark .top-contact-bar__icon {
+  color: #94a3b8;
+}
+
+.dark .top-contact-bar__icon:hover {
+  color: #f97316;
+}
+
+/* Responsive design for top contact bar */
+@media (max-width: 1400px) {
+  .top-contact-bar {
+    padding: 8px 20px;
+  }
+}
+
 
 /* Admin Login Navbar Styles */
 .admin-login-navbar {
@@ -491,7 +582,6 @@
   height: var(--navbar-h);
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
 }
 
@@ -502,7 +592,6 @@
 
 .navbar--scrolled {
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   border-bottom: 1px solid #d1d5db;
 }
 
@@ -592,8 +681,10 @@
   color: #111111;
   padding: 10px 0;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   position: relative;
   transition: color 0.2s ease;
 }
@@ -621,11 +712,12 @@
   color: #111;
   padding: 10px 0;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 15px;
   position: relative;
   transition: color 0.2s ease;
-  text-transform: capitalize;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .navbar__cta::after {
@@ -903,6 +995,108 @@
   align-items: center;
 }
 
+/* World Toggle Button */
+.navbar__world-toggle {
+  width: 60px;
+  height: 44px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navbar__world-toggle:hover {
+  border-color: #f97316;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+  transform: translateY(-1px);
+}
+
+.world-icon {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.world-half {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.world-half--left {
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 8px 0 0 8px;
+  margin-right: 2px;
+}
+
+.world-half--right {
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 0 8px 8px 0;
+  margin-left: 2px;
+}
+
+.world-half--left:hover {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.world-half--right:hover {
+  background: #10b981;
+  color: #ffffff;
+}
+
+/* Dark mode styles for world toggle */
+.dark .navbar__world-toggle {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .navbar__world-toggle:hover {
+  border-color: #f97316;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+}
+
+.dark .world-half--left {
+  background: #374151;
+  color: #d1d5db;
+  margin-right: 2px;
+}
+
+.dark .world-half--right {
+  background: #374151;
+  color: #d1d5db;
+  margin-left: 2px;
+}
+
+.dark .world-half--left:hover {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.dark .world-half--right:hover {
+  background: #10b981;
+  color: #ffffff;
+}
+
 /* Language Toggle */
 .navbar__language-toggle {
   color: #ffffff;
@@ -1064,7 +1258,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   letter-spacing: 0.3px;
   outline: none;
   box-shadow: none;
@@ -1179,7 +1373,7 @@
   font-weight: 500;
   color: #111111;
   margin-bottom: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   letter-spacing: 0.3px;
 }
 
@@ -1195,7 +1389,7 @@
   color: #111111;
   padding: 15px 15px 15px 0;
   font-size: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
@@ -1261,7 +1455,7 @@
   color: white;
   padding: 18px 48px;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -1293,14 +1487,14 @@
   color: #dc2626;
   font-size: 14px;
   margin-top: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .success-message {
   color: #059669;
   font-size: 14px;
   margin-top: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* 2FA Styles - İletişim Sayfası Tarzı */
@@ -1332,7 +1526,7 @@
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .dark .twofa-description {
@@ -1351,7 +1545,7 @@
   color: white;
   padding: 12px 24px;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -1438,7 +1632,7 @@
   font-size: 16px;
   font-weight: 600;
   color: #111111;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .dark .package-info h5 {
@@ -1449,7 +1643,7 @@
   margin: 0;
   font-size: 14px;
   color: #64748b;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .dark .package-info p {
@@ -1462,7 +1656,7 @@
   color: white;
   padding: 8px 16px;
   font-size: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -1494,7 +1688,7 @@
   color: white;
   padding: 16px 32px;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;

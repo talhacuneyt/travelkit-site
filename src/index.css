@@ -1,24 +1,152 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
-:root {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+/* Montserrat Font Face */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { 
-  margin: 0; 
-  padding: 0; 
-  background: var(--bg); 
-  color: var(--text); 
-  width: 100%; 
-  min-height: 100vh; 
-  overflow-x: hidden; 
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Raleway Font Face */
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/raleway.regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/raleway.medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/raleway.semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/raleway.bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/raleway.extrabold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/raleway.heavy.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  font-family: 'Montserrat', 'Cormorant', 'Raleway', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
   overflow-y: auto;
   position: relative;
 }
 
 :root {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: 'Montserrat', 'Cormorant', 'Raleway', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -31,7 +159,8 @@ html, body {
   --text: #111111;
   --muted: #64748b;
   --border: rgba(2, 6, 23, 0.08);
-  --btn-bg: #fb923c; /* orange-400 */
+  --btn-bg: #fb923c;
+  /* orange-400 */
   --btn-text: #ffffff;
   --navbar-bg: rgba(255, 255, 255, 0.65);
   --navbar-bg-strong: rgba(255, 255, 255, 0.85);
@@ -45,8 +174,15 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-a { font-weight: 500; color: #f97316; text-decoration: inherit; }
-a:hover { color: #ea580c; }
+a {
+  font-weight: 500;
+  color: #f97316;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #ea580c;
+}
 
 body {
   margin: 0;
@@ -57,29 +193,49 @@ body {
   min-height: 100vh;
 }
 
-#root { padding: 0; }
+#root {
+  padding: 0;
+}
 
 /* Scrollbar (WebKit) */
-*::-webkit-scrollbar { width: 6px; height: 6px; }
-*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 *::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #93c5fd, #38bdf8);
   border-radius: 999px;
   border: 1.5px solid transparent;
   background-clip: padding-box;
 }
-*::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #60a5fa, #22d3ee); }
 
-/* Scrollbar (Firefox) */
-* { scrollbar-width: thin; scrollbar-color: #7dd3fc transparent; }
-
-/* Typography */
-h1, h2, h3, .logo {
-  font-family: 'Poppins', sans-serif;
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #60a5fa, #22d3ee);
 }
 
-body, p, li {
-  font-family: 'Inter', sans-serif;
+/* Scrollbar (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #7dd3fc transparent;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+.logo {
+  font-family: 'Montserrat', 'Cormorant', 'Raleway', 'Poppins', sans-serif;
+}
+
+body,
+p,
+li {
+  font-family: 'Montserrat', 'Cormorant', 'Raleway', 'Poppins', sans-serif;
 }
 
 h1 {
@@ -99,7 +255,12 @@ button {
   cursor: pointer;
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
-button:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(17,17,17,0.15); }
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(17, 17, 17, 0.15);
+}
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -110,9 +271,11 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: var(--btn-bg);
     color: var(--btn-text);
@@ -146,7 +309,7 @@ button:focus-visible {
   color-scheme: dark !important;
   color: #ffffff !important;
   background-color: #000000 !important;
-  
+
   /* Dark theme variables - Pure black theme */
   --bg: #000000;
   --text: #ffffff;
@@ -171,4 +334,9 @@ button:focus-visible {
 /* Smooth transitions for dark mode */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Fix Turkish character issues with text-transform */
+.turkish-text {
+  text-transform: none !important;
 }

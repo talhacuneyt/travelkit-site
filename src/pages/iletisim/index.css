@@ -39,7 +39,7 @@
   font-size: 18px;
   color: #64748b;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 300;
   line-height: 1.5;
 }
@@ -98,7 +98,7 @@
   color: #111111;
   padding: 15px 15px 15px 0;
   font-size: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
@@ -153,7 +153,7 @@
 .form-textarea {
   resize: none;
   min-height: 120px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   line-height: 1.6;
 }
 
@@ -163,7 +163,7 @@
   color: white;
   padding: 18px 48px;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -259,7 +259,7 @@
   font-weight: 600;
   color: #1e293b;
   margin: 0 0 12px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   letter-spacing: -0.5px;
 }
 
@@ -267,7 +267,7 @@
   font-size: 15px;
   color: #64748b;
   margin: 0 0 32px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400;
   line-height: 1.6;
   letter-spacing: 0.2px;
@@ -279,7 +279,7 @@
   color: white;
   padding: 16px 32px;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -363,6 +363,51 @@
   gap: 30px;
 }
 
+/* WhatsApp Contact Button */
+.whatsapp-contact-btn {
+  background: #111111;
+  border: 1px solid #111111;
+  color: white;
+  padding: 18px 48px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 0;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  width: 100%;
+  max-width: 300px;
+}
+
+.whatsapp-contact-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.whatsapp-contact-btn:hover {
+  background: #ffffff;
+  color: #111111;
+  border-color: #111111;
+  transform: none !important;
+}
+
+.whatsapp-contact-btn:hover::before {
+  left: 100%;
+}
+
+.whatsapp-contact-btn:active {
+  transform: translateY(0);
+}
+
 .info-item {
   position: relative;
   padding: 12px 0;
@@ -385,7 +430,7 @@
   font-weight: 600;
   color: #6b7280;
   margin: 0 0 6px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 0;
@@ -395,7 +440,7 @@
   font-size: 15px;
   color: #111111;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: 0.1px;
@@ -608,7 +653,7 @@
   font-weight: 600;
   color: #111111;
   margin: 0 0 12px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   letter-spacing: -0.3px;
 }
 
@@ -616,7 +661,7 @@
   font-size: 16px;
   color: #64748b;
   margin: 0 0 24px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -627,7 +672,7 @@
   color: white;
   padding: 18px 36px;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -734,6 +779,17 @@
 }
 
 .dark .whatsapp-button:hover {
+  background: #f0f0f0;
+  color: #000000;
+}
+
+.dark .whatsapp-contact-btn {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.dark .whatsapp-contact-btn:hover {
   background: #f0f0f0;
   color: #000000;
 }

@@ -2,6 +2,18 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/messages/(.*)",
+      "destination": "/api/messages"
+    },
+    {
+      "source": "/api/contact",
+      "destination": "/api/contact"
+    },
+    {
+      "source": "/api/packages",
+      "destination": "/api/packages"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/backend/$1"
     },

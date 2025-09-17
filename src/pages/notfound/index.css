@@ -43,7 +43,7 @@
   font-size: 18px;
   color: #64748b;
   margin: 0 0 40px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 300;
   line-height: 1.5;
 }
@@ -54,7 +54,7 @@
   color: white;
   padding: 18px 48px;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

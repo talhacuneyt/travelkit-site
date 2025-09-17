@@ -1,11 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
+import pkg from 'pg';
+const { Pool } = pkg;
 import emailjs from '@emailjs/nodejs';
 
-// Supabase configuration
-const supabaseUrl = process.env.SUPABASE_URL || 'https://kegdhelzdksivfekktkx.supabase.co';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2RoZWx6ZGtzaXZmZWtrdGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTA1NDgsImV4cCI6MjA3MjgyNjU0OH0.9srURxR_AsLu5lqwodeFuV-zsmkkr82PRh9RSToqQUU';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Neon Database configuration
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_kacwW2tmv8dh@ep-hidden-rain-agg3uf7b-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 export default async function handler(req, res) {
   console.log('🚀 Contact endpoint çağrıldı:', {
@@ -60,41 +63,29 @@ export default async function handler(req, res) {
 
     console.log('✅ Validation passed:', { name, email, message: message.substring(0, 50) + '...' });
 
-    // 1. Supabase'e kaydet
-    console.log('💾 Supabase\'e kaydetmeye başlanıyor...');
-    let supabaseSuccess = false;
+    // 1. Neon'a kaydet
+    console.log('💾 Neon\'a kaydetmeye başlanıyor...');
+    let dbSuccess = false;
     try {
-      const { data: contactData, error: dbError } = await supabase
-        .from('contact_messages')
-        .insert([
-          {
-            name: name,
-            email: email,
-            message: message,
-            created_at: new Date().toISOString()
-          }
-        ])
-        .select();
+      const client = await pool.connect();
+      try {
+        const result = await client.query(
+          'INSERT INTO contact_messages (name, email, message, is_read, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+          [name, email, message, false, new Date().toISOString()]
+        );
 
-      if (dbError) {
-        console.error('❌ Supabase kayıt hatası:', {
-          error: dbError,
-          message: dbError.message,
-          details: dbError.details,
-          hint: dbError.hint
-        });
-        supabaseSuccess = false;
-      } else {
-        console.log('✅ Mesaj Supabase\'e kaydedildi:', contactData);
-        supabaseSuccess = true;
+        console.log('✅ Yeni mesaj kaydedildi:', result.rows[0]);
+        dbSuccess = true;
+      } finally {
+        client.release();
       }
     } catch (dbError) {
-      console.error('❌ Supabase bağlantı hatası:', {
+      console.error('❌ Neon error:', {
         error: dbError,
         message: dbError.message,
         stack: dbError.stack
       });
-      supabaseSuccess = false;
+      dbSuccess = false;
     }
 
     // 2. EmailJS ile email gönder
@@ -129,17 +120,17 @@ export default async function handler(req, res) {
     }
 
     // Response döndür
-    if (supabaseSuccess && emailSuccess) {
+    if (dbSuccess && emailSuccess) {
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi ve mail gönderildi'
       });
-    } else if (supabaseSuccess && !emailSuccess) {
+    } else if (dbSuccess && !emailSuccess) {
       return res.status(200).json({
         success: true,
         message: 'Mesaj kaydedildi (email gönderilemedi)'
       });
-    } else if (!supabaseSuccess && emailSuccess) {
+    } else if (!dbSuccess && emailSuccess) {
       return res.status(200).json({
         success: true,
         message: 'Email gönderildi (veritabanına kaydedilemedi)'

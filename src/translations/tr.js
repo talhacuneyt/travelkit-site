@@ -30,25 +30,25 @@ export const tr = {
       }
     },
     packages: {
-      title: 'SEYAHAT PAKETLERİMİZ',
+      title: 'Seyahat Paketlerimiz',
       subtitle: 'Her bütçe ve ihtiyaca uygun hazır seyahat setleri',
       economic: {
         title: 'Ekonomik',
-        price: '₺299',
+        price: '4.999 TL',
         features: ['Diş fırçası & macun', 'Şampuan & sabun', 'Havlu', 'Çorap'],
         purchase: 'Satın Al',
         cta: 'İletişime Geç'
       },
       comfort: {
         title: 'Konforlu',
-        price: '₺599',
+        price: '9.999 TL',
         features: ['Ekonomik paket içeriği', 'Yüz bakım seti', 'Nemlendirici', 'Güneş kremi'],
         purchase: 'Satın Al',
         cta: 'İletişime Geç'
       },
       luxury: {
         title: 'Lüks',
-        price: '₺999',
+        price: '14.999 TL',
         features: ['Konforlu paket içeriği', 'Premium bakım ürünleri', 'Organik ürünler', 'Özel çanta'],
         purchase: 'Satın Al',
         cta: 'İletişime Geç'
@@ -169,7 +169,7 @@ export const tr = {
     economic: {
       title: 'Ekonomik',
       description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-      price: '₺299',
+      price: '4.999 TL',
       sections: {
         personalCare: 'Kişisel Bakım Ürünleri',
         comfort: 'Konfor',
@@ -199,13 +199,13 @@ export const tr = {
     comfort: {
       title: 'Konforlu',
       description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı. Standartların bir adım ötesinde, eksiksiz bir deneyim sunar.',
-      price: '₺599',
+      price: '9.999 TL',
       sections: {
         personalCare: 'Kişisel Bakım Ürünleri',
         comfort: 'Konfor',
         technology: 'Teknoloji',
         health: 'Sağlık / İlk Yardım',
-        additions: 'KONFOR PAKET EKLEMELERİ'
+        additions: 'Konfor Paket Eklemeleri'
       },
       items: {
         personalCare: [
@@ -231,7 +231,7 @@ export const tr = {
     luxury: {
       title: 'Lüks',
       description: 'Her bileşeniyle size özel, seyahatin en seçkin ve prestijli hâli.',
-      price: '₺999',
+      price: '14.999 TL',
       sections: {
         personalCare: 'Kişisel Bakım Ürünleri (Premium Kalite)',
         comfort: 'Konfor',

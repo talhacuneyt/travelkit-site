@@ -17,145 +17,102 @@ function SatinAl() {
   const [packageData, setPackageData] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // API'den paket verilerini çek
-  const getPackageData = async (packageType) => {
-    try {
-      const response = await fetch('/api/packages');
-
-      // Response'un JSON olup olmadığını kontrol et
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error(`API returned non-JSON response: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success && data.data) {
-        // Tüm paketlerden istenen paketi bul
-        const packageData = data.data.find(pkg => pkg.id === packageType);
-
-        if (!packageData) {
-          throw new Error('Paket bulunamadı');
-        }
-
-        return {
-          title: packageData.name,
-          description: packageData.description || 'Seyahat paketi',
-          price: `₺${packageData.price}`,
-          features: packageData.features
-        };
-      } else {
-        throw new Error(data.message || 'Paket verisi alınamadı');
-      }
-    } catch (error) {
-      console.error('API error, falling back to localStorage:', error);
-
-      // API hatası durumunda localStorage'dan kaydedilmiş veriyi kontrol et
-      const savedPackage = localStorage.getItem(`package_${packageType}`)
-      if (savedPackage) {
-        try {
-          return JSON.parse(savedPackage)
-        } catch (parseError) {
-          console.error('Error parsing saved package data:', parseError)
-        }
-      }
-
-      // Son çare olarak hardcoded veriyi döndür
-      const fallbackPackages = {
-        economic: {
-          title: 'Ekonomik',
-          description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-          price: '₺299',
-          sections: {
-            personalCare: 'Kişisel Bakım Ürünleri',
-            comfort: 'Konfor',
-            technology: 'Teknoloji',
-            health: 'Sağlık / İlk Yardım',
-            additions: 'Ekonomik Paket Eklemeleri'
-          },
-          items: {
-            personalCare: [
-              'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
-              'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
-            ],
-            comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
-            technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
-            health: [
-              'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
-              'Burun Spreyi', 'Maske', 'Sineksavar'
-            ],
-            additions: [
-              'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
-              'QR Kart, müzik listesi', 'Lavanta kesesi'
-            ]
-          }
+  // Hardcoded paket verilerini döndür
+  const getPackageData = (packageType) => {
+    const packages = {
+      economic: {
+        title: 'Ekonomik',
+        description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
+        price: '4.999 TL',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Ekonomik Paket Eklemeleri'
         },
-        comfort: {
-          title: 'Konforlu',
-          description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı.',
-          price: '₺499',
-          sections: {
-            personalCare: 'Kişisel Bakım Ürünleri',
-            comfort: 'Konfor',
-            technology: 'Teknoloji',
-            health: 'Sağlık / İlk Yardım',
-            additions: 'Konforlu Paket Eklemeleri'
-          },
-          items: {
-            personalCare: [
-              'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
-              'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
-            ],
-            comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği'],
-            technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo', 'Bluetooth Kulaklık'],
-            health: [
-              'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
-              'Burun Spreyi', 'Maske', 'Sineksavar'
-            ],
-            additions: [
-              'Bavul İçi Düzenleyici', 'QR Kart, müzik listesi', 'Lavanta kesesi', 'Seyahat Yastığı'
-            ]
-          }
-        },
-        lux: {
-          title: 'Lux',
-          description: 'En lüks seyahat deneyimi için özel olarak seçilmiş premium malzemeler.',
-          price: '₺799',
-          sections: {
-            personalCare: 'Kişisel Bakım Ürünleri',
-            comfort: 'Konfor',
-            technology: 'Teknoloji',
-            health: 'Sağlık / İlk Yardım',
-            additions: 'Lux Paket Eklemeleri'
-          },
-          items: {
-            personalCare: [
-              'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
-              'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
-            ],
-            comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği', 'Premium Seyahat Yastığı'],
-            technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo', 'Bluetooth Kulaklık', 'Seyahat Adaptörü'],
-            health: [
-              'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
-              'Burun Spreyi', 'Maske', 'Sineksavar'
-            ],
-            additions: [
-              'Bavul İçi Düzenleyici', 'QR Kart, müzik listesi', 'Lavanta kesesi', 'Premium Seyahat Yastığı', 'VIP Çanta'
-            ]
-          }
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+          ],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
+          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+            'QR Kart, müzik listesi', 'Lavanta kesesi'
+          ]
         }
-      };
+      },
+      comfort: {
+        title: 'Konforlu',
+        description: 'Seyahatlerinde sadece işlevselliği değil, konforu da önemseyenler için özenle hazırlandı.',
+        price: '9.999 TL',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Konforlu Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+          ],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği'],
+          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo', 'Bluetooth Kulaklık'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Bavul İçi Düzenleyici', 'QR Kart, müzik listesi', 'Lavanta kesesi', 'Seyahat Yastığı'
+          ]
+        }
+      },
+      lux: {
+        title: 'Lux',
+        description: 'En lüks seyahat deneyimi için özel olarak seçilmiş premium malzemeler.',
+        price: '14.999 TL',
+        sections: {
+          personalCare: 'Kişisel Bakım Ürünleri',
+          comfort: 'Konfor',
+          technology: 'Teknoloji',
+          health: 'Sağlık / İlk Yardım',
+          additions: 'Lux Paket Eklemeleri'
+        },
+        items: {
+          personalCare: [
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
+          ],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği', 'Premium Seyahat Yastığı'],
+          technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo', 'Bluetooth Kulaklık', 'Seyahat Adaptörü'],
+          health: [
+            'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',
+            'Burun Spreyi', 'Maske', 'Sineksavar'
+          ],
+          additions: [
+            'Bavul İçi Düzenleyici', 'QR Kart, müzik listesi', 'Lavanta kesesi', 'Premium Seyahat Yastığı', 'VIP Çanta'
+          ]
+        }
+      }
+    };
 
-      return fallbackPackages[packageType] || null;
-    }
+    return packages[packageType] || null;
   }
 
   // Paket verilerini yükle
   useEffect(() => {
-    const loadPackageData = async () => {
+    const loadPackageData = () => {
       setLoading(true)
       try {
-        const data = await getPackageData(packageType)
+        const data = getPackageData(packageType)
         setPackageData(data)
       } catch (error) {
         console.error('Paket verisi yüklenirken hata:', error)
@@ -226,7 +183,7 @@ function SatinAl() {
       `Lütfen bana detaylı bilgi verin ve sipariş sürecini başlatalım.`
     )
     // WhatsApp'a yönlendir (Türkiye numarası formatı)
-    window.open(`https://wa.me/905551234567?text=${message}`, '_blank')
+    window.open(`https://wa.me/905529278937?text=${message}`, '_blank')
   }
 
   if (isSuccess) {
@@ -349,7 +306,7 @@ function SatinAl() {
                   Çalışma saatleri: 09:00 - 18:00
                 </p>
                 <button
-                  onClick={() => window.location.href = 'tel:+905551234567'}
+                  onClick={() => window.location.href = 'tel:+905529278937'}
                   className="satin-al__option-btn satin-al__option-btn--phone"
                 >
                   Telefon ile Arayın

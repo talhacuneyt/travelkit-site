@@ -1,6 +1,17 @@
+import pkg from 'pg';
+const { Pool } = pkg;
+
+// Neon Database configuration
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_kacwW2tmv8dh@ep-hidden-rain-agg3uf7b-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://travelkit-site.vercel.app');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -15,31 +26,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const packages = [
-      {
-        id: 'ekonomik',
-        name: 'Ekonomik Paket',
-        price: 299,
-        features: ['Temel seyahat malzemeleri', '1 kişilik', 'Çanta dahil']
-      },
-      {
-        id: 'konforlu',
-        name: 'Konforlu Paket',
-        price: 499,
-        features: ['Gelişmiş seyahat malzemeleri', '2 kişilik', 'Premium çanta dahil']
-      },
-      {
-        id: 'lux',
-        name: 'Lux Paket',
-        price: 799,
-        features: ['Lüks seyahat malzemeleri', '4 kişilik', 'VIP çanta dahil']
-      }
-    ];
+    console.log('📦 Fetching packages from Neon...');
 
-    res.status(200).json({
-      success: true,
-      data: packages
-    });
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT id, package_type, slug, title, description, price, sections, items, created_at, updated_at 
+        FROM packages 
+        ORDER BY id ASC
+      `);
+
+      console.log('📦 Packages loaded:', result.rows.length);
+      res.status(200).json(result.rows);
+    } finally {
+      client.release();
+    }
 
   } catch (error) {
     console.error('Packages endpoint error:', error);

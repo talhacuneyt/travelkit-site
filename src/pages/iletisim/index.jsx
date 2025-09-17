@@ -130,6 +130,18 @@ function Iletisim() {
               <h3>{t('contact.info.response')}</h3>
               <p>{t('contact.info.responseValue')}</p>
             </div>
+
+            <button
+              className="whatsapp-contact-btn"
+              onClick={() => {
+                const whatsappSection = document.querySelector('.whatsapp-section');
+                if (whatsappSection) {
+                  whatsappSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
+              WhatsApp ile İletişime Geç
+            </button>
           </div>
         </div>
       </section>

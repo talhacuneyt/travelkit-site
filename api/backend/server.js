@@ -8,7 +8,6 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createClient } from '@supabase/supabase-js';
 import emailjs from '@emailjs/nodejs';
 import pkg from 'pg';
 const { Pool } = pkg;
@@ -18,15 +17,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Supabase configuration
-const supabaseUrl = process.env.SUPABASE_URL || 'https://kegdhelzdksivfekktkx.supabase.co';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2RoZWx6ZGtzaXZmZWtrdGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTA1NDgsImV4cCI6MjA3MjgyNjU0OH0.9srURxR_AsLu5lqwodeFuV-zsmkkr82PRh9RSToqQUU';
+// Neon Database configuration
 
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Postgres pool configuration
+// Postgres pool configuration - Neon Database
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:YOUR_PASSWORD@ep-rough-king-a5q8q8q8.us-east-2.aws.neon.tech/neondb?sslmode=require',
+  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_kacwW2tmv8dh@ep-hidden-rain-agg3uf7b-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
   ssl: {
     rejectUnauthorized: false
   }
@@ -500,89 +495,24 @@ app.post('/api/payments/verify', paymentLimiter, async (req, res) => {
   }
 });
 
-// Package information endpoint
+// Package information endpoint - Neon'dan paketleri çek
 app.get('/api/packages', async (req, res) => {
   try {
-    console.log('📦 Fetching packages...');
+    console.log('📦 Fetching packages from Neon...');
 
-    // Mock packages data (Supabase tablosu oluşturulana kadar)
-    const mockPackages = [
-      {
-        id: 1,
-        package_type: 'economic',
-        slug: 'economic',
-        title: 'Ekonomik',
-        description: 'Seyahate zahmetsiz ve eksiksiz bir başlangıç yapmak isteyenler için, akıllı ve şık bir çözüm.',
-        price: 299.00,
-        sections: {
-          personalCare: "Kişisel Bakım Ürünleri",
-          comfort: "Konfor",
-          technology: "Teknoloji",
-          health: "Sağlık / İlk Yardım",
-          additions: "Ekonomik Paket Eklemeleri"
-        },
-        items: {
-          personalCare: ["Diş Fırçası & Macun", "Şampuan & Duş Jeli", "Deodorant", "Güneş Kremi", "El Kremi", "Islak Mendil", "Mikrofiber Havlu", "Çamaşır Torbası", "Dezenfektan"],
-          comfort: ["Kulak Tıkacı", "Göz Bandı", "Seyahat Defteri & Kalem"],
-          technology: ["Powerbank", "Çoklu Fonksiyonlu Kablo"],
-          health: ["Ağrı Kesici", "Basit Alerji İlacı", "Yara Bandı", "Antiseptik Krem", "Burun Spreyi", "Maske", "Sineksavar"],
-          additions: ["Bavul İçi Düzenleyici", "Boyun Yastığı", "Seyahat Terliği", "QR Kart, müzik listesi", "Lavanta kesesi"]
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 2,
-        package_type: 'comfort',
-        slug: 'comfort',
-        title: 'Konforlu',
-        description: 'Seyahatinizi daha konforlu hale getiren gelişmiş malzemelerle donatılmış paket.',
-        price: 499.00,
-        sections: {
-          personalCare: "Kişisel Bakım Ürünleri",
-          comfort: "Konfor",
-          technology: "Teknoloji",
-          health: "Sağlık / İlk Yardım",
-          additions: "Konforlu Paket Eklemeleri"
-        },
-        items: {
-          personalCare: ["Diş Fırçası & Macun", "Şampuan & Duş Jeli", "Deodorant", "Güneş Kremi", "El Kremi", "Islak Mendil", "Mikrofiber Havlu", "Çamaşır Torbası", "Dezenfektan"],
-          comfort: ["Kulak Tıkacı", "Göz Bandı", "Seyahat Defteri & Kalem", "Boyun Yastığı", "Seyahat Terliği"],
-          technology: ["Powerbank", "Çoklu Fonksiyonlu Kablo", "Bluetooth Kulaklık"],
-          health: ["Ağrı Kesici", "Basit Alerji İlacı", "Yara Bandı", "Antiseptik Krem", "Burun Spreyi", "Maske", "Sineksavar"],
-          additions: ["Bavul İçi Düzenleyici", "QR Kart, müzik listesi", "Lavanta kesesi", "Seyahat Yastığı"]
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 3,
-        package_type: 'lux',
-        slug: 'lux',
-        title: 'Lux',
-        description: 'En lüks seyahat deneyimi için özel olarak seçilmiş premium malzemeler.',
-        price: 799.00,
-        sections: {
-          personalCare: "Kişisel Bakım Ürünleri",
-          comfort: "Konfor",
-          technology: "Teknoloji",
-          health: "Sağlık / İlk Yardım",
-          additions: "Lux Paket Eklemeleri"
-        },
-        items: {
-          personalCare: ["Diş Fırçası & Macun", "Şampuan & Duş Jeli", "Deodorant", "Güneş Kremi", "El Kremi", "Islak Mendil", "Mikrofiber Havlu", "Çamaşır Torbası", "Dezenfektan"],
-          comfort: ["Kulak Tıkacı", "Göz Bandı", "Seyahat Defteri & Kalem", "Boyun Yastığı", "Seyahat Terliği", "Premium Seyahat Yastığı"],
-          technology: ["Powerbank", "Çoklu Fonksiyonlu Kablo", "Bluetooth Kulaklık", "Seyahat Adaptörü"],
-          health: ["Ağrı Kesici", "Basit Alerji İlacı", "Yara Bandı", "Antiseptik Krem", "Burun Spreyi", "Maske", "Sineksavar"],
-          additions: ["Bavul İçi Düzenleyici", "QR Kart, müzik listesi", "Lavanta kesesi", "Premium Seyahat Yastığı", "VIP Çanta"]
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ];
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT id, package_type, slug, title, description, price, sections, items, created_at, updated_at 
+        FROM packages 
+        ORDER BY id ASC
+      `);
 
-    console.log('📦 Mock packages loaded:', mockPackages.length);
-    res.json(mockPackages);
+      console.log('📦 Packages loaded:', result.rows.length);
+      res.json(result.rows);
+    } finally {
+      client.release();
+    }
   } catch (error) {
     console.error('❌ Package fetch error:', error);
     res.status(500).json({
@@ -592,7 +522,7 @@ app.get('/api/packages', async (req, res) => {
   }
 });
 
-// Get single package by slug endpoint
+// Get single package by slug endpoint - Neon'dan çek
 app.get('/api/packages/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
@@ -606,22 +536,24 @@ app.get('/api/packages/:slug', async (req, res) => {
 
     const actualSlug = slugMapping[slug] || slug;
 
-    // Supabase'den paketi slug'a göre çek
-    const { data, error } = await supabase
-      .from('packages')
-      .select('*')
-      .eq('slug', actualSlug)
-      .single();
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM packages WHERE slug = $1',
+        [actualSlug]
+      );
 
-    if (error) {
-      console.error('❌ Supabase package fetch error:', error);
-      return res.status(404).json({
-        success: false,
-        message: 'Paket bulunamadı'
-      });
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paket bulunamadı'
+        });
+      }
+
+      res.json(result.rows[0]);
+    } finally {
+      client.release();
     }
-
-    res.json(data);
   } catch (error) {
     console.error('❌ Package fetch error:', error);
     res.status(500).json({
@@ -690,31 +622,26 @@ app.put('/api/packages/:id', async (req, res) => {
       });
     }
 
-    // Supabase'de paketi güncelle
-    const { data, error } = await supabase
-      .from('packages')
-      .update({
-        title,
-        description,
-        price: parseFloat(price),
-        sections: sections || {},
-        items: items || {},
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
+    // Neon'da paketi güncelle
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'UPDATE packages SET title = $1, description = $2, price = $3, sections = $4, items = $5, updated_at = NOW() WHERE id = $6 RETURNING *',
+        [title, description, parseFloat(price), sections || {}, items || {}, id]
+      );
 
-    if (error) {
-      console.error('❌ Supabase package update error:', error);
-      return res.status(404).json({
-        success: false,
-        message: 'Paket bulunamadı veya güncellenemedi'
-      });
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Paket bulunamadı veya güncellenemedi'
+        });
+      }
+
+      console.log(`✅ Paket güncellendi: ${id} - Fiyat: ${price}`);
+      res.json(result.rows[0]);
+    } finally {
+      client.release();
     }
-
-    console.log(`✅ Paket güncellendi: ${id} - Fiyat: ${price}`);
-    res.json(data);
 
   } catch (error) {
     console.error('❌ Package update error:', error);
@@ -759,32 +686,24 @@ app.post('/api/contact', async (req, res) => {
 
     console.log('✅ Validation passed:', { name, email, message: message.substring(0, 50) + '...' });
 
-    // 1. Supabase'e kaydet
-    console.log('💾 Supabase\'e kaydetmeye başlanıyor...');
+    // 1. Neon'a kaydet
+    console.log('💾 Neon\'a kaydetmeye başlanıyor...');
     let dbSuccess = false;
     try {
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .insert([
-          {
-            name,
-            email,
-            message,
-            is_read: false,
-            created_at: new Date().toISOString()
-          }
-        ])
-        .select();
+      const client = await pool.connect();
+      try {
+        const result = await client.query(
+          'INSERT INTO contact_messages (name, email, message, is_read, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+          [name, email, message, false, new Date().toISOString()]
+        );
 
-      if (error) {
-        console.error('❌ Supabase insert error:', error);
-        dbSuccess = false;
-      } else {
-        console.log('✅ Yeni mesaj kaydedildi:', data[0]);
+        console.log('✅ Yeni mesaj kaydedildi:', result.rows[0]);
         dbSuccess = true;
+      } finally {
+        client.release();
       }
     } catch (dbError) {
-      console.error('❌ Supabase error:', {
+      console.error('❌ Neon error:', {
         error: dbError,
         message: dbError.message,
         stack: dbError.stack
@@ -1073,32 +992,123 @@ app.post('/api/send-sms', smsLimiter, async (req, res) => {
   }
 });
 
-// Messages endpoint - Supabase'den mesajları çek
+// Messages endpoint - Neon'dan mesajları çek
 app.get('/api/messages', async (req, res) => {
   try {
-    console.log('📨 Fetching messages from Supabase...');
+    console.log('📨 Fetching messages from Neon...');
 
-    // Supabase'den mesajları çek
-    const { data, error } = await supabase
-      .from('contact_messages')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT id, name, email, message, is_read, created_at 
+        FROM contact_messages 
+        ORDER BY created_at DESC
+      `);
 
-    if (error) {
-      console.error('❌ Supabase error:', error);
-      return res.status(500).json({
-        error: 'Database error',
-        message: error.message
-      });
+      console.log('📩 Mesajlar yüklendi:', result.rows.length);
+      res.json(result.rows);
+    } finally {
+      client.release();
     }
-
-    console.log('📩 Mesajlar yüklendi:', data?.length || 0);
-    res.json(data || []);
   } catch (error) {
     console.error('❌ Messages endpoint error:', error);
     res.status(500).json({
       error: 'Server error',
       message: error.message
+    });
+  }
+});
+
+// Delete message endpoint
+app.delete('/api/messages/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (id === 'delete-all') {
+      // Tüm mesajları sil
+      console.log('🗑️ Deleting all messages...');
+      const client = await pool.connect();
+      try {
+        const result = await client.query('DELETE FROM contact_messages RETURNING *');
+        console.log('✅ Tüm mesajlar silindi:', result.rows.length);
+        res.json({
+          success: true,
+          message: 'Tüm mesajlar başarıyla silindi',
+          deletedCount: result.rows.length
+        });
+      } finally {
+        client.release();
+      }
+    } else {
+      // Tek mesaj sil
+      console.log('🗑️ Deleting message:', id);
+      const client = await pool.connect();
+      try {
+        const result = await client.query(
+          'DELETE FROM contact_messages WHERE id = $1 RETURNING *',
+          [id]
+        );
+
+        if (result.rows.length === 0) {
+          return res.status(404).json({
+            success: false,
+            message: 'Mesaj bulunamadı'
+          });
+        }
+
+        console.log('✅ Mesaj silindi:', result.rows[0]);
+        res.json({
+          success: true,
+          message: 'Mesaj başarıyla silindi'
+        });
+      } finally {
+        client.release();
+      }
+    }
+  } catch (error) {
+    console.error('❌ Delete message error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error: ' + error.message
+    });
+  }
+});
+
+// Update message endpoint (mark as read)
+app.patch('/api/messages/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_read } = req.body;
+    console.log('📝 Updating message:', id, 'is_read:', is_read);
+
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'UPDATE contact_messages SET is_read = $1 WHERE id = $2 RETURNING *',
+        [is_read, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Mesaj bulunamadı'
+        });
+      }
+
+      console.log('✅ Mesaj güncellendi:', result.rows[0]);
+      res.json({
+        success: true,
+        message: 'Mesaj başarıyla güncellendi',
+        data: result.rows[0]
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('❌ Update message error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error: ' + error.message
     });
   }
 });

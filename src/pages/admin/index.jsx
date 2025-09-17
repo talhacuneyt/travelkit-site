@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
-import { supabase, EMAILJS_CONFIG } from '../../lib/supabase'
+import { EMAILJS_CONFIG } from '../../lib/emailjs'
 import emailjs from '@emailjs/browser'
 import { SignJWT, jwtVerify } from 'jose'
+import Footer from '../../components/footer'
 import './index.css'
 
 function Admin() {
@@ -109,9 +110,7 @@ function Admin() {
       detail: { isAuthenticated: true }
     }))
 
-    if (supabase) {
-      fetchMessages()
-    }
+    fetchMessages()
   }
 
   // Admin login/logout event'lerini dinle
@@ -492,9 +491,7 @@ function Admin() {
           detail: { isAuthenticated: true }
         }))
 
-        if (supabase) {
-          fetchMessages()
-        }
+        fetchMessages()
 
         // Admin girişi başarılı
       } else {
@@ -542,21 +539,19 @@ function Admin() {
   }
 
   async function deleteMessage(id) {
-    if (!supabase) {
-      console.warn('Supabase yapılandırılmamış')
-      return
-    }
-
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .delete()
-        .eq('id', id)
+      const response = await fetch(`/api/messages/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
 
-      if (error) {
-        console.error('Mesaj silinirken hata:', error)
-      } else {
+      if (response.ok) {
         setMessages(messages.filter(msg => msg.id !== id))
+        console.log('Mesaj başarıyla silindi')
+      } else {
+        console.error('Mesaj silinirken hata:', await response.text())
       }
     } catch (err) {
       console.error('Silme hatası:', err)
@@ -578,22 +573,23 @@ function Admin() {
       localStorage.setItem('read_messages', JSON.stringify(readMessages))
     }
 
-    // Veritabanını güncelle (eğer Supabase varsa)
-    if (supabase) {
-      try {
-        const { error } = await supabase
-          .from('contact_messages')
-          .update({ is_read: true })
-          .eq('id', id)
+    // Veritabanını güncelle
+    try {
+      const response = await fetch(`/api/messages/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_read: true })
+      })
 
-        if (error) {
-          console.error('Veritabanı güncelleme hatası:', error)
-        } else {
-          console.log('Veritabanı başarıyla güncellendi')
-        }
-      } catch (err) {
-        console.error('Veritabanı güncelleme hatası:', err)
+      if (response.ok) {
+        console.log('Veritabanı başarıyla güncellendi')
+      } else {
+        console.error('Veritabanı güncelleme hatası:', await response.text())
       }
+    } catch (err) {
+      console.error('Veritabanı güncelleme hatası:', err)
     }
 
     console.log('Mesaj başarıyla okundu olarak işaretlendi')
@@ -748,23 +744,6 @@ function Admin() {
 
     localStorage.setItem('read_messages', JSON.stringify(newReadMessages))
 
-    // Veritabanını güncelle (eğer Supabase varsa)
-    if (supabase) {
-      try {
-        const { error } = await supabase
-          .from('contact_messages')
-          .update({ is_read: true })
-          .in('id', unreadMessages.map(msg => msg.id))
-
-        if (error) {
-          console.error('Toplu güncelleme hatası:', error)
-        } else {
-          console.log('Tüm mesajlar başarıyla okundu olarak işaretlendi')
-        }
-      } catch (err) {
-        console.error('Toplu güncelleme hatası:', err)
-      }
-    }
   }
 
   function openDeleteConfirmModal() {
@@ -775,25 +754,23 @@ function Admin() {
   }
 
   async function confirmDeleteAll() {
-    if (!supabase) {
-      console.warn('Supabase yapılandırılmamış')
-      return
-    }
-
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .delete()
-        .neq('id', 0) // Tüm kayıtları sil
+      // API endpoint'i ile tüm mesajları sil
+      const response = await fetch('/api/messages/delete-all', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
 
-      if (error) {
-        console.error('Tüm mesajlar silinirken hata:', error)
-        alert('Mesajlar silinirken bir hata oluştu!')
-      } else {
+      if (response.ok) {
         setMessages([])
         // localStorage'daki okunmuş mesajları da temizle
         localStorage.removeItem('read_messages')
         console.log('Tüm mesajlar başarıyla silindi')
+      } else {
+        console.error('Tüm mesajlar silinirken hata:', await response.text())
+        alert('Mesajlar silinirken bir hata oluştu!')
       }
     } catch (err) {
       console.error('Toplu silme hatası:', err)
@@ -1152,23 +1129,11 @@ function Admin() {
     )
   }
 
-  // Geçici olarak Supabase kontrolünü devre dışı bırak
-  // if (!supabase) {
-  //   return (
-  //     <div className="admin-container">
-  //       <div className="no-messages">
-  //         <h2>Supabase Yapılandırılmamış</h2>
-  //         <p>Veritabanı özelliklerini kullanmak için Supabase ayarlarını yapılandırın.</p>
-  //         <p>Detaylar için <code>SUPABASE_SETUP.md</code> dosyasını inceleyin.</p>
-  //       </div>
-  //     </div>
-  //   )
-  // }
 
   return (
     <div className="admin-container">
-
-      {/* Filtre Bilgisi */}
+      <div className="admin-content-wrapper">
+        {/* Filtre Bilgisi */}
       {dateFilter !== 'all' && (
         <div className="date-filter-info">
           {dateFilter === 'today' && 'Bugünkü mesajlar gösteriliyor'}
@@ -1258,91 +1223,90 @@ function Admin() {
         </div>
       </div>
 
-      {/* Arama ve Filtreleme */}
-      <div className="search-filters-section">
-        <div className="search-container">
-          <div className="search-input-wrapper">
-            <div className="search-icon">⌕</div>
-            <input
-              type="text"
-              placeholder="Ara..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="search-input"
-            />
+      <div className="admin-main-content">
+        {/* Arama ve Filtreleme */}
+        <div className="search-filters-section">
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <div className="search-icon">⌕</div>
+              <input
+                type="text"
+                placeholder="Ara..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="search-input"
+              />
+            </div>
+            {searchTerm && (
+              <div className="search-results-info">
+                {filteredMessages.length} sonuç
+              </div>
+            )}
           </div>
-          {searchTerm && (
-            <div className="search-results-info">
-              {filteredMessages.length} sonuç
-            </div>
-          )}
-        </div>
-        <div className="filters-row">
-          <select
-            value={dateFilter}
-            onChange={(e) => handleDateFilterChange(e.target.value)}
-            className="date-filter-select"
-          >
-            <option value="all">Tümü</option>
-            <option value="today">Bugün</option>
-            <option value="week">Bu Hafta</option>
-            <option value="month">Bu Ay</option>
-            <option value="custom">Özel Tarih</option>
-          </select>
-          <button
-            className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
-            onClick={() => handleSortChange('date')}
-            title="Tarihe göre sırala"
-          >
-            📅 {getSortIcon('date')}
-          </button>
-          <button
-            className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
-            onClick={() => handleSortChange('name')}
-            title="İsme göre sırala"
-          >
-            👤 {getSortIcon('name')}
-          </button>
-          <button
-            className={`sort-btn ${sortBy === 'email' ? 'active' : ''}`}
-            onClick={() => handleSortChange('email')}
-            title="Email'e göre sırala"
-          >
-            📧 {getSortIcon('email')}
-          </button>
-        </div>
-      </div>
-
-      {/* Özel Tarih Seçici */}
-      {showDatePicker && (
-        <div className="custom-date-picker">
-          <div className="date-inputs">
-            <div className="date-input-group">
-              <label>Başlangıç:</label>
-              <input
-                type="date"
-                value={customStartDate}
-                onChange={(e) => setCustomStartDate(e.target.value)}
-                className="date-input"
-              />
-            </div>
-            <div className="date-input-group">
-              <label>Bitiş:</label>
-              <input
-                type="date"
-                value={customEndDate}
-                onChange={(e) => setCustomEndDate(e.target.value)}
-                className="date-input"
-              />
-            </div>
-            <button onClick={clearDateFilter} className="clear-date-btn">
-              Temizle
+          <div className="filters-row">
+            <select
+              value={dateFilter}
+              onChange={(e) => handleDateFilterChange(e.target.value)}
+              className="date-filter-select"
+            >
+              <option value="all">Tümü</option>
+              <option value="today">Bugün</option>
+              <option value="week">Bu Hafta</option>
+              <option value="month">Bu Ay</option>
+              <option value="custom">Özel Tarih</option>
+            </select>
+            <button
+              className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
+              onClick={() => handleSortChange('date')}
+              title="Tarihe göre sırala"
+            >
+              📅 {getSortIcon('date')}
+            </button>
+            <button
+              className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
+              onClick={() => handleSortChange('name')}
+              title="İsme göre sırala"
+            >
+              👤 {getSortIcon('name')}
+            </button>
+            <button
+              className={`sort-btn ${sortBy === 'email' ? 'active' : ''}`}
+              onClick={() => handleSortChange('email')}
+              title="Email'e göre sırala"
+            >
+              📧 {getSortIcon('email')}
             </button>
           </div>
         </div>
-      )}
 
-      <div className="admin-main-content">
+        {/* Özel Tarih Seçici */}
+        {showDatePicker && (
+          <div className="custom-date-picker">
+            <div className="date-inputs">
+              <div className="date-input-group">
+                <label>Başlangıç:</label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="date-input"
+                />
+              </div>
+              <div className="date-input-group">
+                <label>Bitiş:</label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className="date-input"
+                />
+              </div>
+              <button onClick={clearDateFilter} className="clear-date-btn">
+                Temizle
+              </button>
+            </div>
+          </div>
+        )}
         <div className="tabs">
           <div className="tabs-container">
             <button
@@ -1366,14 +1330,6 @@ function Admin() {
           </div>
           <div className="tabs-actions">
             {activeTab === 'unread' && unreadCount > 0 && (
-              <button
-                className="mark-all-read-btn"
-                onClick={markAllAsRead}
-              >
-                Hepsini Okundu Say
-              </button>
-            )}
-            {activeTab === 'read' && readCount > 0 && (
               <button
                 className="mark-all-read-btn"
                 onClick={markAllAsRead}
@@ -1638,6 +1594,10 @@ function Admin() {
           </div>
         </div>
       )}
+      </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

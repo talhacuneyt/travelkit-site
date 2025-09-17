@@ -322,7 +322,7 @@
   margin: 0;
   color: #64748b;
   font-size: 1.1rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   line-height: 1.6;
   font-weight: 400;
 }
@@ -334,7 +334,7 @@
   color: #3b82f6;
   text-align: center;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 
@@ -422,7 +422,7 @@
   font-weight: 300;
   color: #64748b;
   margin-bottom: 30px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   text-align: center;
@@ -480,7 +480,7 @@
   margin: 0;
   color: #64748b;
   font-size: 18px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   transition: color 0.3s ease;
   cursor: pointer;
 }
@@ -584,7 +584,7 @@
   background: transparent; 
   color: #64748b;
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 300;
   opacity: 0;
   transform: translateY(15px);
@@ -631,7 +631,7 @@
   background: transparent; 
   text-decoration: none;
   font-size: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 300;
   position: relative;
 }
@@ -722,7 +722,7 @@
   background: transparent;
   text-decoration: none;
   font-size: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 300;
   cursor: pointer;
   position: relative;
@@ -760,7 +760,7 @@
   background: transparent;
   text-decoration: none;
   font-size: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 300;
   cursor: pointer;
   position: relative;
