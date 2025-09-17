@@ -22,9 +22,9 @@ function Footer() {
             <button onClick={() => handleFooterLinkClick('/hakkimizda')} className="footer__link">Hakkımızda</button>
             <button onClick={() => handleFooterLinkClick('/sss')} className="footer__link">SSS</button>
             <button onClick={() => handleFooterLinkClick('/iletisim')} className="footer__link">İletişim</button>
-            <button onClick={() => handleFooterLinkClick('/satin-al?package=economic')} className="footer__link">Ekonomik Paket Satın Al</button>
-            <button onClick={() => handleFooterLinkClick('/satin-al?package=comfort')} className="footer__link">Konfor Paket Satın Al</button>
-            <button onClick={() => handleFooterLinkClick('/satin-al?package=lux')} className="footer__link">Lüks Paket Satın Al</button>
+            <button onClick={() => handleFooterLinkClick('/satin-al?package=economic')} className="footer__link footer__link--package">Ekonomik Paket Satın Al</button>
+            <button onClick={() => handleFooterLinkClick('/satin-al?package=comfort')} className="footer__link footer__link--package">Konfor Paket Satın Al</button>
+            <button onClick={() => handleFooterLinkClick('/satin-al?package=lux')} className="footer__link footer__link--package">Lüks Paket Satın Al</button>
           </div>
         </div>
 
