@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '../hooks/useTranslation'
+import LazyImg from './LazyImg'
 
 // SVG icons as components
 const PersonalCareIcon = () => (
@@ -62,6 +63,194 @@ const FeatureSection = ({ icon: Icon, sectionTitle, items, isEven = false }) => 
         </div>
       </div>
     </article>
+  )
+}
+
+// Two-row infinite, opposing-direction slider (JS-driven widths to ensure 4-5 visible)
+const TwoRowInfiniteSlider = ({ images }) => {
+  const [itemsPerView, setItemsPerView] = useState(5)
+  const [itemWidth, setItemWidth] = useState(0)
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth
+      if (w <= 560) setItemsPerView(2)
+      else if (w <= 768) setItemsPerView(3)
+      else if (w <= 1200) setItemsPerView(4)
+      else setItemsPerView(4)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  useEffect(() => {
+    const measure = () => {
+      const viewport = document.querySelector('.two-row-slider__viewport')
+      if (!viewport) return
+      const gap = 15
+      const width = viewport.clientWidth
+      const totalGaps = (itemsPerView - 1) * gap
+      const w = Math.max(0, Math.floor((width - totalGaps) / itemsPerView))
+      setItemWidth(w)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [itemsPerView])
+
+  const useMarquee = (selector, direction = 1) => {
+    useEffect(() => {
+      const track = document.querySelector(selector)
+      if (!track) return
+      let rafId
+      let offset = 0
+      const speed = 30
+      const step = (ts) => {
+        if (!track._lastTs) track._lastTs = ts
+        const dt = (ts - track._lastTs) / 1000
+        track._lastTs = ts
+        offset += direction * speed * dt
+        track.style.transform = `translateX(${-offset}px)`
+        const first = track.firstElementChild
+        if (first) {
+          const threshold = (first.clientWidth + 15)
+          if (offset >= threshold) {
+            track.appendChild(first)
+            offset -= threshold
+            track.style.transform = `translateX(${-offset}px)`
+          } else if (offset <= -threshold) {
+            track.insertBefore(track.lastElementChild, track.firstElementChild)
+            offset += threshold
+            track.style.transform = `translateX(${-offset}px)`
+          }
+        }
+        rafId = requestAnimationFrame(step)
+      }
+      rafId = requestAnimationFrame(step)
+      return () => cancelAnimationFrame(rafId)
+    }, [itemWidth])
+  }
+
+  useMarquee('.two-row-slider__track--top', +1)
+  useMarquee('.two-row-slider__track--bottom', -1)
+
+  const Row = ({ className }) => {
+    const [showDuplicates, setShowDuplicates] = useState(false)
+    useEffect(() => {
+      const id = setTimeout(() => setShowDuplicates(true), 800)
+      return () => clearTimeout(id)
+    }, [])
+    return (
+      <div className="two-row-slider__viewport" style={{ overflow: 'hidden', borderRadius: 12 }}>
+        <div className={className} style={{ display: 'flex', alignItems: 'center', gap: 15, willChange: 'transform' }}>
+          {images.map((src, idx) => (
+            <LazyImg key={`${className}-${idx}-a`} src={src} alt={`Lüks görsel ${idx + 1}`} style={{ width: itemWidth, height: 'clamp(140px, 22vw, 220px)', objectFit: 'cover', borderRadius: 12, flex: '0 0 auto' }} loading={idx < 2 ? 'eager' : 'lazy'} fetchpriority={idx === 0 ? 'high' : 'auto'} />
+          ))}
+          {showDuplicates && images.map((src, idx) => (
+            <LazyImg key={`${className}-${idx}-b`} src={src} alt={`Lüks görsel ${idx + 1}`} style={{ width: itemWidth, height: 'clamp(140px, 22vw, 220px)', objectFit: 'cover', borderRadius: 12, flex: '0 0 auto' }} loading="lazy" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="two-row-slider" style={{ width: '100%', margin: '0 auto', maxWidth: 1200 }}>
+      <Row className="two-row-slider__track two-row-slider__track--top" />
+      <div style={{ height: 12 }} />
+      <Row className="two-row-slider__track two-row-slider__track--bottom" />
+    </div>
+  )
+}
+
+// Single-row infinite slider: kesintisiz marquee, 4-5 görünür, kenarlarda kısmi ve blur
+const SingleRowInfiniteSlider = ({ images, direction = 1, speed = 30, heightClamp = 'clamp(160px, 24vw, 260px)' }) => {
+  const GAP = 24
+  const [itemsPerView, setItemsPerView] = useState(5)
+  const [itemWidth, setItemWidth] = useState(0)
+  const viewportRef = useRef(null)
+  const trackRef = useRef(null)
+
+  // 3 kopya ama her kopyayı 1 görsel kaydırarak diz (yan yana duplicate önlemek için)
+  const tiledImages = useMemo(() => {
+    if (!images || images.length === 0) return []
+    const n = images.length
+    const tiles = 3
+    const out = []
+    for (let t = 0; t < tiles; t++) {
+      for (let i = 0; i < n; i++) {
+        out.push(images[(i + t) % n])
+      }
+    }
+    return out
+  }, [images])
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth
+      if (w <= 560) setItemsPerView(1)
+      else if (w <= 768) setItemsPerView(2)
+      else if (w <= 1200) setItemsPerView(3)
+      else setItemsPerView(3)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  useEffect(() => {
+    const measure = () => {
+      const viewport = viewportRef.current
+      if (!viewport) return
+      const width = viewport.clientWidth
+      const totalGaps = (itemsPerView - 1) * GAP
+      const w = Math.max(0, Math.floor((width - totalGaps) / itemsPerView))
+      setItemWidth(w)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [itemsPerView])
+
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track || !images || images.length === 0) return
+    let rafId
+    let offset = 0
+
+    const step = (ts) => {
+      if (!track._lastTs) track._lastTs = ts
+      const dt = (ts - track._lastTs) / 1000
+      track._lastTs = ts
+      const cycleWidth = images.length * (itemWidth + GAP)
+      if (cycleWidth <= 0) {
+        rafId = requestAnimationFrame(step)
+        return
+      }
+      offset += direction * speed * dt
+      const normalized = ((offset % cycleWidth) + cycleWidth) % cycleWidth
+      track.style.transform = `translate3d(${-normalized}px, 0, 0)`
+      rafId = requestAnimationFrame(step)
+    }
+    rafId = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(rafId)
+  }, [itemWidth, direction, speed, images])
+
+  return (
+    <div className="single-row-slider" style={{ width: '100%', margin: '0 auto', maxWidth: 1200 }}>
+      <div ref={viewportRef} className="single-row-slider__viewport" style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
+        <div ref={trackRef} className="single-row-slider__track" style={{ display: 'flex', alignItems: 'center', gap: GAP, willChange: 'transform' }}>
+          {tiledImages.map((src, idx) => (
+            <LazyImg key={`sr-${idx}`} src={src} alt={`Lüks görsel ${idx + 1}`} style={{ width: itemWidth, height: heightClamp, objectFit: 'cover', borderRadius: 12, flex: '0 0 auto' }} loading={idx < 2 ? 'eager' : 'lazy'} fetchpriority={idx === 0 ? 'high' : 'auto'} />
+          ))}
+        </div>
+
+        {/* Edge blur overlays */}
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 60, pointerEvents: 'none', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', maskImage: 'linear-gradient(to right, black, transparent)', WebkitMaskImage: 'linear-gradient(to right, black, transparent)' }} />
+        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 60, pointerEvents: 'none', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', maskImage: 'linear-gradient(to left, black, transparent)', WebkitMaskImage: 'linear-gradient(to left, black, transparent)' }} />
+      </div>
+    </div>
   )
 }
 
@@ -168,6 +357,91 @@ const PackageDetail = ({ packageType }) => {
   // Doğrudan hardcoded data kullan - basit çözüm
   const packageData = hardcodedData[packageType] || hardcodedData.economic
 
+  // Luxury/Economic/Comfort görsellerini tanımla ve ilk render'da rastgele sırala
+  const luxuryImages = [
+    '/images/luxury/IMG_3918_48.jpg',
+    '/images/luxury/IMG_3919_50.jpg',
+    '/images/luxury/IMG_3921_50.jpg',
+    '/images/luxury/IMG_3922_50.jpg',
+    '/images/luxury/IMG_3923_50.jpg',
+    '/images/luxury/IMG_3924_50.jpg',
+    '/images/luxury/IMG_3928_50.jpg',
+    '/images/luxury/IMG_3931_50.jpg',
+    '/images/luxury/IMG_3937_50.jpg',
+    '/images/luxury/IMG_3948_50.jpg',
+    '/images/luxury/IMG_3950_50.jpg',
+    '/images/luxury/IMG_3951_50.jpg',
+    '/images/luxury/IMG_4010_50.jpg',
+    '/images/luxury/kisiselbakim1_50.jpg',
+    '/images/luxury/kisiselbakim2_50.jpg',
+    '/images/luxury/kisiselbakim3_50.jpg',
+    '/images/luxury/kisiselbakim4_50.jpg',
+    '/images/luxury/kisiselbakim5_50.jpg'
+  ]
+
+  const shuffledLuxuryImages = useMemo(() => {
+    const arr = luxuryImages.slice()
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = arr[i]
+      arr[i] = arr[j]
+      arr[j] = tmp
+    }
+    return arr
+  }, [])
+
+  const economicImages = [
+    '/images/eko/IMG_3974.JPG',
+    '/images/eko/IMG_3978.JPG',
+    '/images/eko/IMG_3979.JPG',
+    '/images/eko/IMG_3980.JPG',
+    '/images/eko/IMG_3981.JPG',
+    '/images/eko/IMG_3983.JPG',
+    '/images/eko/IMG_3986.JPG'
+  ]
+  const shuffledEconomicImages = useMemo(() => {
+    const arr = economicImages.slice()
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = arr[i]
+      arr[i] = arr[j]
+      arr[j] = tmp
+    }
+    return arr
+  }, [])
+
+  const comfortImages = [
+    '/images/konfor/IMG_3974.JPG',
+    '/images/konfor/IMG_3978.JPG',
+    '/images/konfor/IMG_3997.JPG',
+    '/images/konfor/IMG_3998.JPG',
+    '/images/konfor/IMG_4000.JPG',
+    '/images/konfor/IMG_4001.JPG',
+    '/images/konfor/IMG_4003.JPG',
+    '/images/konfor/IMG_4004.JPG',
+    '/images/konfor/IMG_4005.JPG',
+    '/images/konfor/IMG_4006.JPG',
+    '/images/konfor/IMG_4007.JPG',
+    '/images/konfor/IMG_4008.JPG',
+    '/images/konfor/IMG_4010.JPG',
+    '/images/konfor/IMG_4011.JPG',
+    '/images/konfor/IMG_4012.JPG'
+  ]
+  const shuffledComfortImages = useMemo(() => {
+    const arr = comfortImages.slice()
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = arr[i]
+      arr[i] = arr[j]
+      arr[j] = tmp
+    }
+    return arr
+  }, [])
+
+  // Üst ve alt slider için 9'ar görsel ayır
+  const topImages = useMemo(() => shuffledLuxuryImages.slice(0, 9), [shuffledLuxuryImages])
+  const bottomImages = useMemo(() => shuffledLuxuryImages.slice(9), [shuffledLuxuryImages])
+
   // Animation useEffect - must be before conditional returns
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -250,6 +524,33 @@ const PackageDetail = ({ packageType }) => {
       </section>
 
       <div className="paket-layout">
+        {packageType === 'luxury' && (
+          <section className="paket__section" style={{ paddingTop: 0 }}>
+            <div style={{ width: '100%', margin: '0 auto', maxWidth: 1200 }}>
+              <SingleRowInfiniteSlider images={topImages} direction={+1} speed={28} />
+              <div style={{ height: 20 }} />
+              <SingleRowInfiniteSlider images={bottomImages} direction={-1} speed={32} />
+            </div>
+          </section>
+        )}
+        {packageType === 'economic' && (
+          <section className="paket__section" style={{ paddingTop: 0 }}>
+            <div style={{ width: '100%', margin: '0 auto', maxWidth: 1200 }}>
+              <SingleRowInfiniteSlider images={shuffledEconomicImages.slice(0, Math.ceil(shuffledEconomicImages.length / 2))} direction={+1} speed={26} />
+              <div style={{ height: 20 }} />
+              <SingleRowInfiniteSlider images={shuffledEconomicImages.slice(Math.ceil(shuffledEconomicImages.length / 2))} direction={-1} speed={30} />
+            </div>
+          </section>
+        )}
+        {packageType === 'comfort' && (
+          <section className="paket__section" style={{ paddingTop: 0 }}>
+            <div style={{ width: '100%', margin: '0 auto', maxWidth: 1200 }}>
+              <SingleRowInfiniteSlider images={shuffledComfortImages.slice(0, Math.ceil(shuffledComfortImages.length / 2))} direction={+1} speed={26} />
+              <div style={{ height: 20 }} />
+              <SingleRowInfiniteSlider images={shuffledComfortImages.slice(Math.ceil(shuffledComfortImages.length / 2))} direction={-1} speed={30} />
+            </div>
+          </section>
+        )}
         <div className="paket-content">
           <section className="paket__section">
             <div className="paket-features">

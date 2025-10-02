@@ -3,6 +3,7 @@ import ortaImg from '/images/orta.jpg'
 import luxImg from '/images/lux.png'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import LazyImg from '../../components/LazyImg'
 import { useTranslation } from '../../hooks/useTranslation'
 import './index.css'
 
@@ -263,7 +264,7 @@ function HomeContent() {
                 {item.key === 'comfort' && <span className="home-card__badge">{t('home.badges.bestseller')}</span>}
                 {item.key === 'luxury' && <span className="home-card__badge badge--accent">{t('home.badges.premium')}</span>}
                 <div className="home-card__media">
-                  <img src={item.img} alt={`${item.name} package`} loading="lazy" />
+                  <LazyImg src={item.img} alt={`${item.name} package`} loading="lazy" />
                 </div>
                 <div className="home-card__label">
                 </div>
