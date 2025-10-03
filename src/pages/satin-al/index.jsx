@@ -33,7 +33,7 @@ function SatinAl() {
         },
         items: {
           personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant',
             'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
           ],
           comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
@@ -43,7 +43,7 @@ function SatinAl() {
             'Burun Spreyi', 'Maske', 'Sineksavar'
           ],
           additions: [
-            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+            'Bavul İçi Düzenleyici', 'Boyun Yastığı',  
             'QR Kart, müzik listesi', 'Lavanta kesesi'
           ]
         }
@@ -61,7 +61,7 @@ function SatinAl() {
         },
         items: {
           personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant',
             'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
           ],
           comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği'],
@@ -88,10 +88,10 @@ function SatinAl() {
         },
         items: {
           personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant',
             'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
           ],
-          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı', 'Seyahat Terliği', 'Premium Seyahat Yastığı'],
+          comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem', 'Boyun Yastığı',   'Premium Seyahat Yastığı'],
           technology: ['Powerbank', 'Çoklu Fonksiyonlu Kablo', 'Bluetooth Kulaklık', 'Seyahat Adaptörü'],
           health: [
             'Ağrı Kesici', 'Basit Alerji İlacı', 'Yara Bandı', 'Antiseptik Krem',

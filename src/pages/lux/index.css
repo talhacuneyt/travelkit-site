@@ -68,51 +68,39 @@
   border: none;
   border-radius: 0;
   background: transparent;
-  min-height: 90vh;
+  min-height: 60vh;
   display: grid;
   align-items: center;
   position: relative;
-  margin-left: -20px;
-  margin-right: -20px;
-  margin-bottom: 60px;
+  margin: 0 -20px 40px -20px;
+  padding: 40px 20px;
   width: calc(100% + 40px);
-  padding: 40px 0;
 }
 
 @media (min-width: 768px) {
   .paket-hero {
-    margin-left: -40px;
-    margin-right: -40px;
+    min-height: 70vh;
+    margin: 0 -40px 60px -40px;
+    padding: 60px 40px;
     width: calc(100% + 80px);
-    padding: 60px 0;
-    margin-bottom: 80px;
   }
 }
 
 @media (min-width: 1024px) {
   .paket-hero {
-    margin-left: -60px;
-    margin-right: -60px;
+    min-height: 80vh;
+    margin: 0 -60px 80px -60px;
+    padding: 80px 60px;
     width: calc(100% + 120px);
-    padding: 70px 0;
-  }
-}
-
-@media (min-width: 1200px) {
-  .paket-hero {
-    margin-left: -80px;
-    margin-right: -80px;
-    width: calc(100% + 160px);
-    padding: 80px 0;
   }
 }
 
 @media (min-width: 1400px) {
   .paket-hero {
-    margin-left: -250px;
-    margin-right: -250px;
+    min-height: 90vh;
+    margin: 0 -250px 120px -250px;
+    padding: 100px 250px;
     width: calc(100% + 500px);
-    padding: 80px 0;
   }
 }
 

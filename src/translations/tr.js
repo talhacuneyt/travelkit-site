@@ -42,7 +42,7 @@ export const tr = {
       comfort: {
         title: 'Konforlu',
         price: '9.999 TL',
-        features: ['Ekonomik paket içeriği', 'Yüz bakım seti', 'Nemlendirici', 'Güneş kremi'],
+        features: ['Ekonomik paket içeriği', 'Yüz bakım seti', 'Nemlendirici'],
         purchase: 'Satın Al',
         cta: 'İletişime Geç'
       },
@@ -179,7 +179,7 @@ export const tr = {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant',
           'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
         ],
         comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
@@ -189,7 +189,7 @@ export const tr = {
           'Burun Spreyi', 'Maske', 'Sineksavar'
         ],
         additions: [
-          'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+          'Bavul İçi Düzenleyici', 'Boyun Yastığı',  
           'QR Kart, müzik listesi', 'Lavanta kesesi'
         ]
       },
@@ -209,7 +209,7 @@ export const tr = {
       },
       items: {
         personalCare: [
-          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+          'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant',
           'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
           'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
         ],
@@ -242,7 +242,7 @@ export const tr = {
       items: {
         personalCare: [
           'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
-          'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+          'El Kremi', 'Tırnak Makası',
           'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
           'El Dezenfektanı', 'Tarak'
         ],

@@ -9,6 +9,7 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [showProductsDropdown, setShowProductsDropdown] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { language, toggleLanguage } = useLanguage()
@@ -152,9 +153,12 @@ function Navbar() {
       if (isOpen && !event.target.closest('.navbar')) {
         closeMenu()
       }
+      if (showProductsDropdown && !event.target.closest('.navbar__products-dropdown')) {
+        setShowProductsDropdown(false)
+      }
     }
 
-    if (isOpen) {
+    if (isOpen || showProductsDropdown) {
       document.addEventListener('click', handleClickOutside)
       document.addEventListener('touchstart', handleClickOutside)
     }
@@ -163,7 +167,7 @@ function Navbar() {
       document.removeEventListener('click', handleClickOutside)
       document.removeEventListener('touchstart', handleClickOutside)
     }
-  }, [isOpen])
+  }, [isOpen, showProductsDropdown])
 
   const handleLanguageChange = () => {
     toggleLanguage()
@@ -308,7 +312,7 @@ function Navbar() {
         },
         items: {
           personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi',
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant',
             'El Kremi', 'Islak Mendil', 'Mikrofiber Havlu', 'Çamaşır Torbası', 'Dezenfektan'
           ],
           comfort: ['Kulak Tıkacı', 'Göz Bandı', 'Seyahat Defteri & Kalem'],
@@ -318,7 +322,7 @@ function Navbar() {
             'Burun Spreyi', 'Maske', 'Sineksavar'
           ],
           additions: [
-            'Bavul İçi Düzenleyici', 'Boyun Yastığı', 'Seyahat Terliği',
+            'Bavul İçi Düzenleyici', 'Boyun Yastığı',  
             'QR Kart, müzik listesi', 'Lavanta kesesi'
           ]
         }
@@ -336,7 +340,7 @@ function Navbar() {
         },
         items: {
           personalCare: [
-            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant', 'Güneş Kremi La Roche-Posay',
+            'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant',
             'El Krem', 'Tırnak Makası', 'Islak/Kuru Mendil', 'Mikrofiber Havlu',
             'Mini Çamaşır Torbası', 'Dezenfektan', 'Tarak'
           ],
@@ -367,7 +371,7 @@ function Navbar() {
         items: {
           personalCare: [
             'Diş Fırçası & Macun', 'Şampuan & Duş Jeli', 'Deodorant - L\'occitaneroll-On',
-            'Güneş Kremi - La Roche Posay', 'El Kremi', 'Tırnak Makası',
+             'El Kremi', 'Tırnak Makası',
             'Islak/Kuru Mendil', 'Mikrofiber Havlu', 'Mini Çamaşır Torbası',
             'El Dezenfektanı', 'Tarak'
           ],
@@ -858,6 +862,25 @@ function Navbar() {
           </button>
 
           <nav className={`navbar__nav ${isOpen ? 'is-open' : ''} ${isClosing ? 'is-closing' : ''}`} aria-label="Primary">
+            <div className="navbar__products-dropdown" onMouseEnter={() => setShowProductsDropdown(true)} onMouseLeave={() => setShowProductsDropdown(false)}>
+              <button className="navbar__link navbar__products-trigger">
+                Ürünlerimiz
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="currentColor" style={{ marginLeft: '6px', transition: 'transform 0.2s ease' }}>
+                  <path d="M1.41 7.41L6 2.83L10.59 7.41L12 6L6 0L0 6L1.41 7.41Z" />
+                </svg>
+              </button>
+              <div className={`navbar__dropdown ${showProductsDropdown ? 'show' : ''}`}>
+                <Link to="/ekonomik" className="navbar__dropdown-link" onClick={closeMenu}>
+                  Ekonomik Paket
+                </Link>
+                <Link to="/konforlu" className="navbar__dropdown-link" onClick={closeMenu}>
+                  Konfor Paket
+                </Link>
+                <Link to="/lux" className="navbar__dropdown-link" onClick={closeMenu}>
+                  Lüks Paket
+                </Link>
+              </div>
+            </div>
             <NavLink to="/hakkimizda" className="navbar__link" onClick={closeMenu}>{t('nav.about')}</NavLink>
             <NavLink to="/sss" className="navbar__link" onClick={closeMenu}>{t('nav.faq')}</NavLink>
             <NavLink to="/iletisim" className="navbar__cta" role="button" onClick={closeMenu}>{t('nav.contact')}</NavLink>
